@@ -31,6 +31,10 @@ body,
     font-size: 1.2rem;
 }
 
+:root {
+    --carryover-color: #ffb3b3;
+}
+
 .budget-page {
     display: flex;
     flex-direction: column;
@@ -55,6 +59,10 @@ body,
     font-size: 1rem;
 }
 
+.carryover-text {
+    color: var(--carryover-color);
+}
+
 .balance-bar {
     display: flex;
     height: 24px;
@@ -72,5 +80,5 @@ body,
 }
 
 .bar-carryover {
-    background-color: #ffb3b3;
+    background-color: var(--carryover-color);
 }

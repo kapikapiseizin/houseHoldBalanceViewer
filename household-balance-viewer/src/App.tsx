@@ -19,7 +19,7 @@ function BalanceDisplay({ title, budgetAmount, carryOverAmount, usedAmount }: Ba
     <div className="balance-display">
       <div className="balance-title">{title}</div>
       <div className="balance-text">
-        残高 {remainingAmount}円 / {budgetAmount}円 + {carryOverAmount}円
+        残高 {remainingAmount}円 / {budgetAmount}円 + <span className="carryover-text">{carryOverAmount}円</span>
       </div>
       <div className="balance-bar">
         <div className="bar-used" style={{ width: `${usedPercent}%` }}></div>
