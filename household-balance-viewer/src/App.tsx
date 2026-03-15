@@ -49,8 +49,109 @@ function BudgetPage() {
   );
 }
 
+type DateInputProps = {
+  title: string;
+  date: string;
+};
+
+function DateInput({ title, date }: DateInputProps) {
+  return (
+    <div>
+      <div>{title}</div>
+      <input type="date" defaultValue={date} />
+    </div>
+  );
+}
+
+type TextInputProps = {
+  title: string;
+  value: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+};
+
+function TextInput({ title, value, onChange }: TextInputProps) {
+  return (
+    <div>
+      <div>{title}</div>
+      <input type="text" value={value} onChange={onChange} />
+    </div>
+  );
+}
+
+type ListDropdownInputProps = {
+  title: string;
+  valueId: number;
+  items: { id: number; displayName: string }[];
+  onChange: (id: number, displayName: string) => void;
+};
+
+function ListDropdownInput({ title, valueId, items, onChange }: ListDropdownInputProps) {
+  return (
+    <div>
+      <div>{title}</div>
+      <select
+        value={valueId}
+        onChange={(e) => {
+          const id = Number(e.target.value);
+          const item = items.find(i => i.id === id);
+          if (item) {
+            onChange(id, item.displayName);
+          }
+        }}
+      >
+        {items.map((item) => (
+          <option key={item.id} value={item.id}>
+            {item.displayName}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 function InputPage() {
-  return <div>入力ページ</div>;
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+  const dropdownItems = [
+    { id: 0, displayName: "食費" },
+    { id: 1, displayName: "日用品" },
+    { id: 2, displayName: "娯楽" }
+  ];
+
+  const [categoryId, setCategoryId] = useState(0);
+  const [isTitleManuallyEdited, setIsTitleManuallyEdited] = useState(false);
+  const [manualTitle, setManualTitle] = useState("");
+
+  const selectedCategory = dropdownItems.find(item => item.id === categoryId);
+  const defaultTitle = selectedCategory ? selectedCategory.displayName : "";
+  const title = isTitleManuallyEdited ? manualTitle : defaultTitle;
+
+  const handleCategoryChange = (id: number) => {
+    setCategoryId(id);
+  };
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIsTitleManuallyEdited(true);
+    setManualTitle(e.target.value);
+  };
+
+  return (
+    <div>
+      <DateInput title="入力日" date={today} />
+      <TextInput 
+        title="タイトル" 
+        value={title} 
+        onChange={handleTitleChange} 
+      />
+      <ListDropdownInput
+        title="種類"
+        valueId={categoryId}
+        items={dropdownItems}
+        onChange={handleCategoryChange}
+      />
+    </div>
+  );
 }
 
 export default function App() {
