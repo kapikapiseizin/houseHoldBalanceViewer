@@ -6,15 +6,10 @@ import AccessSheet from "./AccessSheet";
 import LoginContent from "./LoginContent";
 
 export default function App() {
-  const [phase, setPhase] = useState<"checkingLogin" | "loginRequired" | "checkingSheet" | "sheetRequired" | "ready">("checkingLogin");
+  const [phase, setPhase] = useState<"loginRequired" | "sheetRequired" | "ready">("loginRequired");
 
   const [accountCredential, setAccountCredential] = useState<any>({});
   const [sheetCredential, setSheetCredential] = useState<any>({});
-
-  // Simulate initial phase transition
-  if (phase === "checkingLogin") {
-    setTimeout(() => setPhase("loginRequired"), 0);
-  }
 
   const handleLoginSuccess = (credential: any) => {
     setAccountCredential(credential);
