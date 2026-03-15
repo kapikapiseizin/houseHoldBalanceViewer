@@ -109,6 +109,25 @@ function ListDropdownInput({ title, valueId, items, onChange }: ListDropdownInpu
   );
 }
 
+type MoneyInputProps = {
+  title: string;
+  amount: number;
+  onChange: (amount: number) => void;
+};
+
+function MoneyInput({ title, amount, onChange }: MoneyInputProps) {
+  return (
+    <div>
+      <div>{title}</div>
+      <input 
+        type="number" 
+        value={amount} 
+        onChange={(e) => onChange(Number(e.target.value))} 
+      />円
+    </div>
+  );
+}
+
 function InputPage() {
   const now = new Date();
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -122,6 +141,7 @@ function InputPage() {
   const [categoryId, setCategoryId] = useState(0);
   const [isTitleManuallyEdited, setIsTitleManuallyEdited] = useState(false);
   const [manualTitle, setManualTitle] = useState("");
+  const [amount, setAmount] = useState(0);
 
   const selectedCategory = dropdownItems.find(item => item.id === categoryId);
   const defaultTitle = selectedCategory ? selectedCategory.displayName : "";
@@ -134,6 +154,15 @@ function InputPage() {
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsTitleManuallyEdited(true);
     setManualTitle(e.target.value);
+  };
+
+  const handleSubmit = () => {
+    console.log({
+      date: today,
+      categoryId,
+      title,
+      amount
+    });
   };
 
   return (
@@ -150,6 +179,12 @@ function InputPage() {
         items={dropdownItems}
         onChange={handleCategoryChange}
       />
+      <MoneyInput
+        title="金額"
+        amount={amount}
+        onChange={setAmount}
+      />
+      <button onClick={handleSubmit}>登録</button>
     </div>
   );
 }
