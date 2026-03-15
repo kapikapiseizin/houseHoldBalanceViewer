@@ -12,11 +12,13 @@ export default function App() {
   const [sheetCredential, setSheetCredential] = useState<any>({});
 
   const handleLoginSuccess = (credential: any) => {
+    console.log("handleLoginSuccess");
     setAccountCredential(credential);
     setPhase("sheetRequired");
   };
 
   const handleSheetSuccess = (credential: any) => {
+    console.log("handleSheetSuccess");
     setSheetCredential(credential);
     setPhase("ready");
   };
