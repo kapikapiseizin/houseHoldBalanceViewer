@@ -10,7 +10,7 @@ type AccessAccountProps = {
   onSuccess: (credential: AccountCredential) => void;
 };
 
-export default function AccessAccount({ onSuccess }: AccessAccountProps) {
+export default function AccessAccount({ onSuccess, loginHintEmail, onNewLogin }: AccessAccountProps) {
   const tokenClientRef = useRef<any>(null);
   const initialized = useRef(false);
 
