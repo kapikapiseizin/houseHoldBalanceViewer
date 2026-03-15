@@ -6,8 +6,14 @@ type AccountCredential = {
   accessToken: string;
 };
 
+export type LoginInfo = {
+  email?: string;
+};
+
 type AccessAccountProps = {
   onSuccess: (credential: AccountCredential) => void;
+  loginHintEmail?: string;
+  onNewLogin: (loginInfo: LoginInfo) => void;
 };
 
 export default function AccessAccount({ onSuccess, loginHintEmail, onNewLogin }: AccessAccountProps) {
