@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import ListDropdownInput from './ListDropdownInput';
+import TextInput from './TextInput';
 
 type AccessSheetProps = {
   accessToken: string;
@@ -63,9 +64,45 @@ type CreateSheetProps = {
 };
 
 function CreateSheet({ accessToken, onCreate }: CreateSheetProps) {
+  const [sheetName, setSheetName] = useState<string>("");
+
+  const handleCreate = async () => {
+    try {
+      const response = await fetch("https://sheets.googleapis.com/v4/spreadsheets", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          properties: {
+            title: sheetName,
+          },
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.spreadsheetId) {
+        onCreate(data.spreadsheetId);
+      } else {
+        console.error("Failed to create spreadsheet:", data);
+        onCreate(undefined);
+      }
+    } catch (error) {
+      console.error("Error creating spreadsheet:", error);
+      onCreate(undefined);
+    }
+  };
+
   return (
     <div>
-      <button onClick={() => onCreate(undefined)}>Create</button>
+      <TextInput
+        title="シート名を入力"
+        value={sheetName}
+        onChange={(e) => setSheetName(e.target.value)}
+      />
+      <button onClick={handleCreate}>作成</button>
     </div>
   );
 }
