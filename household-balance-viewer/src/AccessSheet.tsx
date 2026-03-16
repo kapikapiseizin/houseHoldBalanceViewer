@@ -51,6 +51,49 @@ async function createTable(accessToken: string, spreadsheetId: string, tableForm
   }
 }
 
+async function checkSheetFormat(accessToken: string, spreadsheetId: string): Promise<boolean> {
+  try {
+    for (const tableFormat of SHEET_FORMAT.tables) {
+      const endColumn = String.fromCharCode(64 + tableFormat.headers.length);
+      const range = `'${tableFormat.title}'!A1:${endColumn}1`;
+      
+      const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const data = await response.json();
+
+      // Check A: Confirm that a sheet with name tableFormat.title exists.
+      if (data.error) {
+        return false;
+      }
+
+      // Check B: Confirm that the header row of the sheet matches tableFormat.headers.
+      if (!data.values || data.values.length === 0) {
+        return false;
+      }
+
+      const headers = data.values[0];
+      if (headers.length !== tableFormat.headers.length) {
+        return false;
+      }
+
+      for (let i = 0; i < tableFormat.headers.length; i++) {
+        if (headers[i] !== tableFormat.headers[i]) {
+          return false;
+        }
+      }
+    }
+    return true;
+  } catch (error) {
+    console.error("Format check failed:", error);
+    return false;
+  }
+}
+
 type AccessSheetProps = {
   accessToken: string;
   onSuccess: (spreadSheetID: string | undefined) => void;
@@ -84,7 +127,19 @@ export default function AccessSheet({ accessToken, onSuccess, initializeSpreadSh
     return (
       <CreateSheet
         accessToken={accessToken}
-        onCreate={(spreadSheetID) => onSuccess(spreadSheetID)}
+        onCreate={async (spreadSheetID) => {
+          if (!spreadSheetID) {
+            onSuccess(undefined);
+            return;
+          }
+          const isValid = await checkSheetFormat(accessToken, spreadSheetID);
+          if (isValid) {
+            onSuccess(spreadSheetID);
+          } else {
+            console.error("Created sheet format is invalid");
+            onSuccess(undefined);
+          }
+        }}
       />
     );
   }
@@ -93,7 +148,19 @@ export default function AccessSheet({ accessToken, onSuccess, initializeSpreadSh
     return (
       <SelectSheet
         accessToken={accessToken}
-        onSelect={(spreadSheetID) => onSuccess(spreadSheetID)}
+        onSelect={async (spreadSheetID) => {
+          if (!spreadSheetID) {
+            onSuccess(undefined);
+            return;
+          }
+          const isValid = await checkSheetFormat(accessToken, spreadSheetID);
+          if (isValid) {
+            onSuccess(spreadSheetID);
+          } else {
+            console.error("Selected sheet format is invalid");
+            onSuccess(undefined);
+          }
+        }}
       />
     );
   }
