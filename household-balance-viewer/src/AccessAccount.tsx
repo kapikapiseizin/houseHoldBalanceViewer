@@ -39,13 +39,17 @@ export default function AccessAccount({ onSuccess, loginHintEmail, onNewLogin }:
       scope: "openid email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive",
       callback: async (response: any) => {
         if (response.error !== undefined) {
+          window.confirm("Google login failed: " + response.error);
           throw response;
         }
+
         console.log("Google login success");
 
         const accessToken = response.access_token;
         if (typeof accessToken !== "string") {
-          throw new Error("Access token is not a string");
+          const accessTokenTypeError = "Access token is not a string";
+          window.confirm(accessTokenTypeError);
+          throw new Error(accessTokenTypeError);
         }
 
         // fetch email

@@ -56,7 +56,7 @@ async function checkSheetFormat(accessToken: string, spreadsheetId: string): Pro
     for (const tableFormat of SHEET_FORMAT.tables) {
       const endColumn = String.fromCharCode(64 + tableFormat.headers.length);
       const range = `'${tableFormat.title}'!A1:${endColumn}1`;
-      
+
       const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}`, {
         method: "GET",
         headers: {
@@ -104,13 +104,28 @@ type Phase = 'selectMode' | 'createSheet' | 'selectSheet';
 
 export default function AccessSheet({ accessToken, onSuccess, initializeSpreadSheetID }: AccessSheetProps) {
   const [phase, setPhase] = useState<Phase>('selectMode');
+  const sheetFormatSuccess = "Sheet format is valid";
+  const sheetFormatError = "Sheet format is invalid";
 
   useEffect(() => {
     if (!initializeSpreadSheetID) {
       return;
     }
 
-    onSuccess(initializeSpreadSheetID);
+    const checkInitializeSpreadSheetID = async () => {
+      const isValid = await checkSheetFormat(accessToken, initializeSpreadSheetID);
+      if (isValid) {
+        console.log(sheetFormatSuccess);
+        onSuccess(initializeSpreadSheetID);
+      } else {
+        console.error(sheetFormatError);
+        window.confirm(sheetFormatError);
+        onSuccess(undefined);
+      }
+    }
+
+    checkInitializeSpreadSheetID();
+
   }, [onSuccess, initializeSpreadSheetID]);
 
   if (phase === 'selectMode') {
@@ -134,9 +149,11 @@ export default function AccessSheet({ accessToken, onSuccess, initializeSpreadSh
           }
           const isValid = await checkSheetFormat(accessToken, spreadSheetID);
           if (isValid) {
+            console.log(sheetFormatSuccess);
             onSuccess(spreadSheetID);
           } else {
-            console.error("Created sheet format is invalid");
+            console.error(sheetFormatError);
+            window.confirm(sheetFormatError);
             onSuccess(undefined);
           }
         }}
@@ -155,9 +172,11 @@ export default function AccessSheet({ accessToken, onSuccess, initializeSpreadSh
           }
           const isValid = await checkSheetFormat(accessToken, spreadSheetID);
           if (isValid) {
+            console.log(sheetFormatSuccess);
             onSuccess(spreadSheetID);
           } else {
-            console.error("Selected sheet format is invalid");
+            console.error(sheetFormatError);
+            window.confirm(sheetFormatError);
             onSuccess(undefined);
           }
         }}
