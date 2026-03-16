@@ -1,8 +1,8 @@
 type ListDropdownInputProps = {
     title: string;
-    valueId: number;
-    items: { id: number; displayName: string }[];
-    onChange: (id: number, displayName: string) => void;
+    valueId: any;
+    items: { id: any; displayName: string }[];
+    onChange: (id: any, displayName: string) => void;
 };
 
 export default function ListDropdownInput({ title, valueId, items, onChange }: ListDropdownInputProps) {
@@ -12,7 +12,7 @@ export default function ListDropdownInput({ title, valueId, items, onChange }: L
             <select
                 value={valueId}
                 onChange={(e) => {
-                    const id = Number(e.target.value);
+                    const id = e.target.value;
                     const item = items.find(i => i.id === id);
                     if (item) {
                         onChange(id, item.displayName);

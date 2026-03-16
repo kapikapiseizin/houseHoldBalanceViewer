@@ -75,14 +75,18 @@ type SelectSheetProps = {
   onSelect: (spreadSheetID: string | undefined) => void;
 };
 
-type Sheet = {
+type SheetItem = {
   id: string;
-  name: string;
+  title: string;
 };
+
+interface SheetResponse {
+  items: SheetItem[];
+}
 
 function SelectSheet({ accessToken, onSelect }: SelectSheetProps) {
   const [spreadSheetID, setSpreadSheetID] = useState<string | undefined>(undefined);
-  const [sheets, setSheets] = useState<Sheet[]>([]);
+  const [sheets, setSheets] = useState<SheetItem[]>([]);
 
   useEffect(() => {
     async function fetchSheets() {
@@ -99,17 +103,19 @@ function SelectSheet({ accessToken, onSelect }: SelectSheetProps) {
           },
         }
       );
+      const dataJson = await response.json();
+      const data: SheetResponse = dataJson;
 
-      const data = await response.json();
-      const files: Sheet[] = data.files || [];
+      console.log(data);
 
-      if (files.length < 1) {
+      if (data.items.length < 1) {
         console.log("No sheets found");
         onSelect(undefined);
-      } else {
-        setSheets(files);
-        setSpreadSheetID(files[0].id);
+        return;
       }
+
+      setSheets(data.items);
+      setSpreadSheetID(data.items[0].id);
     }
 
     fetchSheets();
@@ -119,21 +125,15 @@ function SelectSheet({ accessToken, onSelect }: SelectSheetProps) {
     onSelect(spreadSheetID);
   };
 
-  const selectedIndex = Math.max(0, sheets.findIndex(s => s.id === spreadSheetID));
-  const items = sheets.map((s, index) => ({ id: index, displayName: s.name }));
-
   return (
     <div>
       {sheets.length > 0 && (
         <ListDropdownInput
           title="シートを選択"
-          valueId={selectedIndex}
-          items={items}
+          valueId={spreadSheetID}
+          items={sheets.map((item) => ({ id: item.id, displayName: item.title }))}
           onChange={(id) => {
-            const sheet = sheets[id];
-            if (sheet) {
-              setSpreadSheetID(sheet.id);
-            }
+            setSpreadSheetID(id);
           }}
         />
       )}
