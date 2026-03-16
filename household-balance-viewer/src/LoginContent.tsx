@@ -1,5 +1,9 @@
 import { useState } from "react";
 import "./App.css";
+import DateInput from "./DateInput";
+import TextInput from "./TextInput";
+import ListDropdownInput from "./ListDropdownInput";
+import MoneyInput from "./MoneyInput";
 
 type BalanceDisplayProps = {
   title: string;
@@ -49,84 +53,7 @@ function BudgetPage() {
   );
 }
 
-type DateInputProps = {
-  title: string;
-  date: string;
-};
 
-function DateInput({ title, date }: DateInputProps) {
-  return (
-    <div>
-      <div>{title}</div>
-      <input type="date" defaultValue={date} />
-    </div>
-  );
-}
-
-type TextInputProps = {
-  title: string;
-  value: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-};
-
-function TextInput({ title, value, onChange }: TextInputProps) {
-  return (
-    <div>
-      <div>{title}</div>
-      <input type="text" value={value} onChange={onChange} />
-    </div>
-  );
-}
-
-type ListDropdownInputProps = {
-  title: string;
-  valueId: number;
-  items: { id: number; displayName: string }[];
-  onChange: (id: number, displayName: string) => void;
-};
-
-function ListDropdownInput({ title, valueId, items, onChange }: ListDropdownInputProps) {
-  return (
-    <div>
-      <div>{title}</div>
-      <select
-        value={valueId}
-        onChange={(e) => {
-          const id = Number(e.target.value);
-          const item = items.find(i => i.id === id);
-          if (item) {
-            onChange(id, item.displayName);
-          }
-        }}
-      >
-        {items.map((item) => (
-          <option key={item.id} value={item.id}>
-            {item.displayName}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
-
-type MoneyInputProps = {
-  title: string;
-  amount: number;
-  onChange: (amount: number) => void;
-};
-
-function MoneyInput({ title, amount, onChange }: MoneyInputProps) {
-  return (
-    <div>
-      <div>{title}</div>
-      <input
-        type="number"
-        value={amount}
-        onChange={(e) => onChange(Number(e.target.value))}
-      />円
-    </div>
-  );
-}
 
 function InputPage() {
   const now = new Date();
