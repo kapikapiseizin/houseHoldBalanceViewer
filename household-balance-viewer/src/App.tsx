@@ -7,6 +7,7 @@ import LoginContent from "./LoginContent";
 
 export default function App() {
   const LAST_LOGIN_EMAIL_KEY = "lastLoginEmail";
+  const LAST_SPREADSHEET_ID_KEY = "lastSpreadsheetId";
 
   const [phase, setPhase] = useState<"loginRequired" | "sheetRequired" | "ready">("loginRequired");
 
@@ -54,6 +55,25 @@ export default function App() {
     if (loginInfo.email) {
       console.log("storeLoginInfo:success", loginInfo.email);
       storeLastLoginEmail(loginInfo.email);
+    }
+  };
+
+  const tryLoadLastSpreadsheetId = () => {
+    const spreadsheetId = localStorage.getItem(LAST_SPREADSHEET_ID_KEY);
+    if (spreadsheetId) {
+      console.log("tryLoadLastSpreadsheetId:success", spreadsheetId);
+      return spreadsheetId;
+    }
+    console.log("tryLoadLastSpreadsheetId:failed");
+    return undefined;
+  };
+
+  const storeLastSpreadsheetId = (spreadsheetId: string | undefined) => {
+    if (spreadsheetId) {
+      console.log("storeLastSpreadsheetId:success", spreadsheetId);
+      localStorage.setItem(LAST_SPREADSHEET_ID_KEY, spreadsheetId);
+    } else {
+      console.log("storeLastSpreadsheetId:failed");
     }
   };
 
