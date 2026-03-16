@@ -12,7 +12,6 @@ export default function App() {
 
   const [accountCredential, setAccountCredential] = useState<any>({});
   const [sheetCredential, setSheetCredential] = useState<any>({});
-  const [lastLoginEmail, setLastLoginEmail] = useState<string | undefined>(undefined);
 
   const handleLoginSuccess = (credential: any) => {
     console.log("handleLoginSuccess");
@@ -29,22 +28,26 @@ export default function App() {
   const tryLoadLastLoginEmail = () => {
     const email = localStorage.getItem(LAST_LOGIN_EMAIL_KEY);
     if (email) {
-      setLastLoginEmail(email);
+      console.log("tryLoadLastLoginEmail:success", email);
       return email;
     }
-
+    console.log("tryLoadLastLoginEmail:failed");
     return undefined;
   };
 
   const storeLastLoginEmail = (email: string | undefined) => {
-    setLastLoginEmail(email);
     if (email) {
+      console.log("storeLastLoginEmail:success", email);
       localStorage.setItem(LAST_LOGIN_EMAIL_KEY, email);
+    } else {
+      console.log("storeLastLoginEmail:failed");
     }
   };
 
   const storeLoginInfo = (loginInfo: LoginInfo) => {
+    console.log("storeLoginInfo", loginInfo);
     if (loginInfo.email) {
+      console.log("storeLoginInfo:success", loginInfo.email);
       storeLastLoginEmail(loginInfo.email);
     }
   };

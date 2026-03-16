@@ -19,6 +19,15 @@ type AccessAccountProps = {
 export default function AccessAccount({ onSuccess, loginHintEmail, onNewLogin }: AccessAccountProps) {
   const tokenClientRef = useRef<any>(null);
   const initialized = useRef(false);
+  const fetchEmailByToken = async (accessToken: string) => {
+    const response = await fetch("https://www.googleapis.com/oauth2/v1/userinfo", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const data = await response.json();
+    return data.email;
+  };
 
   useEffect(() => {
     if (initialized.current) {
@@ -31,21 +40,42 @@ export default function AccessAccount({ onSuccess, loginHintEmail, onNewLogin }:
 
     tokenClientRef.current = google.accounts.oauth2.initTokenClient({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-      scope: "https://www.googleapis.com/auth/spreadsheets",
-      callback: (response: any) => {
+      scope: "openid email profile https://www.googleapis.com/auth/spreadsheets",
+      callback: async (response: any) => {
         if (response.error !== undefined) {
           throw response;
         }
         console.log("Google login success");
+
+        // fetch email
+        const email = await fetchEmailByToken(response.access_token);
+        console.log("Email: ", email);
+
+        if (loginHintEmail) {
+          if (loginHintEmail !== email) {
+            // login different account
+            onNewLogin({ email });
+          }
+        } else {
+          // no hint login
+          onNewLogin({ email });
+        }
+
+        // fire success callback
         onSuccess({
           accessToken: response.access_token,
         });
       },
     });
 
-    // silent login
-    tokenClientRef.current?.requestAccessToken({ prompt: "" });
-  }, [onSuccess]);
+    if (loginHintEmail) {
+      // silent login with hint
+      tokenClientRef.current?.requestAccessToken({ prompt: "", login_hint: loginHintEmail });
+    } else {
+      // silent login
+      tokenClientRef.current?.requestAccessToken({ prompt: "" });
+    }
+  }, [onSuccess, onNewLogin, loginHintEmail]);
 
   return (
     <div>
