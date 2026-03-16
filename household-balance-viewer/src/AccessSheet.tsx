@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import ListDropdownInput from './ListDropdownInput';
 
 type AccessSheetProps = {
   accessToken: string;
@@ -74,10 +75,73 @@ type SelectSheetProps = {
   onSelect: (spreadSheetID: string | undefined) => void;
 };
 
+type Sheet = {
+  id: string;
+  name: string;
+};
+
 function SelectSheet({ accessToken, onSelect }: SelectSheetProps) {
+  const [spreadSheetID, setSpreadSheetID] = useState<string | undefined>(undefined);
+  const [sheets, setSheets] = useState<Sheet[]>([]);
+
+  useEffect(() => {
+    async function fetchSheets() {
+      try {
+        const params = new URLSearchParams({
+          q: "mimeType='application/vnd.google-apps.spreadsheet'",
+          fields: "items(id, title)"
+        });
+        const url = `https://www.googleapis.com/drive/v2/files?${params.toString()}`;
+        const response = await fetch(
+          url,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+        const data = await response.json();
+
+        const files: Sheet[] = data.files || [];
+
+        if (files.length < 1) {
+          onSelect(undefined);
+        } else {
+          setSheets(files);
+          setSpreadSheetID(files[0].id);
+        }
+      } catch (error) {
+        console.error(error);
+        onSelect(undefined);
+      }
+    }
+
+    fetchSheets();
+  }, [accessToken]);
+
+  const handleSelect = () => {
+    onSelect(spreadSheetID);
+  };
+
+  const selectedIndex = Math.max(0, sheets.findIndex(s => s.id === spreadSheetID));
+  const items = sheets.map((s, index) => ({ id: index, displayName: s.name }));
+
   return (
     <div>
-      <button onClick={() => onSelect(undefined)}>Select</button>
+      {sheets.length > 0 && (
+        <ListDropdownInput
+          title="シートを選択"
+          valueId={selectedIndex}
+          items={items}
+          onChange={(id) => {
+            const sheet = sheets[id];
+            if (sheet) {
+              setSpreadSheetID(sheet.id);
+            }
+          }}
+        />
+      )}
+      <button onClick={handleSelect}>Select</button>
     </div>
   );
 }

@@ -36,12 +36,12 @@ export default function AccessAccount({ onSuccess, loginHintEmail, onNewLogin }:
 
     tokenClientRef.current = google.accounts.oauth2.initTokenClient({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-      scope: "openid email profile https://www.googleapis.com/auth/spreadsheets",
+      scope: "openid email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive",
       callback: async (response: any) => {
         if (response.error !== undefined) {
           throw response;
         }
-        console.log("Google login success");
+        console.log("Google login success", response.access_token);
 
         // fetch email
         const email = await fetchEmailByToken(response.access_token);
