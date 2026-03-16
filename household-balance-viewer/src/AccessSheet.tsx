@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import ListDropdownInput from './ListDropdownInput';
 import TextInput from './TextInput';
+import { SHEET_FORMAT } from './SheetFormat';
 
 type AccessSheetProps = {
   accessToken: string;
@@ -82,13 +83,15 @@ function CreateSheet({ accessToken, onCreate }: CreateSheetProps) {
       });
 
       const data = await response.json();
-      
-      if (data.spreadsheetId) {
-        onCreate(data.spreadsheetId);
-      } else {
+
+      if (!data.spreadsheetId) {
         console.error("Failed to create spreadsheet:", data);
         onCreate(undefined);
+        return;
       }
+
+      const spreadSheetID = data.spreadsheetId;
+      onCreate(spreadSheetID);
     } catch (error) {
       console.error("Error creating spreadsheet:", error);
       onCreate(undefined);
