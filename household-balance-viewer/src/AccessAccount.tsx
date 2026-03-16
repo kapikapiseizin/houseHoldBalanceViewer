@@ -7,7 +7,7 @@ export type LoginInfo = {
 };
 
 type AccessAccountProps = {
-  onSuccess: (accessToken: any) => void;
+  onSuccess: (accessToken: string) => void;
   loginHintEmail?: string;
   onNewLogin: (loginInfo: LoginInfo) => void;
 };
@@ -41,10 +41,15 @@ export default function AccessAccount({ onSuccess, loginHintEmail, onNewLogin }:
         if (response.error !== undefined) {
           throw response;
         }
-        console.log("Google login success", response.access_token);
+        console.log("Google login success");
+
+        const accessToken = response.access_token;
+        if (typeof accessToken !== "string") {
+          throw new Error("Access token is not a string");
+        }
 
         // fetch email
-        const email = await fetchEmailByToken(response.access_token);
+        const email = await fetchEmailByToken(accessToken);
         console.log("Email: ", email);
 
         if (loginHintEmail) {
@@ -58,9 +63,7 @@ export default function AccessAccount({ onSuccess, loginHintEmail, onNewLogin }:
         }
 
         // fire success callback
-        onSuccess({
-          accessToken: response.access_token,
-        });
+        onSuccess(accessToken);
       },
     });
 

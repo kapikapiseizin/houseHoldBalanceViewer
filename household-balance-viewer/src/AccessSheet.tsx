@@ -86,33 +86,29 @@ function SelectSheet({ accessToken, onSelect }: SelectSheetProps) {
 
   useEffect(() => {
     async function fetchSheets() {
-      try {
-        const params = new URLSearchParams({
-          q: "mimeType='application/vnd.google-apps.spreadsheet'",
-          fields: "items(id, title)"
-        });
-        const url = `https://www.googleapis.com/drive/v2/files?${params.toString()}`;
-        const response = await fetch(
-          url,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
-        const data = await response.json();
-
-        const files: Sheet[] = data.files || [];
-
-        if (files.length < 1) {
-          onSelect(undefined);
-        } else {
-          setSheets(files);
-          setSpreadSheetID(files[0].id);
+      const params = new URLSearchParams({
+        q: "mimeType='application/vnd.google-apps.spreadsheet' and trashed=false",
+        fields: "items(id, title)"
+      });
+      const url = `https://www.googleapis.com/drive/v2/files?${params.toString()}`;
+      const response = await fetch(
+        url,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
-      } catch (error) {
-        console.error(error);
+      );
+
+      const data = await response.json();
+      const files: Sheet[] = data.files || [];
+
+      if (files.length < 1) {
+        console.log("No sheets found");
         onSelect(undefined);
+      } else {
+        setSheets(files);
+        setSpreadSheetID(files[0].id);
       }
     }
 

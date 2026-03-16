@@ -10,16 +10,16 @@ export default function App() {
 
   const [phase, setPhase] = useState<"loginRequired" | "sheetRequired" | "ready">("loginRequired");
 
-  const [access_token, setAccessToken] = useState<any>({});
-  const [spreadsheetId, setSpreadsheetId] = useState<any>({});
+  const [access_token, setAccessToken] = useState<string | undefined>(undefined);
+  const [spreadsheetId, setSpreadsheetId] = useState<string | undefined>(undefined);
 
-  const handleLoginSuccess = (access_token: any) => {
+  const handleLoginSuccess = (access_token: string | undefined) => {
     console.log("handleLoginSuccess");
     setAccessToken(access_token);
     setPhase("sheetRequired");
   };
 
-  const handleSheetSuccess = (spreadsheetId: any) => {
+  const handleSheetSuccess = (spreadsheetId: string | undefined) => {
     console.log("handleSheetSuccess");
     setSpreadsheetId(spreadsheetId);
     setPhase("ready");
@@ -55,8 +55,8 @@ export default function App() {
   return (
     <>
       {phase === "loginRequired" && <AccessAccount onSuccess={handleLoginSuccess} loginHintEmail={tryLoadLastLoginEmail()} onNewLogin={storeLoginInfo} />}
-      {phase === "sheetRequired" && <AccessSheet accessToken={access_token} onSuccess={handleSheetSuccess} />}
-      {phase === "ready" && <LoginContent accessToken={access_token} spreadsheetId={spreadsheetId} />}
+      {phase === "sheetRequired" && <AccessSheet accessToken={access_token ? access_token : ""} onSuccess={handleSheetSuccess} />}
+      {phase === "ready" && <LoginContent accessToken={access_token ? access_token : ""} spreadsheetId={spreadsheetId ? spreadsheetId : ""} />}
     </>
   );
 }
