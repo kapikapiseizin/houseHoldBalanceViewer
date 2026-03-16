@@ -33,7 +33,7 @@ async function createTable(accessToken: string, spreadsheetId: string, tableForm
   const values = [tableFormat.headers];
   const endColumn = String.fromCharCode(64 + tableFormat.headers.length); // Assume < 26 headers for simplicity
   const range = `'${tableFormat.title}'!A1:${endColumn}1`;
-  
+
   const updateValuesResponse = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`, {
     method: "PUT",
     headers: {
@@ -54,11 +54,12 @@ async function createTable(accessToken: string, spreadsheetId: string, tableForm
 type AccessSheetProps = {
   accessToken: string;
   onSuccess: (spreadSheetID: string | undefined) => void;
+  initializeSpreadSheetID: string | undefined;
 };
 
 type Phase = 'selectMode' | 'createSheet' | 'selectSheet';
 
-export default function AccessSheet({ accessToken, onSuccess }: AccessSheetProps) {
+export default function AccessSheet({ accessToken, onSuccess, initializeSpreadSheetID }: AccessSheetProps) {
   const [phase, setPhase] = useState<Phase>('selectMode');
 
   if (phase === 'selectMode') {
