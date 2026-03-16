@@ -62,6 +62,14 @@ type Phase = 'selectMode' | 'createSheet' | 'selectSheet';
 export default function AccessSheet({ accessToken, onSuccess, initializeSpreadSheetID }: AccessSheetProps) {
   const [phase, setPhase] = useState<Phase>('selectMode');
 
+  useEffect(() => {
+    if (!initializeSpreadSheetID) {
+      return;
+    }
+
+    onSuccess(initializeSpreadSheetID);
+  }, [onSuccess, initializeSpreadSheetID]);
+
   if (phase === 'selectMode') {
     return (
       <SelectMode
