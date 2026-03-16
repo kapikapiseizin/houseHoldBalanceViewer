@@ -2,16 +2,12 @@ import { useEffect, useRef } from "react";
 
 declare const google: any;
 
-type AccountCredential = {
-  accessToken: string;
-};
-
 export type LoginInfo = {
   email?: string;
 };
 
 type AccessAccountProps = {
-  onSuccess: (credential: AccountCredential) => void;
+  onSuccess: (accessToken: any) => void;
   loginHintEmail?: string;
   onNewLogin: (loginInfo: LoginInfo) => void;
 };

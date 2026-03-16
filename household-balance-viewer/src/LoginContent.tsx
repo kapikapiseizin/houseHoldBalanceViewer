@@ -119,10 +119,10 @@ function MoneyInput({ title, amount, onChange }: MoneyInputProps) {
   return (
     <div>
       <div>{title}</div>
-      <input 
-        type="number" 
-        value={amount} 
-        onChange={(e) => onChange(Number(e.target.value))} 
+      <input
+        type="number"
+        value={amount}
+        onChange={(e) => onChange(Number(e.target.value))}
       />円
     </div>
   );
@@ -168,10 +168,10 @@ function InputPage() {
   return (
     <div>
       <DateInput title="入力日" date={today} />
-      <TextInput 
-        title="タイトル" 
-        value={title} 
-        onChange={handleTitleChange} 
+      <TextInput
+        title="タイトル"
+        value={title}
+        onChange={handleTitleChange}
       />
       <ListDropdownInput
         title="種類"
@@ -190,11 +190,11 @@ function InputPage() {
 }
 
 export type LoginContentProps = {
-  accountCredential: {};
-  sheetCredential: {};
+  accessToken: string;
+  spreadsheetId: string;
 };
 
-export default function LoginContent(_props: LoginContentProps) {
+export default function LoginContent({ }: LoginContentProps) {
   const [page, setPage] = useState<"budget" | "input">("budget");
 
   return (

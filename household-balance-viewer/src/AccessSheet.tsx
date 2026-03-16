@@ -1,12 +1,12 @@
 type AccessSheetProps = {
-  accountCredential: {};
-  onSuccess: (credential: {}) => void;
+  accessToken: string;
+  onSuccess: (spreadsheetId: string) => void;
 };
 
-export default function AccessSheet({ accountCredential: _accountCredential, onSuccess }: AccessSheetProps) {
+export default function AccessSheet({ accessToken, onSuccess }: AccessSheetProps) {
   return (
     <div>
-      <button onClick={() => onSuccess({})}>Access Sheet</button>
+      <button onClick={() => onSuccess("")}>Access Sheet</button>
     </div>
   );
 }
