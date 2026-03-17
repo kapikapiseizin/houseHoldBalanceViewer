@@ -19,7 +19,7 @@ export class GoogleSheetOperator implements SheetOperator {
     computeBalance(): Promise<BalanceResponse[]> {
         return Promise.resolve([
             { title: "テスト食費", budgetAmount: 50000, carryOverAmount: 10000, usedAmount: 60000 },
-            { title: "テスト日用品", budgetAmount: 20000, carryOverAmount: 0, usedAmount: 5000 },
+            { title: "テスト日用品", budgetAmount: 20000, carryOverAmount: 10000, usedAmount: 15000 },
             { title: "テスト娯楽", budgetAmount: 10000, carryOverAmount: 0, usedAmount: 2000 }
         ]);
     }

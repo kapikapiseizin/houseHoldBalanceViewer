@@ -19,9 +19,8 @@ export default function BalanceDisplay({ title, budgetAmount, carryOverAmount, u
                 残高 {remainingAmount}円 / {budgetAmount}円 + <span className="carryover-text">{carryOverAmount}円</span>
             </div>
             <div className="balance-bar">
-                <div className="bar-used" style={{ width: `${usedPercent}%` }}></div>
-                <div className="bar-remaining"></div>
                 <div className="bar-carryover" style={{ width: `${carryOverPercent}%` }}></div>
+                <div className="bar-used" style={{ width: `${usedPercent}%` }}></div>
             </div>
         </div>
     );
