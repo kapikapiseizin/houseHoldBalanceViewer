@@ -12,10 +12,10 @@ export default function ListDropdownInput({ title, valueId, items, onChange }: L
             <select
                 value={valueId}
                 onChange={(e) => {
-                    const id = e.target.value;
-                    const item = items.find(i => i.id === id);
+                    const id: string = e.target.value;
+                    const item = items.find(i => String(i.id) === id);
                     if (item) {
-                        onChange(id, item.displayName);
+                        onChange(item.id, item.displayName);
                     }
                 }}
             >

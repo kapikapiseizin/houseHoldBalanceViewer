@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import DateInput from "./DateInput";
 import TextInput from "./TextInput";
 import ListDropdownInput from "./ListDropdownInput";
 import MoneyInput from "./MoneyInput";
 import BalanceDisplay from "./BalanceDisplay";
-import type { SheetOperator } from "./SheetOperator";
+import type { SheetOperator, Category } from "./SheetOperator";
 
 function BudgetPage() {
   return (
@@ -26,28 +26,26 @@ function BudgetPage() {
   );
 }
 
+type InputPageProps = {
+  sheetOperator: SheetOperator;
+}
 
-
-function InputPage() {
+function InputPage({ sheetOperator }: InputPageProps) {
   const now = new Date();
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-
-  const dropdownItems = [
-    { id: 0, displayName: "食費" },
-    { id: 1, displayName: "日用品" },
-    { id: 2, displayName: "娯楽" }
-  ];
 
   const [categoryId, setCategoryId] = useState(0);
   const [isTitleManuallyEdited, setIsTitleManuallyEdited] = useState(false);
   const [manualTitle, setManualTitle] = useState("");
   const [amount, setAmount] = useState(0);
+  const [dropdownItems, setDropdownItems] = useState<Category[]>([]);
 
   const selectedCategory = dropdownItems.find(item => item.id === categoryId);
-  const defaultTitle = selectedCategory ? selectedCategory.displayName : "";
+  const defaultTitle = selectedCategory ? selectedCategory.name : "";
   const title = isTitleManuallyEdited ? manualTitle : defaultTitle;
 
   const handleCategoryChange = (id: number) => {
+    console.log("handleCategoryChange", id);
     setCategoryId(id);
   };
 
@@ -65,6 +63,10 @@ function InputPage() {
     });
   };
 
+  useEffect(() => {
+    sheetOperator.fetchCategories().then(setDropdownItems);
+  }, [sheetOperator]);
+
   return (
     <div>
       <DateInput title="入力日" date={today} />
@@ -76,7 +78,7 @@ function InputPage() {
       <ListDropdownInput
         title="種類"
         valueId={categoryId}
-        items={dropdownItems}
+        items={dropdownItems.map(item => ({ id: item.id, displayName: item.name }))}
         onChange={handleCategoryChange}
       />
       <MoneyInput
@@ -113,7 +115,7 @@ export default function LoginContent({ sheetOperator, onLogout }: LoginContentPr
     <div className="app">
       <main className="main">
         {page === "budget" && <BudgetPage />}
-        {page === "input" && <InputPage />}
+        {page === "input" && <InputPage sheetOperator={sheetOperator} />}
         {page === "menu" && <Menu onLogout={onLogout} />}
       </main>
 
