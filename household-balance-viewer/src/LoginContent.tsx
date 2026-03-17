@@ -40,7 +40,7 @@ function InputPage({ sheetOperator }: InputPageProps) {
   const [amount, setAmount] = useState(0);
   const [dropdownItems, setDropdownItems] = useState<Category[]>([]);
 
-  const selectedCategory = dropdownItems.find(item => item.id === categoryId);
+  const selectedCategory = dropdownItems.find(item => item.categoryID === categoryId);
   const defaultTitle = selectedCategory ? selectedCategory.name : "";
   const title = isTitleManuallyEdited ? manualTitle : defaultTitle;
 
@@ -54,13 +54,15 @@ function InputPage({ sheetOperator }: InputPageProps) {
     setManualTitle(e.target.value);
   };
 
-  const handleSubmit = () => {
-    console.log({
+  const handleSubmit = async () => {
+    await sheetOperator.requestAddPayment({
       date: today,
-      categoryId,
+      categoryID: categoryId,
       title,
       amount
     });
+
+    window.confirm("決済を登録しました");
   };
 
   useEffect(() => {
@@ -78,7 +80,7 @@ function InputPage({ sheetOperator }: InputPageProps) {
       <ListDropdownInput
         title="種類"
         valueId={categoryId}
-        items={dropdownItems.map(item => ({ id: item.id, displayName: item.name }))}
+        items={dropdownItems.map(item => ({ id: item.categoryID, displayName: item.name }))}
         onChange={handleCategoryChange}
       />
       <MoneyInput
