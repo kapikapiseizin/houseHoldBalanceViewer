@@ -116,25 +116,39 @@ function InputPage() {
   );
 }
 
+type MenuProps = {
+  onLogout: () => void;
+};
+
+function Menu({ onLogout }: MenuProps) {
+  return (
+    <div>
+      <button onClick={onLogout}>Logout</button>
+    </div>
+  );
+}
+
 export type LoginContentProps = {
   accessToken: string;
   spreadsheetId: string;
   onLogout: () => void;
 };
 
-export default function LoginContent({ }: LoginContentProps) {
-  const [page, setPage] = useState<"budget" | "input">("budget");
+export default function LoginContent({ accessToken, spreadsheetId, onLogout }: LoginContentProps) {
+  const [page, setPage] = useState<"budget" | "input" | "menu">("budget");
 
   return (
     <div className="app">
       <main className="main">
         {page === "budget" && <BudgetPage />}
         {page === "input" && <InputPage />}
+        {page === "menu" && <Menu onLogout={onLogout} />}
       </main>
 
       <nav className="menu">
         <button onClick={() => setPage("budget")}>予算</button>
         <button onClick={() => setPage("input")}>入力</button>
+        <button onClick={() => setPage("menu")}>メニュー</button>
       </nav>
     </div>
   );

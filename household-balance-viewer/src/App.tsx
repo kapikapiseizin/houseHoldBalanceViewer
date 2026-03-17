@@ -79,6 +79,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    console.log("handleLogout");
     localStorage.removeItem(LAST_LOGIN_EMAIL_KEY);
     localStorage.removeItem(LAST_SPREADSHEET_ID_KEY);
     setPhase("loginRequired");
