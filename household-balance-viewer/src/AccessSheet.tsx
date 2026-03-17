@@ -213,8 +213,8 @@ type SelectModeProps = {
 function SelectMode({ onChoiceCreateSheet, onChoiceSelectSheet }: SelectModeProps) {
   return (
     <div>
-      <button onClick={onChoiceCreateSheet}>Create</button>
-      <button onClick={onChoiceSelectSheet}>Select</button>
+      <button onClick={onChoiceCreateSheet}>新規作成</button>
+      <button onClick={onChoiceSelectSheet}>既存のシートを選択</button>
     </div>
   );
 }
