@@ -6,6 +6,7 @@ import ListDropdownInput from "./ListDropdownInput";
 import MoneyInput from "./MoneyInput";
 import BalanceDisplay from "./BalanceDisplay";
 import type { SheetOperator, Category, BalanceResponse } from "./SheetOperator";
+import LoadingContent from "./LoadingContent";
 
 type BudgetPageProps = {
   sheetOperator: SheetOperator;
@@ -47,6 +48,7 @@ function InputPage({ sheetOperator }: InputPageProps) {
   const [manualTitle, setManualTitle] = useState("");
   const [amount, setAmount] = useState(0);
   const [dropdownItems, setDropdownItems] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const selectedCategory = dropdownItems.find(item => item.categoryID === categoryId);
   const defaultTitle = selectedCategory ? selectedCategory.name : "";
@@ -74,8 +76,13 @@ function InputPage({ sheetOperator }: InputPageProps) {
   };
 
   useEffect(() => {
-    sheetOperator.fetchCategories().then(setDropdownItems);
+    setIsLoading(true);
+    sheetOperator.fetchCategories().then(setDropdownItems).finally(() => setIsLoading(false));
   }, [sheetOperator]);
+
+  if (isLoading) {
+    return <LoadingContent title="データを取得中" />;
+  }
 
   return (
     <div>
