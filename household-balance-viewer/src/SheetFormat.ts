@@ -7,48 +7,64 @@ interface SheetFormat {
     readonly tables: TableFormat[];
 }
 
+const headerCategoryID = "分類ID";
+
+export class CategoryMasterFormat {
+    static readonly headerCategoryID = headerCategoryID;
+    static readonly headerName = "名前";
+    static readonly title = "分類マスタ";
+}
+
+export class BudgetMasterFormat {
+    static readonly headerCategoryID = headerCategoryID;
+    static readonly headerUpdateDate = "更新年月日";
+    static readonly headerBudgetAmount = "月次予算";
+    static readonly title = "予算マスタ";
+}
+
+export class PaymentTableFormat {
+    static readonly headerPaymentID = "決済ID";
+    static readonly headerPaymentDate = "決済日";
+    static readonly headerTitle = "タイトル";
+    static readonly headerCategoryID = headerCategoryID;
+    static readonly headerAmount = "金額";
+    static readonly title = "決済テーブル";
+}
+
+export class CarryOverSummaryFormat {
+    static readonly headerCategoryID = headerCategoryID;
+    static readonly headerMeasurementYearMonth = "計測年月";
+    static readonly headerCarryOverAmount = "繰越金額";
+    static readonly title = "繰越サマリ";
+}
+
+export class BudgetDisplayCategoryMasterFormat {
+    static readonly headerCategoryID = headerCategoryID;
+    static readonly headerDisplayOrder = "昇順上位表示優先度";
+    static readonly title = "予算表示分類マスタ";
+}
+
 export const SHEET_FORMAT: SheetFormat = {
     tables: [
         {
-            title: "分類マスタ",
-            headers: [
-                "分類ID",
-                "名前"
-            ]
+            title: CategoryMasterFormat.title,
+            headers: [CategoryMasterFormat.headerCategoryID, CategoryMasterFormat.headerName]
         },
         {
-            title: "予算マスタ",
-            headers: [
-                "分類ID",
-                "更新年月日",
-                "月次予算"
-            ]
+            title: BudgetMasterFormat.title,
+            headers: [BudgetMasterFormat.headerCategoryID, BudgetMasterFormat.headerUpdateDate, BudgetMasterFormat.headerBudgetAmount]
         },
         {
-            title: "決済テーブル",
-            headers: [
-                "決済ID",
-                "決済日",
-                "タイトル",
-                "分類ID",
-                "金額"
-            ]
+            title: PaymentTableFormat.title,
+            headers: [PaymentTableFormat.headerPaymentID, PaymentTableFormat.headerPaymentDate, PaymentTableFormat.headerTitle, PaymentTableFormat.headerCategoryID, PaymentTableFormat.headerAmount]
         },
         {
-            title: "繰越サマリ",
-            headers: [
-                "分類ID",
-                "計測年月",
-                "繰越金額"
-            ]
+            title: CarryOverSummaryFormat.title,
+            headers: [CarryOverSummaryFormat.headerCategoryID, CarryOverSummaryFormat.headerMeasurementYearMonth, CarryOverSummaryFormat.headerCarryOverAmount]
         },
         {
-            title: "予算表示分類マスタ",
-            headers: [
-                "分類ID",
-                "昇順上位表示優先度"
-            ]
+            title: BudgetDisplayCategoryMasterFormat.title,
+            headers: [BudgetDisplayCategoryMasterFormat.headerCategoryID, BudgetDisplayCategoryMasterFormat.headerDisplayOrder]
         }
-
     ]
 } as const;
