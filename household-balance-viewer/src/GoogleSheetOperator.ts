@@ -151,7 +151,7 @@ export class GoogleSheetOperator implements SheetOperator {
         return Promise.resolve();
     }
 
-    async computeBalance(): Promise<BalanceResponse[]> {
+    async computeBalance(targetMonthYear: string): Promise<BalanceResponse[]> {
         const fetchBudgetDisplayCategories = async () => {
             const sheetName = BudgetDisplayCategoryMasterFormat.title;
 

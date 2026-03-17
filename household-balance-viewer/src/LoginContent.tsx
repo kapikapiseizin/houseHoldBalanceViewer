@@ -13,14 +13,18 @@ type BudgetPageProps = {
 }
 
 function BudgetPage({ sheetOperator }: BudgetPageProps) {
+  const now = new Date();
+  const targetMonthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
   const [balance, setBalance] = useState<BalanceResponse[]>([]);
 
   useEffect(() => {
-    sheetOperator.computeBalance().then(setBalance);
+    sheetOperator.computeBalance(targetMonthYear).then(setBalance);
   }, [sheetOperator]);
 
   return (
     <div className="budget-page">
+      <p>{targetMonthYear}</p>
       {balance.map((balance, index) => (
         <BalanceDisplay
           key={index}
