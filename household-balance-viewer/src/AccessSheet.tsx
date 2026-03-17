@@ -99,12 +99,13 @@ type AccessSheetProps = {
   accessToken: string;
   onSuccess: (spreadSheetID: string) => void;
   onFailure: () => void;
+  onLogout: () => void;
   initializeSpreadSheetID: string | undefined;
 };
 
 type Phase = 'selectMode' | 'createSheet' | 'selectSheet';
 
-export default function AccessSheet({ accessToken, onSuccess, onFailure, initializeSpreadSheetID }: AccessSheetProps) {
+export default function AccessSheet({ accessToken, onSuccess, onFailure, onLogout, initializeSpreadSheetID }: AccessSheetProps) {
   const [phase, setPhase] = useState<Phase>('selectMode');
   const sheetFormatSuccess = "Sheet format is valid";
   const sheetFormatError = "Sheet format is invalid";
@@ -131,10 +132,9 @@ export default function AccessSheet({ accessToken, onSuccess, onFailure, initial
         setIsLoading(false);
       }
     }
-
     checkInitializeSpreadSheetID();
 
-  }, [onSuccess, onFailure, initializeSpreadSheetID]);
+  }, [initializeSpreadSheetID]);
 
   if (isLoading) {
     return <LoadingContent title="シートの検証中" />;
@@ -145,6 +145,7 @@ export default function AccessSheet({ accessToken, onSuccess, onFailure, initial
       <SelectMode
         onChoiceCreateSheet={() => setPhase('createSheet')}
         onChoiceSelectSheet={() => setPhase('selectSheet')}
+        onLogout={onLogout}
       />
     );
   }
@@ -208,13 +209,15 @@ export default function AccessSheet({ accessToken, onSuccess, onFailure, initial
 type SelectModeProps = {
   onChoiceCreateSheet: () => void;
   onChoiceSelectSheet: () => void;
+  onLogout: () => void;
 };
 
-function SelectMode({ onChoiceCreateSheet, onChoiceSelectSheet }: SelectModeProps) {
+function SelectMode({ onChoiceCreateSheet, onChoiceSelectSheet, onLogout }: SelectModeProps) {
   return (
     <div>
       <button onClick={onChoiceCreateSheet}>新規作成</button>
       <button onClick={onChoiceSelectSheet}>既存のシートを選択</button>
+      <button onClick={onLogout}>ログアウト</button>
     </div>
   );
 }

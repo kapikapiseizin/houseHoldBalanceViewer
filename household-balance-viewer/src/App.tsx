@@ -88,7 +88,7 @@ export default function App() {
   return (
     <>
       {phase === "loginRequired" && <AccessAccount onSuccess={handleLoginSuccess} loginHintEmail={tryLoadLastLoginEmail()} onNewLogin={storeLoginInfo} />}
-      {phase === "sheetRequired" && <AccessSheet accessToken={access_token} onSuccess={handleSheetSuccess} onFailure={handleSheetFailure} initializeSpreadSheetID={tryLoadLastSpreadsheetId()} />}
+      {phase === "sheetRequired" && <AccessSheet accessToken={access_token} onSuccess={handleSheetSuccess} onFailure={handleSheetFailure} onLogout={handleLogout} initializeSpreadSheetID={tryLoadLastSpreadsheetId()} />}
       {phase === "ready" && <LoginContent accessToken={access_token} spreadsheetId={spreadsheetId} onLogout={handleLogout} />}
     </>
   );
