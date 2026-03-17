@@ -1,5 +1,5 @@
 import type { Category, PaymentRequest, BalanceResponse, SheetOperator } from "./SheetOperator";
-import { CategoryMasterFormat } from "./SheetFormat";
+import { CategoryMasterFormat, PaymentTableFormat } from "./SheetFormat";
 
 export class GoogleSheetOperator implements SheetOperator {
 
@@ -58,8 +58,96 @@ export class GoogleSheetOperator implements SheetOperator {
         return categories;
     }
 
-    requestAddPayment(payment: PaymentRequest): Promise<void> {
-        console.log(payment);
+    async requestAddPayment(payment: PaymentRequest): Promise<void> {
+        const sheetName = PaymentTableFormat.title;
+
+        // 1. シートの全データ取得
+        const getRes = await fetch(
+            `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}/values/${encodeURIComponent(sheetName)}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${this.accessToken}`
+                }
+            }
+        );
+
+        const data = await getRes.json();
+        const values: string[][] = data.values ?? [];
+
+        if (values.length === 0) {
+            throw new Error("シートが空です");
+        }
+
+        // 2. ヘッダ取得
+        const headers = values[0];
+
+        const colIndexMap: Record<string, number> = {};
+
+        headers.forEach((h, i) => {
+            colIndexMap[h] = i;
+        });
+
+        const idxID = colIndexMap[PaymentTableFormat.headerPaymentID];
+        const idxDate = colIndexMap[PaymentTableFormat.headerPaymentDate];
+        const idxTitle = colIndexMap[PaymentTableFormat.headerTitle];
+        const idxCategory = colIndexMap[PaymentTableFormat.headerCategoryID];
+        const idxAmount = colIndexMap[PaymentTableFormat.headerAmount];
+
+        if (
+            idxID === undefined ||
+            idxDate === undefined ||
+            idxTitle === undefined ||
+            idxCategory === undefined ||
+            idxAmount === undefined
+        ) {
+            throw new Error("必要なヘッダが存在しません");
+        }
+
+        // 3. 空行探索（決済IDが空）
+        let targetRowIndex = values.findIndex((row, i) => {
+            if (i === 0) return false;
+            return !row[idxID];
+        });
+
+        if (targetRowIndex === -1) {
+            targetRowIndex = values.length;
+        }
+
+        // 4. 行データ作成
+        const newRow: string[] = [];
+
+        const paymentID = crypto.randomUUID();
+
+        newRow[idxID] = paymentID;
+        newRow[idxDate] = payment.date;
+        newRow[idxTitle] = payment.title;
+        newRow[idxCategory] = String(payment.categoryID);
+        newRow[idxAmount] = String(payment.amount);
+
+        // undefined埋め（列ズレ防止）
+        const maxCol = Math.max(idxID, idxDate, idxTitle, idxCategory, idxAmount);
+        for (let i = 0; i <= maxCol; i++) {
+            if (newRow[i] === undefined) {
+                newRow[i] = "";
+            }
+        }
+
+        // 5. 書き込み
+        const range = `${sheetName}!A${targetRowIndex + 1}`;
+
+        await fetch(
+            `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`,
+            {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${this.accessToken}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    values: [newRow]
+                })
+            }
+        );
         return Promise.resolve();
     }
 
