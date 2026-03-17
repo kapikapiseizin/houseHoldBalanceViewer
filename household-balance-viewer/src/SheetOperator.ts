@@ -10,7 +10,15 @@ export type PaymentRequest = {
     amount: number;
 }
 
+export type BalanceResponse = {
+    title: string;
+    budgetAmount: number;
+    carryOverAmount: number;
+    usedAmount: number;
+}
+
 export interface SheetOperator {
     fetchCategories(): Promise<Category[]>;
     requestAddPayment(payment: PaymentRequest): Promise<void>;
+    computeBalance(): Promise<BalanceResponse[]>;
 }

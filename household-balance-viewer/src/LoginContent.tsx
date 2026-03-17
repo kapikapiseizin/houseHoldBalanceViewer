@@ -5,23 +5,30 @@ import TextInput from "./TextInput";
 import ListDropdownInput from "./ListDropdownInput";
 import MoneyInput from "./MoneyInput";
 import BalanceDisplay from "./BalanceDisplay";
-import type { SheetOperator, Category } from "./SheetOperator";
+import type { SheetOperator, Category, BalanceResponse } from "./SheetOperator";
 
-function BudgetPage() {
+type BudgetPageProps = {
+  sheetOperator: SheetOperator;
+}
+
+function BudgetPage({ sheetOperator }: BudgetPageProps) {
+  const [balance, setBalance] = useState<BalanceResponse[]>([]);
+
+  useEffect(() => {
+    sheetOperator.computeBalance().then(setBalance);
+  }, [sheetOperator]);
+
   return (
     <div className="budget-page">
-      <BalanceDisplay
-        title="食費"
-        budgetAmount={50000}
-        carryOverAmount={10000}
-        usedAmount={25000}
-      />
-      <BalanceDisplay
-        title="日用品"
-        budgetAmount={20000}
-        carryOverAmount={0}
-        usedAmount={5000}
-      />
+      {balance.map((balance, index) => (
+        <BalanceDisplay
+          key={index}
+          title={balance.title}
+          budgetAmount={balance.budgetAmount}
+          carryOverAmount={balance.carryOverAmount}
+          usedAmount={balance.usedAmount}
+        />
+      ))}
     </div>
   );
 }
@@ -67,8 +74,6 @@ function InputPage({ sheetOperator }: InputPageProps) {
   };
 
   useEffect(() => {
-
-
     sheetOperator.fetchCategories().then(setDropdownItems);
   }, [sheetOperator]);
 
@@ -119,7 +124,7 @@ export default function LoginContent({ sheetOperator, onLogout }: LoginContentPr
   return (
     <div className="app">
       <main className="main">
-        {page === "budget" && <BudgetPage />}
+        {page === "budget" && <BudgetPage sheetOperator={sheetOperator} />}
         {page === "input" && <InputPage sheetOperator={sheetOperator} />}
         {page === "menu" && <Menu onLogout={onLogout} />}
       </main>

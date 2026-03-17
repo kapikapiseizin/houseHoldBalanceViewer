@@ -1,4 +1,4 @@
-import type { Category, PaymentRequest, SheetOperator } from "./SheetOperator";
+import type { Category, PaymentRequest, BalanceResponse, SheetOperator } from "./SheetOperator";
 
 export class GoogleSheetOperator implements SheetOperator {
     constructor(accessToken: string, spreadSheetID: string) { }
@@ -14,5 +14,13 @@ export class GoogleSheetOperator implements SheetOperator {
     requestAddPayment(payment: PaymentRequest): Promise<void> {
         console.log(payment);
         return Promise.resolve();
+    }
+
+    computeBalance(): Promise<BalanceResponse[]> {
+        return Promise.resolve([
+            { title: "テスト食費", budgetAmount: 50000, carryOverAmount: 10000, usedAmount: 60000 },
+            { title: "テスト日用品", budgetAmount: 20000, carryOverAmount: 0, usedAmount: 5000 },
+            { title: "テスト娯楽", budgetAmount: 10000, carryOverAmount: 0, usedAmount: 2000 }
+        ]);
     }
 }
