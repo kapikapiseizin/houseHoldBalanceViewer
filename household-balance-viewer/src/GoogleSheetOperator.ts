@@ -1,5 +1,5 @@
 import type { Category, PaymentRequest, BalanceResponse, SheetOperator } from "./SheetOperator";
-import { CategoryMasterFormat, BudgetMasterFormat, PaymentTableFormat, CarryOverSummaryFormat, BudgetDisplayCategoryMasterFormat } from "./SheetFormat";
+import { CategoryMasterFormat } from "./SheetFormat";
 
 export class GoogleSheetOperator implements SheetOperator {
 
@@ -11,12 +11,51 @@ export class GoogleSheetOperator implements SheetOperator {
         this.spreadSheetID = spreadSheetID;
     }
 
-    fetchCategories(): Promise<Category[]> {
-        return Promise.resolve([
-            { categoryID: 0, name: "テスト食費" },
-            { categoryID: 1, name: "テスト日用品" },
-            { categoryID: 2, name: "テスト娯楽" }
-        ]);
+    async fetchCategories(): Promise<Category[]> {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}/values/${encodeURIComponent(CategoryMasterFormat.title)}`;
+        const response = await fetch(url, {
+            headers: {
+                Authorization: `Bearer ${this.accessToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch categories: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const values = data.values as string[][] | undefined;
+
+        if (!values || values.length === 0) {
+            return [];
+        }
+
+        const headers = values[0];
+        const categoryIdIndex = headers.indexOf(CategoryMasterFormat.headerCategoryID);
+        const nameIndex = headers.indexOf(CategoryMasterFormat.headerName);
+
+        if (categoryIdIndex === -1 || nameIndex === -1) {
+            throw new Error("Required headers not found in the sheet");
+        }
+
+        const categories: Category[] = [];
+
+        for (let i = 1; i < values.length; i++) {
+            const row = values[i];
+            if (!row || row.length === 0) continue;
+
+            const categoryIDStr = row[categoryIdIndex];
+            const name = row[nameIndex];
+
+            if (categoryIDStr !== undefined && name !== undefined) {
+                categories.push({
+                    categoryID: Number(categoryIDStr),
+                    name: name
+                });
+            }
+        }
+
+        return categories;
     }
 
     requestAddPayment(payment: PaymentRequest): Promise<void> {
