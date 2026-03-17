@@ -107,6 +107,7 @@ export default function AccessSheet({ accessToken, onSuccess, initializeSpreadSh
   const [phase, setPhase] = useState<Phase>('selectMode');
   const sheetFormatSuccess = "Sheet format is valid";
   const sheetFormatError = "Sheet format is invalid";
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (!initializeSpreadSheetID) {
@@ -114,20 +115,29 @@ export default function AccessSheet({ accessToken, onSuccess, initializeSpreadSh
     }
 
     const checkInitializeSpreadSheetID = async () => {
-      const isValid = await checkSheetFormat(accessToken, initializeSpreadSheetID);
-      if (isValid) {
-        console.log(sheetFormatSuccess);
-        onSuccess(initializeSpreadSheetID);
-      } else {
-        console.error(sheetFormatError);
-        window.confirm(sheetFormatError);
-        onSuccess(undefined);
+      setIsLoading(true);
+      try {
+        const isValid = await checkSheetFormat(accessToken, initializeSpreadSheetID);
+        if (isValid) {
+          console.log(sheetFormatSuccess);
+          onSuccess(initializeSpreadSheetID);
+        } else {
+          console.error(sheetFormatError);
+          window.confirm(sheetFormatError);
+          onSuccess(undefined);
+        }
+      } finally {
+        setIsLoading(false);
       }
     }
 
     checkInitializeSpreadSheetID();
 
   }, [onSuccess, initializeSpreadSheetID]);
+
+  if (isLoading) {
+    return <LoadingContent title="シートの検証中" />;
+  }
 
   if (phase === 'selectMode') {
     return (
@@ -148,14 +158,20 @@ export default function AccessSheet({ accessToken, onSuccess, initializeSpreadSh
             onSuccess(undefined);
             return;
           }
-          const isValid = await checkSheetFormat(accessToken, spreadSheetID);
-          if (isValid) {
-            console.log(sheetFormatSuccess);
-            onSuccess(spreadSheetID);
-          } else {
-            console.error(sheetFormatError);
-            window.confirm(sheetFormatError);
-            onSuccess(undefined);
+
+          setIsLoading(true);
+          try {
+            const isValid = await checkSheetFormat(accessToken, spreadSheetID);
+            if (isValid) {
+              console.log(sheetFormatSuccess);
+              onSuccess(spreadSheetID);
+            } else {
+              console.error(sheetFormatError);
+              window.confirm(sheetFormatError);
+              onSuccess(undefined);
+            }
+          } finally {
+            setIsLoading(false);
           }
         }}
       />
@@ -171,14 +187,20 @@ export default function AccessSheet({ accessToken, onSuccess, initializeSpreadSh
             onSuccess(undefined);
             return;
           }
-          const isValid = await checkSheetFormat(accessToken, spreadSheetID);
-          if (isValid) {
-            console.log(sheetFormatSuccess);
-            onSuccess(spreadSheetID);
-          } else {
-            console.error(sheetFormatError);
-            window.confirm(sheetFormatError);
-            onSuccess(undefined);
+
+          setIsLoading(true);
+          try {
+            const isValid = await checkSheetFormat(accessToken, spreadSheetID);
+            if (isValid) {
+              console.log(sheetFormatSuccess);
+              onSuccess(spreadSheetID);
+            } else {
+              console.error(sheetFormatError);
+              window.confirm(sheetFormatError);
+              onSuccess(undefined);
+            }
+          } finally {
+            setIsLoading(false);
           }
         }}
       />
@@ -210,8 +232,10 @@ type CreateSheetProps = {
 
 function CreateSheet({ accessToken, onCreate }: CreateSheetProps) {
   const [sheetName, setSheetName] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleCreate = async () => {
+    setIsLoading(true);
     try {
       const response = await fetch("https://sheets.googleapis.com/v4/spreadsheets", {
         method: "POST",
@@ -248,8 +272,14 @@ function CreateSheet({ accessToken, onCreate }: CreateSheetProps) {
     } catch (error) {
       console.error("Error creating spreadsheet:", error);
       onCreate(undefined);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return <LoadingContent title="シートの作成中" />;
+  }
 
   return (
     <div>
