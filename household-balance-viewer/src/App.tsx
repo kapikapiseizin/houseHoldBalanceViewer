@@ -4,6 +4,7 @@ import "./App.css";
 import AccessAccount, { type LoginInfo } from "./AccessAccount";
 import AccessSheet from "./AccessSheet";
 import LoginContent from "./LoginContent";
+import { GoogleSheetOperator } from "./GoogleSheetOperator";
 
 export default function App() {
   const LAST_LOGIN_EMAIL_KEY = "lastLoginEmail";
@@ -89,7 +90,7 @@ export default function App() {
     <>
       {phase === "loginRequired" && <AccessAccount onSuccess={handleLoginSuccess} loginHintEmail={tryLoadLastLoginEmail()} onNewLogin={storeLoginInfo} />}
       {phase === "sheetRequired" && <AccessSheet accessToken={access_token} onSuccess={handleSheetSuccess} onFailure={handleSheetFailure} onLogout={handleLogout} initializeSpreadSheetID={tryLoadLastSpreadsheetId()} />}
-      {phase === "ready" && <LoginContent accessToken={access_token} spreadsheetId={spreadsheetId} onLogout={handleLogout} />}
+      {phase === "ready" && <LoginContent sheetOperator={new GoogleSheetOperator(access_token, spreadsheetId)} onLogout={handleLogout} />}
     </>
   );
 }

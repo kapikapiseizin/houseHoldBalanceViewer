@@ -5,6 +5,7 @@ import TextInput from "./TextInput";
 import ListDropdownInput from "./ListDropdownInput";
 import MoneyInput from "./MoneyInput";
 import BalanceDisplay from "./BalanceDisplay";
+import type { SheetOperator } from "./SheetOperator";
 
 function BudgetPage() {
   return (
@@ -101,12 +102,11 @@ function Menu({ onLogout }: MenuProps) {
 }
 
 export type LoginContentProps = {
-  accessToken: string;
-  spreadsheetId: string;
+  sheetOperator: SheetOperator;
   onLogout: () => void;
 };
 
-export default function LoginContent({ accessToken, spreadsheetId, onLogout }: LoginContentProps) {
+export default function LoginContent({ sheetOperator, onLogout }: LoginContentProps) {
   const [page, setPage] = useState<"budget" | "input" | "menu">("budget");
 
   return (
