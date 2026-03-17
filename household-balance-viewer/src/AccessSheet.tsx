@@ -97,13 +97,14 @@ async function checkSheetFormat(accessToken: string, spreadsheetId: string): Pro
 
 type AccessSheetProps = {
   accessToken: string;
-  onSuccess: (spreadSheetID: string | undefined) => void;
+  onSuccess: (spreadSheetID: string) => void;
+  onFailure: () => void;
   initializeSpreadSheetID: string | undefined;
 };
 
 type Phase = 'selectMode' | 'createSheet' | 'selectSheet';
 
-export default function AccessSheet({ accessToken, onSuccess, initializeSpreadSheetID }: AccessSheetProps) {
+export default function AccessSheet({ accessToken, onSuccess, onFailure, initializeSpreadSheetID }: AccessSheetProps) {
   const [phase, setPhase] = useState<Phase>('selectMode');
   const sheetFormatSuccess = "Sheet format is valid";
   const sheetFormatError = "Sheet format is invalid";
@@ -124,7 +125,7 @@ export default function AccessSheet({ accessToken, onSuccess, initializeSpreadSh
         } else {
           console.error(sheetFormatError);
           window.confirm(sheetFormatError);
-          onSuccess(undefined);
+          onFailure();
         }
       } finally {
         setIsLoading(false);
@@ -133,7 +134,7 @@ export default function AccessSheet({ accessToken, onSuccess, initializeSpreadSh
 
     checkInitializeSpreadSheetID();
 
-  }, [onSuccess, initializeSpreadSheetID]);
+  }, [onSuccess, onFailure, initializeSpreadSheetID]);
 
   if (isLoading) {
     return <LoadingContent title="シートの検証中" />;
@@ -154,11 +155,6 @@ export default function AccessSheet({ accessToken, onSuccess, initializeSpreadSh
       <CreateSheet
         accessToken={accessToken}
         onCreate={async (spreadSheetID) => {
-          if (!spreadSheetID) {
-            onSuccess(undefined);
-            return;
-          }
-
           setIsLoading(true);
           try {
             const isValid = await checkSheetFormat(accessToken, spreadSheetID);
@@ -168,7 +164,7 @@ export default function AccessSheet({ accessToken, onSuccess, initializeSpreadSh
             } else {
               console.error(sheetFormatError);
               window.confirm(sheetFormatError);
-              onSuccess(undefined);
+              onFailure();
             }
           } finally {
             setIsLoading(false);
@@ -183,11 +179,6 @@ export default function AccessSheet({ accessToken, onSuccess, initializeSpreadSh
       <SelectSheet
         accessToken={accessToken}
         onSelect={async (spreadSheetID) => {
-          if (!spreadSheetID) {
-            onSuccess(undefined);
-            return;
-          }
-
           setIsLoading(true);
           try {
             const isValid = await checkSheetFormat(accessToken, spreadSheetID);
@@ -197,11 +188,14 @@ export default function AccessSheet({ accessToken, onSuccess, initializeSpreadSh
             } else {
               console.error(sheetFormatError);
               window.confirm(sheetFormatError);
-              onSuccess(undefined);
+              onFailure();
             }
           } finally {
             setIsLoading(false);
           }
+        }}
+        onFailure={() => {
+          onFailure();
         }}
       />
     );
@@ -227,7 +221,7 @@ function SelectMode({ accessToken, onChoiceCreateSheet, onChoiceSelectSheet }: S
 
 type CreateSheetProps = {
   accessToken: string;
-  onCreate: (spreadSheetID: string | undefined) => void;
+  onCreate: (spreadSheetID: string) => void;
 };
 
 function CreateSheet({ accessToken, onCreate }: CreateSheetProps) {
@@ -254,7 +248,6 @@ function CreateSheet({ accessToken, onCreate }: CreateSheetProps) {
 
       if (!data.spreadsheetId) {
         console.error("Failed to create spreadsheet:", data);
-        onCreate(undefined);
         return;
       }
 
@@ -267,11 +260,9 @@ function CreateSheet({ accessToken, onCreate }: CreateSheetProps) {
         onCreate(spreadSheetID);
       } catch (tableError) {
         console.error(tableError);
-        onCreate(undefined);
       }
     } catch (error) {
-      console.error("Error creating spreadsheet:", error);
-      onCreate(undefined);
+      window.confirm("Error creating spreadsheet:" + error);
     } finally {
       setIsLoading(false);
     }
@@ -295,7 +286,8 @@ function CreateSheet({ accessToken, onCreate }: CreateSheetProps) {
 
 type SelectSheetProps = {
   accessToken: string;
-  onSelect: (spreadSheetID: string | undefined) => void;
+  onSelect: (spreadSheetID: string) => void;
+  onFailure: () => void;
 };
 
 type SheetItem = {
@@ -307,7 +299,7 @@ interface SheetResponse {
   items: SheetItem[];
 }
 
-function SelectSheet({ accessToken, onSelect }: SelectSheetProps) {
+function SelectSheet({ accessToken, onSelect, onFailure }: SelectSheetProps) {
   const [spreadSheetID, setSpreadSheetID] = useState<string | undefined>(undefined);
   const [sheets, setSheets] = useState<SheetItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -336,7 +328,7 @@ function SelectSheet({ accessToken, onSelect }: SelectSheetProps) {
 
         if (data.items.length < 1) {
           console.log("No sheets found");
-          onSelect(undefined);
+          onFailure();
           return;
         }
 
@@ -355,6 +347,11 @@ function SelectSheet({ accessToken, onSelect }: SelectSheetProps) {
   }
 
   const handleSelect = () => {
+    if (!spreadSheetID) {
+      window.confirm("シートを選択してください");
+      return;
+    }
+
     onSelect(spreadSheetID);
   };
 

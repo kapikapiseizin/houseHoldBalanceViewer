@@ -20,16 +20,16 @@ export default function App() {
     setPhase("sheetRequired");
   };
 
-  const handleSheetSuccess = (spreadsheetId: string | undefined) => {
-    if (!spreadsheetId) {
-      console.log("handleSheetSuccess:failed");
-      return;
-    }
-
+  const handleSheetSuccess = (spreadsheetId: string) => {
     console.log("handleSheetSuccess:success", spreadsheetId);
     setSpreadsheetId(spreadsheetId);
     storeLastSpreadsheetId(spreadsheetId);
     setPhase("ready");
+  };
+
+  const handleSheetFailure = () => {
+    console.log("handleSheetFailure");
+    setPhase("sheetRequired");
   };
 
   const tryLoadLastLoginEmail = () => {
@@ -88,7 +88,7 @@ export default function App() {
   return (
     <>
       {phase === "loginRequired" && <AccessAccount onSuccess={handleLoginSuccess} loginHintEmail={tryLoadLastLoginEmail()} onNewLogin={storeLoginInfo} />}
-      {phase === "sheetRequired" && <AccessSheet accessToken={access_token} onSuccess={handleSheetSuccess} initializeSpreadSheetID={tryLoadLastSpreadsheetId()} />}
+      {phase === "sheetRequired" && <AccessSheet accessToken={access_token} onSuccess={handleSheetSuccess} onFailure={handleSheetFailure} initializeSpreadSheetID={tryLoadLastSpreadsheetId()} />}
       {phase === "ready" && <LoginContent accessToken={access_token} spreadsheetId={spreadsheetId} onLogout={handleLogout} />}
     </>
   );
