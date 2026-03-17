@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import ListDropdownInput from './ListDropdownInput';
 import TextInput from './TextInput';
 import { SHEET_FORMAT } from './SheetFormat';
+import LoadingContent from './LoadingContent';
 
 async function createTable(accessToken: string, spreadsheetId: string, tableFormat: { title: string; headers: string[] }) {
   // Create sheet
@@ -279,39 +280,49 @@ interface SheetResponse {
 function SelectSheet({ accessToken, onSelect }: SelectSheetProps) {
   const [spreadSheetID, setSpreadSheetID] = useState<string | undefined>(undefined);
   const [sheets, setSheets] = useState<SheetItem[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     async function fetchSheets() {
-      const params = new URLSearchParams({
-        q: "mimeType='application/vnd.google-apps.spreadsheet' and trashed=false",
-        fields: "items(id, title)"
-      });
-      const url = `https://www.googleapis.com/drive/v2/files?${params.toString()}`;
-      const response = await fetch(
-        url,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+      setIsLoading(true);
+      try {
+        const params = new URLSearchParams({
+          q: "mimeType='application/vnd.google-apps.spreadsheet' and trashed=false",
+          fields: "items(id, title)"
+        });
+        const url = `https://www.googleapis.com/drive/v2/files?${params.toString()}`;
+        const response = await fetch(
+          url,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+        const dataJson = await response.json();
+        const data: SheetResponse = dataJson;
+
+        console.log(data);
+
+        if (data.items.length < 1) {
+          console.log("No sheets found");
+          onSelect(undefined);
+          return;
         }
-      );
-      const dataJson = await response.json();
-      const data: SheetResponse = dataJson;
 
-      console.log(data);
-
-      if (data.items.length < 1) {
-        console.log("No sheets found");
-        onSelect(undefined);
-        return;
+        setSheets(data.items);
+        setSpreadSheetID(data.items[0].id);
+      } finally {
+        setIsLoading(false);
       }
-
-      setSheets(data.items);
-      setSpreadSheetID(data.items[0].id);
     }
 
     fetchSheets();
-  }, [accessToken]);
+  }, [accessToken, onSelect]);
+
+  if (isLoading) {
+    return <LoadingContent title="シートを取得中" />;
+  }
 
   const handleSelect = () => {
     onSelect(spreadSheetID);
