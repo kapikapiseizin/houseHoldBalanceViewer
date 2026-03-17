@@ -1,7 +1,15 @@
 import type { Category, PaymentRequest, BalanceResponse, SheetOperator } from "./SheetOperator";
+import { CategoryMasterFormat, BudgetMasterFormat, PaymentTableFormat, CarryOverSummaryFormat, BudgetDisplayCategoryMasterFormat } from "./SheetFormat";
 
 export class GoogleSheetOperator implements SheetOperator {
-    constructor(accessToken: string, spreadSheetID: string) { }
+
+    private accessToken: string;
+    private spreadSheetID: string;
+
+    constructor(accessToken: string, spreadSheetID: string) {
+        this.accessToken = accessToken;
+        this.spreadSheetID = spreadSheetID;
+    }
 
     fetchCategories(): Promise<Category[]> {
         return Promise.resolve([
