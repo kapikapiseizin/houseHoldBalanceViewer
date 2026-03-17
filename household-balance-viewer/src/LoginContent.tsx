@@ -119,6 +119,7 @@ function InputPage() {
 export type LoginContentProps = {
   accessToken: string;
   spreadsheetId: string;
+  onLogout: () => void;
 };
 
 export default function LoginContent({ }: LoginContentProps) {
