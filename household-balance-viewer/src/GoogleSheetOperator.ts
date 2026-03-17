@@ -1,5 +1,5 @@
 import type { Category, PaymentRequest, BalanceResponse, SheetOperator } from "./SheetOperator";
-import { CategoryMasterFormat, PaymentTableFormat } from "./SheetFormat";
+import { CategoryMasterFormat, PaymentTableFormat, BudgetDisplayCategoryMasterFormat } from "./SheetFormat";
 
 export class GoogleSheetOperator implements SheetOperator {
 
@@ -151,7 +151,76 @@ export class GoogleSheetOperator implements SheetOperator {
         return Promise.resolve();
     }
 
-    computeBalance(): Promise<BalanceResponse[]> {
+    async computeBalance(): Promise<BalanceResponse[]> {
+        const fetchBudgetDisplayCategories = async () => {
+            const sheetName = BudgetDisplayCategoryMasterFormat.title;
+
+            // 1. シート取得
+            const res = await fetch(
+                `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}/values/${encodeURIComponent(sheetName)}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${this.accessToken}`
+                    }
+                }
+            );
+
+            const data = await res.json();
+            const values: string[][] = data.values ?? [];
+
+            if (values.length === 0) {
+                return [];
+            }
+
+            // 2. ヘッダ解析
+            const headers = values[0];
+
+            const colIndexMap: Record<string, number> = {};
+            headers.forEach((h, i) => {
+                colIndexMap[h] = i;
+            });
+
+            const idxCategoryID = colIndexMap[BudgetDisplayCategoryMasterFormat.headerCategoryID];
+            const idxDisplayOrder = colIndexMap[BudgetDisplayCategoryMasterFormat.headerDisplayOrder];
+
+            if (idxCategoryID === undefined || idxDisplayOrder === undefined) {
+                throw new Error("必要なヘッダが存在しません");
+            }
+
+            // 3. データ取得
+            const rows: { categoryID: number; displayOrder: number }[] = [];
+
+            for (let i = 1; i < values.length; i++) {
+                const row = values[i];
+
+                const rawCategoryID = row[idxCategoryID];
+                const rawDisplayOrder = row[idxDisplayOrder];
+
+                // 空行スキップ
+                if (!rawCategoryID || !rawDisplayOrder) continue;
+
+                const categoryID = Number(rawCategoryID);
+                const displayOrder = Number(rawDisplayOrder);
+
+                if (isNaN(categoryID) || isNaN(displayOrder)) continue;
+
+                rows.push({
+                    categoryID,
+                    displayOrder
+                });
+            }
+
+            // 4. ソート
+            rows.sort((a, b) => a.displayOrder - b.displayOrder);
+
+            // 5. categoryIDのみ抽出
+            return rows.map(r => r.categoryID);
+        }
+
+        const budgetDisplayCategories = await fetchBudgetDisplayCategories();
+
+        console.log("budgetDisplayCategories", budgetDisplayCategories);
+
         return Promise.resolve([
             { title: "テスト食費", budgetAmount: 50000, carryOverAmount: 10000, usedAmount: 60000 },
             { title: "テスト日用品", budgetAmount: 20000, carryOverAmount: 10000, usedAmount: 15000 },
