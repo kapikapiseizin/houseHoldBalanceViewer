@@ -34,6 +34,7 @@ function InputPage({ sheetOperator }: InputPageProps) {
   const now = new Date();
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
+  const [inputDate, setInputDate] = useState(today);
   const [categoryId, setCategoryId] = useState(0);
   const [isTitleManuallyEdited, setIsTitleManuallyEdited] = useState(false);
   const [manualTitle, setManualTitle] = useState("");
@@ -56,7 +57,7 @@ function InputPage({ sheetOperator }: InputPageProps) {
 
   const handleSubmit = async () => {
     await sheetOperator.requestAddPayment({
-      date: today,
+      date: inputDate,
       categoryID: categoryId,
       title,
       amount
@@ -66,12 +67,14 @@ function InputPage({ sheetOperator }: InputPageProps) {
   };
 
   useEffect(() => {
+
+
     sheetOperator.fetchCategories().then(setDropdownItems);
   }, [sheetOperator]);
 
   return (
     <div>
-      <DateInput title="入力日" date={today} />
+      <DateInput title="入力日" date={inputDate} onChange={(e) => setInputDate(e.target.value)} />
       <TextInput
         title="タイトル"
         value={title}
