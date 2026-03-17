@@ -143,7 +143,6 @@ export default function AccessSheet({ accessToken, onSuccess, onFailure, initial
   if (phase === 'selectMode') {
     return (
       <SelectMode
-        accessToken={accessToken}
         onChoiceCreateSheet={() => setPhase('createSheet')}
         onChoiceSelectSheet={() => setPhase('selectSheet')}
       />
@@ -170,6 +169,7 @@ export default function AccessSheet({ accessToken, onSuccess, onFailure, initial
             setIsLoading(false);
           }
         }}
+        onBack={() => setPhase('selectMode')}
       />
     );
   }
@@ -197,6 +197,7 @@ export default function AccessSheet({ accessToken, onSuccess, onFailure, initial
         onFailure={() => {
           onFailure();
         }}
+        onBack={() => setPhase('selectMode')}
       />
     );
   }
@@ -205,12 +206,11 @@ export default function AccessSheet({ accessToken, onSuccess, onFailure, initial
 }
 
 type SelectModeProps = {
-  accessToken: string;
   onChoiceCreateSheet: () => void;
   onChoiceSelectSheet: () => void;
 };
 
-function SelectMode({ accessToken, onChoiceCreateSheet, onChoiceSelectSheet }: SelectModeProps) {
+function SelectMode({ onChoiceCreateSheet, onChoiceSelectSheet }: SelectModeProps) {
   return (
     <div>
       <button onClick={onChoiceCreateSheet}>Create</button>
@@ -222,9 +222,10 @@ function SelectMode({ accessToken, onChoiceCreateSheet, onChoiceSelectSheet }: S
 type CreateSheetProps = {
   accessToken: string;
   onCreate: (spreadSheetID: string) => void;
+  onBack: () => void;
 };
 
-function CreateSheet({ accessToken, onCreate }: CreateSheetProps) {
+function CreateSheet({ accessToken, onCreate, onBack }: CreateSheetProps) {
   const [sheetName, setSheetName] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -280,6 +281,7 @@ function CreateSheet({ accessToken, onCreate }: CreateSheetProps) {
         onChange={(e) => setSheetName(e.target.value)}
       />
       <button onClick={handleCreate}>作成</button>
+      <button onClick={onBack}>戻る</button>
     </div>
   );
 }
@@ -288,6 +290,7 @@ type SelectSheetProps = {
   accessToken: string;
   onSelect: (spreadSheetID: string) => void;
   onFailure: () => void;
+  onBack: () => void;
 };
 
 type SheetItem = {
@@ -299,7 +302,7 @@ interface SheetResponse {
   items: SheetItem[];
 }
 
-function SelectSheet({ accessToken, onSelect, onFailure }: SelectSheetProps) {
+function SelectSheet({ accessToken, onSelect, onFailure, onBack }: SelectSheetProps) {
   const [spreadSheetID, setSpreadSheetID] = useState<string | undefined>(undefined);
   const [sheets, setSheets] = useState<SheetItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -367,7 +370,8 @@ function SelectSheet({ accessToken, onSelect, onFailure }: SelectSheetProps) {
           }}
         />
       )}
-      <button onClick={handleSelect}>Select</button>
+      <button onClick={handleSelect}>決定</button>
+      <button onClick={onBack}>戻る</button>
     </div>
   );
 }
