@@ -48,7 +48,8 @@ function InputPage({ sheetOperator }: InputPageProps) {
   const [manualTitle, setManualTitle] = useState("");
   const [amount, setAmount] = useState(0);
   const [dropdownItems, setDropdownItems] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isFetchLoading, setIsFetchLoading] = useState(false);
+  const [isSubmitLoading, setIsSubmitLoading] = useState(false);
 
   const selectedCategory = dropdownItems.find(item => item.categoryID === categoryId);
   const defaultTitle = selectedCategory ? selectedCategory.name : "";
@@ -65,23 +66,32 @@ function InputPage({ sheetOperator }: InputPageProps) {
   };
 
   const handleSubmit = async () => {
-    await sheetOperator.requestAddPayment({
-      date: inputDate,
-      categoryID: categoryId,
-      title,
-      amount
-    });
+    setIsSubmitLoading(true);
+    try {
+      await sheetOperator.requestAddPayment({
+        date: inputDate,
+        categoryID: categoryId,
+        title,
+        amount
+      });
+    } finally {
+      setIsSubmitLoading(false);
+    }
 
     window.confirm("決済を登録しました");
   };
 
   useEffect(() => {
-    setIsLoading(true);
-    sheetOperator.fetchCategories().then(setDropdownItems).finally(() => setIsLoading(false));
+    setIsFetchLoading(true);
+    sheetOperator.fetchCategories().then(setDropdownItems).finally(() => setIsFetchLoading(false));
   }, [sheetOperator]);
 
-  if (isLoading) {
+  if (isFetchLoading) {
     return <LoadingContent title="データを取得中" />;
+  }
+
+  if (isSubmitLoading) {
+    return <LoadingContent title="登録中" />;
   }
 
   return (
