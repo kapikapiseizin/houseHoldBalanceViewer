@@ -91,6 +91,27 @@ export class GoogleSheetOperator implements SheetOperator {
         return categories;
     }
 
+    async getRowsByQueryResponse(response: Response): Promise<string[][]> {
+        const text = await response.text();
+
+        // gvizはJSONっぽい文字列なのでパース
+        const json = JSON.parse(
+            text.substring(
+                text.indexOf("{"),
+                text.lastIndexOf("}") + 1
+            )
+        );
+
+        const rows = json.table.rows.map((row: any) => {
+            return row.c.map((cell: any) => {
+                // セルが空の場合は null や空文字を返す
+                return cell ? (cell.v !== null ? String(cell.v) : "") : "";
+            });
+        });
+
+        return rows;
+    }
+
     async requestAddPayment(payment: PaymentRequest): Promise<void> {
         const sheetName = PaymentTableFormat.title;
 
@@ -254,25 +275,26 @@ export class GoogleSheetOperator implements SheetOperator {
                 }
             });
 
-            const text = await res.text();
+            const rowsCategoryIDtoUsedAmount = await this.getRowsByQueryResponse(res);
 
-            // gvizはJSONっぽい文字列なのでパース
-            const json = JSON.parse(
-                text.substring(
-                    text.indexOf("{"),
-                    text.lastIndexOf("}") + 1
-                )
-            );
+            const categoryIDtoUsedAmount = new Map<number, number>();
+            for (const row of rowsCategoryIDtoUsedAmount) {
+                const categoryID = Number(row[0]);
+                const usedAmount = Number(row[1]);
+                categoryIDtoUsedAmount.set(categoryID, usedAmount);
+            }
 
-            return json;
+            return categoryIDtoUsedAmount;
         }
 
         const budgetDisplayCategories = await fetchBudgetDisplayCategories();
 
-        const usedAmount = await computeUsedAmount();
+        const categoryIDtoUsedAmount = await computeUsedAmount();
 
         console.log("budgetDisplayCategories", budgetDisplayCategories);
-        console.log("usedAmount", usedAmount);
+        console.log("categoryIDtoUsedAmount", categoryIDtoUsedAmount);
+
+
 
         return Promise.resolve([
             { title: "テスト食費", budgetAmount: 50000, carryOverAmount: 10000, usedAmount: 60000 },
