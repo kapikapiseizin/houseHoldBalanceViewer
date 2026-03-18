@@ -104,6 +104,11 @@ export class GoogleSheetOperator implements SheetOperator {
             )
         );
 
+        if (json.status === "error") {
+            console.log("query error:", json);
+            return [];
+        }
+
         const rows = json.table.rows.map((row: any) => {
             return row.c.map((cell: any) => {
                 // セルが空の場合は null や空文字を返す
