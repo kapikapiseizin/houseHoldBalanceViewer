@@ -215,70 +215,39 @@ export class GoogleSheetOperator implements SheetOperator {
         }
 
         const computeUsedAmount = async () => {
-            const sheetName = PaymentTableFormat.title;
+            const paymentColIndexMap = await this.fetchTableHeaderColumnIndex(PaymentTableFormat.title);
 
-            // get first line
-            const rangeFirstLine = `${encodeURIComponent(sheetName)}!1:1`;
-            const getRes = await fetch(
-                `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}/values/${rangeFirstLine}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${this.accessToken}`
-                    }
-                }
-            );
+            console.log("paymentColIndexMap", paymentColIndexMap);
 
-            const data = await getRes.json();
-            const values: string[][] = data.values ?? [];
-
-            if (values.length === 0) {
-                throw new Error("シートが空です");
-            }
-
-            // 2. ヘッダ取得
-            const headers = values[0];
-
-            const colIndexMap: Record<string, number> = {};
-
-            headers.forEach((h, i) => {
-                colIndexMap[h] = i;
-            });
-
-            const idxID = colIndexMap[PaymentTableFormat.headerPaymentID];
-            const idxDate = colIndexMap[PaymentTableFormat.headerPaymentDate];
-            const idxTitle = colIndexMap[PaymentTableFormat.headerTitle];
-            const idxCategory = colIndexMap[PaymentTableFormat.headerCategoryID];
-            const idxAmount = colIndexMap[PaymentTableFormat.headerAmount];
+            const columnNoID = paymentColIndexMap[PaymentTableFormat.headerPaymentID] + 1;
+            const columnNoDate = paymentColIndexMap[PaymentTableFormat.headerPaymentDate] + 1;
+            const columnNoTitle = paymentColIndexMap[PaymentTableFormat.headerTitle] + 1;
+            const columnNoCategory = paymentColIndexMap[PaymentTableFormat.headerCategoryID] + 1;
+            const columnNoAmount = paymentColIndexMap[PaymentTableFormat.headerAmount] + 1;
 
             if (
-                idxID === undefined ||
-                idxDate === undefined ||
-                idxTitle === undefined ||
-                idxCategory === undefined ||
-                idxAmount === undefined
+                columnNoID === undefined ||
+                columnNoDate === undefined ||
+                columnNoTitle === undefined ||
+                columnNoCategory === undefined ||
+                columnNoAmount === undefined
             ) {
                 throw new Error("必要なヘッダが存在しません");
             }
-
-
-            // ヘッダ名
-            const headerDate = PaymentTableFormat.headerPaymentDate;
-            const headerCategory = PaymentTableFormat.headerCategoryID;
-            const headerAmount = PaymentTableFormat.headerAmount;
 
             // 対象年月（例: 2026-03）
             const target = targetMonthYear;
 
             // Visualization API用クエリ
             const query = `
-                SELECT ${headerCategory}, SUM(${headerAmount})
-                WHERE ${headerDate} STARTS WITH '${target}'
-                GROUP BY ${headerCategory}
+                SELECT Col${columnNoCategory}, SUM(Col${columnNoAmount})
+                WHERE Col${columnNoDate} STARTS WITH '${target}'
+                GROUP BY Col${columnNoCategory}
             `;
 
             const encodedQuery = encodeURIComponent(query);
 
-            const url = `https://docs.google.com/spreadsheets/d/${this.spreadSheetID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}&tq=${encodedQuery}`;
+            const url = `https://docs.google.com/spreadsheets/d/${this.spreadSheetID}/gviz/tq?sheet=${encodeURIComponent(PaymentTableFormat.title)}&headers=1&tq=${encodedQuery}`;
 
             console.log("url", url);
 
