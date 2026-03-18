@@ -61,9 +61,10 @@ export class GoogleSheetOperator implements SheetOperator {
     async requestAddPayment(payment: PaymentRequest): Promise<void> {
         const sheetName = PaymentTableFormat.title;
 
-        // 1. シートの全データ取得
+        // get first line
+        const rangeFirstLine = `${encodeURIComponent(sheetName)}!1:1`;
         const getRes = await fetch(
-            `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}/values/${encodeURIComponent(sheetName)}`,
+            `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}/values/${rangeFirstLine}`,
             {
                 headers: {
                     Authorization: `Bearer ${this.accessToken}`
@@ -103,16 +104,6 @@ export class GoogleSheetOperator implements SheetOperator {
             throw new Error("必要なヘッダが存在しません");
         }
 
-        // 3. 空行探索（決済IDが空）
-        let targetRowIndex = values.findIndex((row, i) => {
-            if (i === 0) return false;
-            return !row[idxID];
-        });
-
-        if (targetRowIndex === -1) {
-            targetRowIndex = values.length;
-        }
-
         // 4. 行データ作成
         const newRow: string[] = [];
 
@@ -132,16 +123,14 @@ export class GoogleSheetOperator implements SheetOperator {
             }
         }
 
-        // 5. 書き込み
-        const range = `${sheetName}!A${targetRowIndex + 1}`;
-
+        // 5. 追記
         await fetch(
-            `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`,
+            `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}/values/${encodeURIComponent(sheetName)}!A1:append?valueInputOption=USER_ENTERED`,
             {
-                method: "PUT",
+                method: 'POST',
                 headers: {
                     Authorization: `Bearer ${this.accessToken}`,
-                    "Content-Type": "application/json"
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     values: [newRow]
