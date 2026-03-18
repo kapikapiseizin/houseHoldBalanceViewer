@@ -21,6 +21,7 @@ export interface SheetOperator {
     fetchCategories(): Promise<Category[]>;
     requestAddPayment(payment: PaymentRequest): Promise<void>;
     computeBalance(
-        targetMonthYear: string
+        targetYear: number,
+        targetMonth: number
     ): Promise<BalanceResponse[]>;
 }

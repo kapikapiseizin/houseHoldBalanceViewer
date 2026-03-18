@@ -148,7 +148,7 @@ export class GoogleSheetOperator implements SheetOperator {
         return Promise.resolve();
     }
 
-    async computeBalance(targetMonthYear: string): Promise<BalanceResponse[]> {
+    async computeBalance(targetYear: number, targetMonth: number): Promise<BalanceResponse[]> {
         const fetchBudgetDisplayCategories = async () => {
             const sheetName = BudgetDisplayCategoryMasterFormat.title;
 
@@ -217,8 +217,6 @@ export class GoogleSheetOperator implements SheetOperator {
         const computeUsedAmount = async () => {
             const paymentColIndexMap = await this.fetchTableHeaderColumnIndex(PaymentTableFormat.title);
 
-            console.log("paymentColIndexMap", paymentColIndexMap);
-
             const columnNoID = paymentColIndexMap[PaymentTableFormat.headerPaymentID] + 1;
             const columnNoDate = paymentColIndexMap[PaymentTableFormat.headerPaymentDate] + 1;
             const columnNoTitle = paymentColIndexMap[PaymentTableFormat.headerTitle] + 1;
@@ -235,21 +233,19 @@ export class GoogleSheetOperator implements SheetOperator {
                 throw new Error("必要なヘッダが存在しません");
             }
 
-            // 対象年月（例: 2026-03）
-            const target = targetMonthYear;
-
             // Visualization API用クエリ
-            const query = `
-                SELECT Col${columnNoCategory}, SUM(Col${columnNoAmount})
-                WHERE Col${columnNoDate} STARTS WITH '${target}'
-                GROUP BY Col${columnNoCategory}
-            `;
+            const toAlphabet = (colNo: number) => String.fromCharCode(64 + colNo);
 
+            const query = `
+                SELECT ${toAlphabet(columnNoCategory)}, SUM(${toAlphabet(columnNoAmount)})
+                WHERE year(${toAlphabet(columnNoDate)}) = ${targetYear} AND month(${toAlphabet(columnNoDate)}) = ${targetMonth - 1}
+                GROUP BY ${toAlphabet(columnNoCategory)}
+            `;
             const encodedQuery = encodeURIComponent(query);
 
-            const url = `https://docs.google.com/spreadsheets/d/${this.spreadSheetID}/gviz/tq?sheet=${encodeURIComponent(PaymentTableFormat.title)}&headers=1&tq=${encodedQuery}`;
+            console.log("query", query);
 
-            console.log("url", url);
+            const url = `https://docs.google.com/spreadsheets/d/${this.spreadSheetID}/gviz/tq?sheet=${encodeURIComponent(PaymentTableFormat.title)}&headers=1&tq=${encodedQuery}`;
 
             // 取得
             const res = await fetch(url, {
