@@ -1,5 +1,5 @@
 import type { Category, PaymentRequest, BalanceResponse, SheetOperator } from "./SheetOperator";
-import { CategoryMasterFormat, PaymentTableFormat, BudgetDisplayCategoryMasterFormat } from "./SheetFormat";
+import { CategoryMasterFormat, PaymentTableFormat, BudgetDisplayCategoryMasterFormat, BudgetMasterFormat } from "./SheetFormat";
 
 export class GoogleSheetOperator implements SheetOperator {
 
@@ -90,6 +90,8 @@ export class GoogleSheetOperator implements SheetOperator {
 
         return categories;
     }
+
+    toAlphabet = (colNo: number) => String.fromCharCode(64 + colNo);
 
     async getRowsByQueryResponse(response: Response): Promise<string[][]> {
         const text = await response.text();
@@ -255,12 +257,11 @@ export class GoogleSheetOperator implements SheetOperator {
             }
 
             // Visualization API用クエリ
-            const toAlphabet = (colNo: number) => String.fromCharCode(64 + colNo);
 
             const query = `
-                SELECT ${toAlphabet(columnNoCategory)}, SUM(${toAlphabet(columnNoAmount)})
-                WHERE year(${toAlphabet(columnNoDate)}) = ${targetYear} AND month(${toAlphabet(columnNoDate)}) = ${targetMonth - 1}
-                GROUP BY ${toAlphabet(columnNoCategory)}
+                SELECT ${this.toAlphabet(columnNoCategory)}, SUM(${this.toAlphabet(columnNoAmount)})
+                WHERE year(${this.toAlphabet(columnNoDate)}) = ${targetYear} AND month(${this.toAlphabet(columnNoDate)}) = ${targetMonth - 1}
+                GROUP BY ${this.toAlphabet(columnNoCategory)}
             `;
             const encodedQuery = encodeURIComponent(query);
 
@@ -285,6 +286,21 @@ export class GoogleSheetOperator implements SheetOperator {
             }
 
             return categoryIDtoUsedAmount;
+        }
+
+        const computeBudgetAmount = async () => {
+            const budgetColIndexMap = await this.fetchTableHeaderColumnIndex(BudgetMasterFormat.title);
+
+            const columnNoCategoryID = budgetColIndexMap[BudgetMasterFormat.headerCategoryID] + 1;
+            const columnNoUpdateDate = budgetColIndexMap[BudgetMasterFormat.headerUpdateDate] + 1;
+            const columnNoBudgetAmount = budgetColIndexMap[BudgetMasterFormat.headerBudgetAmount] + 1;
+
+            if (
+                columnNoCategoryID === undefined ||
+                columnNoBudgetAmount === undefined
+            ) {
+                throw new Error("必要なヘッダが存在しません");
+            }
         }
 
         const budgetDisplayCategories = await fetchBudgetDisplayCategories();
