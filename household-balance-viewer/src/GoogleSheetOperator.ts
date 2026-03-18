@@ -91,7 +91,23 @@ export class GoogleSheetOperator implements SheetOperator {
         return categories;
     }
 
-    toAlphabet = (colNo: number) => String.fromCharCode(64 + colNo);
+    columnNoToAlphabet = (colNo: number) => String.fromCharCode(64 + colNo);
+
+    async fetchSheetQuery(tableName: string, query: string, headerLineNo: number = 1): Promise<Response> {
+        const encodedQuery = encodeURIComponent(query);
+
+        console.log("query", query);
+
+        const url = `https://docs.google.com/spreadsheets/d/${this.spreadSheetID}/gviz/tq?sheet=${encodeURIComponent(tableName)}&headers=${headerLineNo}&tq=${encodedQuery}`;
+
+        // 取得
+        return await fetch(url, {
+            headers: {
+                Authorization: `Bearer ${this.accessToken}`
+            }
+        });
+
+    }
 
     async getRowsByQueryResponse(response: Response): Promise<string[][]> {
         const text = await response.text();
@@ -264,22 +280,12 @@ export class GoogleSheetOperator implements SheetOperator {
             // Visualization API用クエリ
 
             const query = `
-                SELECT ${this.toAlphabet(columnNoCategory)}, SUM(${this.toAlphabet(columnNoAmount)})
-                WHERE year(${this.toAlphabet(columnNoDate)}) = ${targetYear} AND month(${this.toAlphabet(columnNoDate)}) = ${targetMonth - 1}
-                GROUP BY ${this.toAlphabet(columnNoCategory)}
+                SELECT ${this.columnNoToAlphabet(columnNoCategory)}, SUM(${this.columnNoToAlphabet(columnNoAmount)})
+                WHERE year(${this.columnNoToAlphabet(columnNoDate)}) = ${targetYear} AND month(${this.columnNoToAlphabet(columnNoDate)}) = ${targetMonth - 1}
+                GROUP BY ${this.columnNoToAlphabet(columnNoCategory)}
             `;
-            const encodedQuery = encodeURIComponent(query);
 
-            console.log("query", query);
-
-            const url = `https://docs.google.com/spreadsheets/d/${this.spreadSheetID}/gviz/tq?sheet=${encodeURIComponent(PaymentTableFormat.title)}&headers=1&tq=${encodedQuery}`;
-
-            // 取得
-            const res = await fetch(url, {
-                headers: {
-                    Authorization: `Bearer ${this.accessToken}`
-                }
-            });
+            const res = await this.fetchSheetQuery(PaymentTableFormat.title, query);
 
             const rowsCategoryIDtoUsedAmount = await this.getRowsByQueryResponse(res);
 
@@ -297,25 +303,53 @@ export class GoogleSheetOperator implements SheetOperator {
             const budgetColIndexMap = await this.fetchTableHeaderColumnIndex(BudgetMasterFormat.title);
 
             const columnNoCategoryID = budgetColIndexMap[BudgetMasterFormat.headerCategoryID] + 1;
-            const columnNoUpdateDate = budgetColIndexMap[BudgetMasterFormat.headerUpdateDate] + 1;
+            const columnTargetYearMonth = budgetColIndexMap[BudgetMasterFormat.headerTargetYearMonth] + 1;
             const columnNoBudgetAmount = budgetColIndexMap[BudgetMasterFormat.headerBudgetAmount] + 1;
 
             if (
                 columnNoCategoryID === undefined ||
-                columnNoBudgetAmount === undefined
+                columnNoBudgetAmount === undefined ||
+                columnTargetYearMonth === undefined
             ) {
                 throw new Error("必要なヘッダが存在しません");
             }
+
+            const query = `
+                SELECT ${this.columnNoToAlphabet(columnNoCategoryID)}, ${this.columnNoToAlphabet(columnNoBudgetAmount)}, ${this.columnNoToAlphabet(columnTargetYearMonth)}
+                WHERE (
+                    year(${this.columnNoToAlphabet(columnTargetYearMonth)}) < ${targetYear} 
+                ) OR (
+                    year(${this.columnNoToAlphabet(columnTargetYearMonth)}) = ${targetYear} AND month(${this.columnNoToAlphabet(columnTargetYearMonth)}) <= ${targetMonth - 1}
+                )
+                ORDER BY ${this.columnNoToAlphabet(columnTargetYearMonth)} DESC
+            `;
+
+            const res = await this.fetchSheetQuery(BudgetMasterFormat.title, query);
+            const rowsCategoryIDtoBudgetAmount = await this.getRowsByQueryResponse(res);
+
+            const categoryIDtoBudgetAmount = new Map<number, number>();
+            for (const row of rowsCategoryIDtoBudgetAmount) {
+                const categoryID = Number(row[0]);
+                const budgetAmount = Number(row[1]);
+
+                if (categoryIDtoBudgetAmount.has(categoryID)) {
+                    continue;
+                }
+
+                categoryIDtoBudgetAmount.set(categoryID, budgetAmount);
+            }
+
+            return categoryIDtoBudgetAmount;
         }
 
         const budgetDisplayCategories = await fetchBudgetDisplayCategories();
 
         const categoryIDtoUsedAmount = await computeUsedAmount();
+        const categoryIDtoBudgetAmount = await computeBudgetAmount();
 
         console.log("budgetDisplayCategories", budgetDisplayCategories);
         console.log("categoryIDtoUsedAmount", categoryIDtoUsedAmount);
-
-
+        console.log("categoryIDtoBudgetAmount", categoryIDtoBudgetAmount);
 
         return Promise.resolve([
             { title: "テスト食費", budgetAmount: 50000, carryOverAmount: 10000, usedAmount: 60000 },
