@@ -11,6 +11,39 @@ export class GoogleSheetOperator implements SheetOperator {
         this.spreadSheetID = spreadSheetID;
     }
 
+    async fetchTableHeaderColumnIndex(
+        tableTitle: string,
+    ): Promise<Record<string, number>> {
+        // get first line
+        const rangeFirstLine = `${encodeURIComponent(tableTitle)}!1:1`;
+        const getRes = await fetch(
+            `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}/values/${rangeFirstLine}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${this.accessToken}`
+                }
+            }
+        );
+
+        const data = await getRes.json();
+        const values: string[][] = data.values ?? [];
+
+        if (values.length === 0) {
+            throw new Error("シートが空です");
+        }
+
+        // 2. ヘッダ取得
+        const headers = values[0];
+
+        const colIndexMap: Record<string, number> = {};
+
+        headers.forEach((h, i) => {
+            colIndexMap[h] = i;
+        });
+
+        return colIndexMap;
+    }
+
     async fetchCategories(): Promise<Category[]> {
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}/values/${encodeURIComponent(CategoryMasterFormat.title)}`;
         const response = await fetch(url, {
@@ -61,32 +94,7 @@ export class GoogleSheetOperator implements SheetOperator {
     async requestAddPayment(payment: PaymentRequest): Promise<void> {
         const sheetName = PaymentTableFormat.title;
 
-        // get first line
-        const rangeFirstLine = `${encodeURIComponent(sheetName)}!1:1`;
-        const getRes = await fetch(
-            `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}/values/${rangeFirstLine}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${this.accessToken}`
-                }
-            }
-        );
-
-        const data = await getRes.json();
-        const values: string[][] = data.values ?? [];
-
-        if (values.length === 0) {
-            throw new Error("シートが空です");
-        }
-
-        // 2. ヘッダ取得
-        const headers = values[0];
-
-        const colIndexMap: Record<string, number> = {};
-
-        headers.forEach((h, i) => {
-            colIndexMap[h] = i;
-        });
+        const colIndexMap = await this.fetchTableHeaderColumnIndex(sheetName);
 
         const idxID = colIndexMap[PaymentTableFormat.headerPaymentID];
         const idxDate = colIndexMap[PaymentTableFormat.headerPaymentDate];
@@ -206,9 +214,100 @@ export class GoogleSheetOperator implements SheetOperator {
             return rows.map(r => r.categoryID);
         }
 
+        const computeUsedAmount = async () => {
+            const sheetName = PaymentTableFormat.title;
+
+            // get first line
+            const rangeFirstLine = `${encodeURIComponent(sheetName)}!1:1`;
+            const getRes = await fetch(
+                `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}/values/${rangeFirstLine}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${this.accessToken}`
+                    }
+                }
+            );
+
+            const data = await getRes.json();
+            const values: string[][] = data.values ?? [];
+
+            if (values.length === 0) {
+                throw new Error("シートが空です");
+            }
+
+            // 2. ヘッダ取得
+            const headers = values[0];
+
+            const colIndexMap: Record<string, number> = {};
+
+            headers.forEach((h, i) => {
+                colIndexMap[h] = i;
+            });
+
+            const idxID = colIndexMap[PaymentTableFormat.headerPaymentID];
+            const idxDate = colIndexMap[PaymentTableFormat.headerPaymentDate];
+            const idxTitle = colIndexMap[PaymentTableFormat.headerTitle];
+            const idxCategory = colIndexMap[PaymentTableFormat.headerCategoryID];
+            const idxAmount = colIndexMap[PaymentTableFormat.headerAmount];
+
+            if (
+                idxID === undefined ||
+                idxDate === undefined ||
+                idxTitle === undefined ||
+                idxCategory === undefined ||
+                idxAmount === undefined
+            ) {
+                throw new Error("必要なヘッダが存在しません");
+            }
+
+
+            // ヘッダ名
+            const headerDate = PaymentTableFormat.headerPaymentDate;
+            const headerCategory = PaymentTableFormat.headerCategoryID;
+            const headerAmount = PaymentTableFormat.headerAmount;
+
+            // 対象年月（例: 2026-03）
+            const target = targetMonthYear;
+
+            // Visualization API用クエリ
+            const query = `
+                SELECT ${headerCategory}, SUM(${headerAmount})
+                WHERE ${headerDate} STARTS WITH '${target}'
+                GROUP BY ${headerCategory}
+            `;
+
+            const encodedQuery = encodeURIComponent(query);
+
+            const url = `https://docs.google.com/spreadsheets/d/${this.spreadSheetID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}&tq=${encodedQuery}`;
+
+            console.log("url", url);
+
+            // 取得
+            const res = await fetch(url, {
+                headers: {
+                    Authorization: `Bearer ${this.accessToken}`
+                }
+            });
+
+            const text = await res.text();
+
+            // gvizはJSONっぽい文字列なのでパース
+            const json = JSON.parse(
+                text.substring(
+                    text.indexOf("{"),
+                    text.lastIndexOf("}") + 1
+                )
+            );
+
+            return json;
+        }
+
         const budgetDisplayCategories = await fetchBudgetDisplayCategories();
 
+        const usedAmount = await computeUsedAmount();
+
         console.log("budgetDisplayCategories", budgetDisplayCategories);
+        console.log("usedAmount", usedAmount);
 
         return Promise.resolve([
             { title: "テスト食費", budgetAmount: 50000, carryOverAmount: 10000, usedAmount: 60000 },
