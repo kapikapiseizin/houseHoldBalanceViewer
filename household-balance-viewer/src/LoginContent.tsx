@@ -19,10 +19,16 @@ function BudgetPage({ sheetOperator }: BudgetPageProps) {
   const targetMonthYear = `${targetYear}-${String(targetMonth).padStart(2, '0')}`;
 
   const [balance, setBalance] = useState<BalanceResponse[]>([]);
+  const [isFetchLoading, setIsFetchLoading] = useState(false);
 
   useEffect(() => {
-    sheetOperator.computeBalance(targetYear, targetMonth).then(setBalance);
+    setIsFetchLoading(true);
+    sheetOperator.computeBalance(targetYear, targetMonth).then(setBalance).finally(() => setIsFetchLoading(false));
   }, [sheetOperator]);
+
+  if (isFetchLoading) {
+    return <LoadingContent title="データを取得中" />;
+  }
 
   return (
     <div className="budget-page">
