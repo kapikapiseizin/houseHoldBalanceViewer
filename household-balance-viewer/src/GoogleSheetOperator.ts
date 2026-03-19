@@ -330,34 +330,29 @@ export class GoogleSheetOperator implements SheetOperator {
 
             const rows = await this.getRowsByQueryResponse(res);
 
-            const categoryIDToCarryOverAmount = new Map<number, { measurementYear: number, measurementMonth: number, carryOverAmount: number }>();
+            const categoryIDToCarryOverAmount = new Map<number, { measurementYearMonth: Date, carryOverAmount: number }>();
             for (const row of rows) {
-                const measureDate = this.parseGvizDate(row[columnNoMeasurementYearMonth - 1]);
-
+                const measurementYearMonth = this.parseGvizDate(row[columnNoMeasurementYearMonth - 1]);
                 const categoryID = Number(row[columnNoCategoryID - 1]);
-                const measurementYear = measureDate.getFullYear();
-                const measurementMonth = measureDate.getMonth() + 1;
                 const carryOverAmount = Number(row[columnNoCarryOverAmount - 1]);
 
                 if (categoryIDToCarryOverAmount.has(categoryID)) {
                     continue;
                 }
 
-                categoryIDToCarryOverAmount.set(categoryID, { measurementYear, measurementMonth, carryOverAmount });
+                categoryIDToCarryOverAmount.set(categoryID, { measurementYearMonth, carryOverAmount });
             }
 
             return categoryIDToCarryOverAmount;
         }
 
-        const selectPaymentTableInPeriod = async (
+        const selectPaymentTableInPeriodOrderByDateAsc = async (
             headerColIndex: Record<string, number>,
             startYear: number | undefined = undefined,
             startMonth: number | undefined = undefined,
             endYear: number,
             endMonth: number
         ) => {
-
-
             const columnNoDate = headerColIndex[PaymentTableFormat.headerPaymentDate] + 1;
 
             if (
@@ -366,16 +361,25 @@ export class GoogleSheetOperator implements SheetOperator {
                 throw new Error("必要なヘッダが存在しません");
             }
 
+            const wherePeriod = startYear === undefined || startMonth === undefined ?
+                `${this.sqlWhereMaxYearMonth(this.columnNoToAlphabet(columnNoDate), endYear, endMonth)}`
+                : `(
+                    ${this.sqlWhereMinYearMonth(this.columnNoToAlphabet(columnNoDate), startYear, startMonth)}
+                    AND
+                    ${this.sqlWhereMaxYearMonth(this.columnNoToAlphabet(columnNoDate), endYear, endMonth)}
+                ) `;
+
             const query = `
                 SELECT * 
-                WHERE (
-                    year(${this.columnNoToAlphabet(columnNoDate)}) < ${startYear} 
-                ) OR (
-                    year(${this.columnNoToAlphabet(columnNoDate)}) = ${startYear} AND month(${this.columnNoToAlphabet(columnNoDate)}) <= ${startMonth - 1}
-                )
-                ORDER BY ${this.columnNoToAlphabet(columnNoDate)} DESC
+                WHERE ${wherePeriod}
+                ORDER BY ${this.columnNoToAlphabet(columnNoDate)} ASC
             `;
 
+            const res = await this.fetchSheetQuery(PaymentTableFormat.title, query);
+
+            const rows = await this.getRowsByQueryResponse(res);
+
+            return rows;
         }
 
         const computeUsedAmount = async () => {
@@ -468,14 +472,41 @@ export class GoogleSheetOperator implements SheetOperator {
             targetMonth - 1 // get last month
         );
 
+        let minSummeryYear: number | undefined = undefined;
+        let minSummeryMonth: number | undefined = undefined;
+        if (latestSummeryCategoryIDtoCarryOver.size > 0) {
+            const minYearMonth = Array.from(latestSummeryCategoryIDtoCarryOver.values())
+                .reduce((prev, curr) => {
+                    if (prev.measurementYearMonth < curr.measurementYearMonth) {
+                        return prev;
+                    }
+                    return curr;
+                });
+            minSummeryYear = minYearMonth.measurementYearMonth.getFullYear();
+            minSummeryMonth = minYearMonth.measurementYearMonth.getMonth() + 1;
+        }
+
+        console.log("minSummeryYear", minSummeryYear);
+        console.log("minSummeryMonth", minSummeryMonth);
+
         const paymentHeaderColIndex = await this.fetchTableHeaderColumnIndex(PaymentTableFormat.title);
+
+        const paymentTableInPeriodOrderByDateAsc = await selectPaymentTableInPeriodOrderByDateAsc(
+            paymentHeaderColIndex,
+            minSummeryYear,
+            minSummeryMonth,
+            targetYear,
+            targetMonth
+        );
+
+        console.log("budgetDisplayCategories", budgetDisplayCategories);
+        console.log("latestSummeryCategoryIDtoCarryOver", latestSummeryCategoryIDtoCarryOver);
+        console.log("paymentTableInPeriodOrderByDateAsc", paymentTableInPeriodOrderByDateAsc);
 
         // TODO:used memo payment table
         const categoryIDtoUsedAmount = await computeUsedAmount();
         const categoryIDtoBudgetAmount = await computeBudgetAmount();
 
-        console.log("latestSummeryCategoryIDtoCarryOver", latestSummeryCategoryIDtoCarryOver);
-        console.log("budgetDisplayCategories", budgetDisplayCategories);
         console.log("categoryIDtoUsedAmount", categoryIDtoUsedAmount);
         console.log("categoryIDtoBudgetAmount", categoryIDtoBudgetAmount);
 
