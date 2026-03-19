@@ -322,11 +322,7 @@ export class GoogleSheetOperator implements SheetOperator {
 
             const query = `
                 SELECT *
-                WHERE (
-                    year(${this.columnNoToAlphabet(columnNoMeasurementYearMonth)}) < ${targetYear} 
-                ) OR (
-                    year(${this.columnNoToAlphabet(columnNoMeasurementYearMonth)}) = ${targetYear} AND month(${this.columnNoToAlphabet(columnNoMeasurementYearMonth)}) <= ${targetMonth - 1}
-                )
+                WHERE ${this.sqlWhereMaxYearMonth(this.columnNoToAlphabet(columnNoMeasurementYearMonth), targetYear, targetMonth)}
                 ORDER BY ${this.columnNoToAlphabet(columnNoMeasurementYearMonth)} DESC
             `;
 
@@ -440,11 +436,7 @@ export class GoogleSheetOperator implements SheetOperator {
 
             const query = `
                 SELECT ${this.columnNoToAlphabet(columnNoCategoryID)}, ${this.columnNoToAlphabet(columnNoBudgetAmount)}, ${this.columnNoToAlphabet(columnTargetYearMonth)}
-                WHERE (
-                    year(${this.columnNoToAlphabet(columnTargetYearMonth)}) < ${targetYear} 
-                ) OR (
-                    year(${this.columnNoToAlphabet(columnTargetYearMonth)}) = ${targetYear} AND month(${this.columnNoToAlphabet(columnTargetYearMonth)}) <= ${targetMonth - 1}
-                )
+                WHERE ${this.sqlWhereMaxYearMonth(this.columnNoToAlphabet(columnTargetYearMonth), targetYear, targetMonth)}
                 ORDER BY ${this.columnNoToAlphabet(columnTargetYearMonth)} DESC
             `;
 
