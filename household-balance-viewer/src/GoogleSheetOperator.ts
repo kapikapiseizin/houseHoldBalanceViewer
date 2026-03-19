@@ -108,6 +108,34 @@ export class GoogleSheetOperator implements SheetOperator {
         throw new Error(`Failed to parse date: ${dateStr}`);
     }
 
+    addYearMonth(
+        srcYear: number,
+        srcMonth: number,
+        addYear: number,
+        addMonth: number
+    ): { year: number, month: number } {
+        // 1. month(1~12) → monthIndex(0~11)
+        const srcMonthIndex = srcMonth - 1;
+
+        // 2. 全てを「総月数」に変換
+        const totalMonths =
+            srcYear * 12 + srcMonthIndex +
+            addYear * 12 + addMonth;
+
+        // 3. 年と月に戻す
+        const year = Math.floor(totalMonths / 12);
+        const monthIndex = totalMonths % 12;
+
+        // 4. JSの % は負を返す可能性があるので補正
+        const normalizedMonthIndex =
+            (monthIndex + 12) % 12;
+
+        // 5. monthIndex → month(1~12)
+        const month = normalizedMonthIndex + 1;
+
+        return { year, month };
+    }
+
     sqlWhereMaxYearMonth(
         column: string,
         maxYear: number,
@@ -505,6 +533,7 @@ export class GoogleSheetOperator implements SheetOperator {
         console.log("budgetDisplayCategories", budgetDisplayCategories);
         console.log("latestSummeryCategoryIDtoCarryOver", latestSummeryCategoryIDtoCarryOver);
         console.log("paymentTableInPeriodOrderByDateAsc", paymentTableInPeriodOrderByDateAsc);
+        console.log("monthCalcTest", this.addYearMonth(2026, 12, 0, 5));
 
         const categoryIDtoUsedAmount = await computeUsedAmount(paymentHeaderColIndex, paymentTableInPeriodOrderByDateAsc);
         const categoryIDtoBudgetAmount = await computeBudgetAmount();
