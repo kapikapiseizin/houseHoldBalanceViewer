@@ -504,6 +504,29 @@ export class GoogleSheetOperator implements SheetOperator {
             return categoryIDtoBudgetAmount;
         }
 
+        const computeCarryOverAmount = async (
+            latestSummeryCategoryIDtoCarryOver: Map<number, { measurementYearMonth: Date, carryOverAmount: number }>,
+            paymentHeaderColIndex: Record<string, number>,
+            paymentTableInPeriodOrderByDateAsc: string[][],
+            budgetHeaderColIndex: Record<string, number>,
+            budgetTableInPeriodOrderByDateAsc: string[][]
+        ) => {
+            // 回答用のmapにサマリが対象昨月ならもう仕舞う
+            // サマリの日付が対象昨月でない分類IDの未処理setを作成
+            // categoryIDtoSumAmountを作成
+            // forで決済テーブルを読む
+            // サマリの翌月以上対象年月昨月以下の決済を集計
+            // サマリに存在しないなら対象年月昨月以下の決済を集計する
+            // categoryIDtoSumBudgetAmountを作成
+            // forで予算テーブルを読む
+            // サマリの翌月以上対象年月昨月以下の予算を集計
+            // サマリに存在しないなら対象年月昨月以下の予算を集計する
+            // 未処理分類IDsetを回す
+            // 確定した繰り越し金額を回答用mapにセット
+            // 表に登録する
+            // 回答用mapを返す
+        }
+
         const carrySummeryHeaderColIndex = await this.fetchTableHeaderColumnIndex(CarryOverSummaryFormat.title);
 
         const budgetDisplayCategories = await fetchBudgetDisplayCategories();
