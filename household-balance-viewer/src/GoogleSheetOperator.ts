@@ -497,10 +497,12 @@ export class GoogleSheetOperator implements SheetOperator {
 
         const budgetDisplayCategories = await fetchBudgetDisplayCategories();
 
+        const { year: lastMonthTargetYear, month: lastMonthTargetMonth } = this.addYearMonth(targetYear, targetMonth, 0, -1);
+
         const latestSummeryCategoryIDtoCarryOver = await fetchLatestCarryOverSummery(
             carrySummeryHeaderColIndex,
-            targetYear,
-            targetMonth - 1 // get last month
+            lastMonthTargetYear,
+            lastMonthTargetMonth
         );
 
         let minSummeryYear: number | undefined = undefined;
