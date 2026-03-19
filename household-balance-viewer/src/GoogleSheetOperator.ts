@@ -452,7 +452,6 @@ export class GoogleSheetOperator implements SheetOperator {
         const calcCategoryIDtoBudgetAmount = (
             headerColIndex: Record<string, number>,
             rowsOrderByDateAsc: string[][],
-            selectCategoryIDs: number[]
         ) => {
             const columnNoCategoryIndex = headerColIndex[BudgetMasterFormat.headerCategoryID];
             const columnNoTargetYearMonth = headerColIndex[BudgetMasterFormat.headerTargetYearMonth];
@@ -466,8 +465,6 @@ export class GoogleSheetOperator implements SheetOperator {
                 throw new Error("必要なヘッダが存在しません");
             }
 
-            const setSelectCategoryIDs = new Set<number>(selectCategoryIDs);
-
             const categoryIDtoBudgetAmount = new Map<number, number>();
             for (let rowIdx = rowsOrderByDateAsc.length - 1; rowIdx >= 0; rowIdx--) {
                 const row = rowsOrderByDateAsc[rowIdx];
@@ -477,28 +474,18 @@ export class GoogleSheetOperator implements SheetOperator {
                 const budgetYear = budgetYearMonth.getFullYear();
                 const budgetMonth = budgetYearMonth.getMonth() + 1;
 
-                if (!setSelectCategoryIDs.has(categoryID)) {
-                    // 対象外の分類IDは無視する
-                    continue;
-                }
-
                 if (budgetYear > targetYear || (budgetYear === targetYear && budgetMonth > targetMonth)) {
                     // 未来の予算は無視する
                     continue;
                 }
 
-                if (categoryIDtoBudgetAmount.has(categoryID)) {
-                    // 既に設定されている場合は無視する
-                    continue;
-                }
-
-                // 対象年月が最も近いものを採用する
-                categoryIDtoBudgetAmount.set(categoryID, budgetAmount);
-
-                if (categoryIDtoBudgetAmount.size === setSelectCategoryIDs.size) {
-                    // 全ての分類IDが設定された場合は終了する
+                if (budgetYear < targetYear || (budgetYear === targetYear && budgetMonth < targetMonth)) {
+                    // 過去の予算なら読込終了
                     break;
                 }
+
+                // 対象年月が同じものを採用する
+                categoryIDtoBudgetAmount.set(categoryID, budgetAmount);
             }
 
             return categoryIDtoBudgetAmount;
@@ -607,7 +594,7 @@ export class GoogleSheetOperator implements SheetOperator {
 
         console.log("budgetTableInPeriodOrderByDateAsc", budgetTableInPeriodOrderByDateAsc);
 
-        const categoryIDtoBudgetAmount = calcCategoryIDtoBudgetAmount(budgetHeaderColIndex, budgetTableInPeriodOrderByDateAsc, budgetDisplayCategories);
+        const categoryIDtoBudgetAmount = calcCategoryIDtoBudgetAmount(budgetHeaderColIndex, budgetTableInPeriodOrderByDateAsc);
         console.log("categoryIDtoBudgetAmount", categoryIDtoBudgetAmount);
 
         return Promise.resolve([
