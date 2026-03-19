@@ -108,6 +108,34 @@ export class GoogleSheetOperator implements SheetOperator {
         throw new Error(`Failed to parse date: ${dateStr}`);
     }
 
+    sqlWhereMaxYearMonth(
+        column: string,
+        maxYear: number,
+        maxMonth: number
+    ): string {
+        return `(
+            (
+                year(${column}) < ${maxYear} 
+            ) OR (
+                year(${column}) = ${maxYear} AND month(${column}) <= ${maxMonth - 1}
+            )
+        )`;
+    }
+
+    sqlWhereMinYearMonth(
+        column: string,
+        minYear: number,
+        minMonth: number
+    ): string {
+        return `(
+            (
+                year(${column}) > ${minYear} 
+            ) OR (
+                year(${column}) = ${minYear} AND month(${column}) >= ${minMonth - 1}
+            )
+        )`;
+    }
+
     async fetchSheetQuery(tableName: string, query: string, headerLineNo: number = 1): Promise<Response> {
         const encodedQuery = encodeURIComponent(query);
 
@@ -274,13 +302,24 @@ export class GoogleSheetOperator implements SheetOperator {
         }
 
         const fetchLatestCarryOverSummery = async (
-            tableName: string,
-            columnNoCategoryID: number,
-            columnNoMeasurementYearMonth: number,
-            columnNoCarryOverAmount: number,
+            headerColIndex: Record<string, number>,
             targetYear: number,
             targetMonth: number
         ) => {
+            const tableName = CarryOverSummaryFormat.title;
+            const columnNoCategoryID = headerColIndex[CarryOverSummaryFormat.headerCategoryID] + 1;
+            const columnNoMeasurementYearMonth = headerColIndex[CarryOverSummaryFormat.headerMeasurementYearMonth] + 1;
+            const columnNoCarryOverAmount = headerColIndex[CarryOverSummaryFormat.headerCarryOverAmount] + 1;
+
+            if (
+                columnNoCategoryID === undefined ||
+                columnNoMeasurementYearMonth === undefined ||
+                columnNoCarryOverAmount === undefined
+            ) {
+                throw new Error("必要なヘッダが存在しません");
+            }
+
+
             const query = `
                 SELECT *
                 WHERE (
@@ -312,6 +351,35 @@ export class GoogleSheetOperator implements SheetOperator {
             }
 
             return categoryIDToCarryOverAmount;
+        }
+
+        const selectPaymentTableInPeriod = async (
+            headerColIndex: Record<string, number>,
+            startYear: number | undefined = undefined,
+            startMonth: number | undefined = undefined,
+            endYear: number,
+            endMonth: number
+        ) => {
+
+
+            const columnNoDate = headerColIndex[PaymentTableFormat.headerPaymentDate] + 1;
+
+            if (
+                columnNoDate === undefined
+            ) {
+                throw new Error("必要なヘッダが存在しません");
+            }
+
+            const query = `
+                SELECT * 
+                WHERE (
+                    year(${this.columnNoToAlphabet(columnNoDate)}) < ${startYear} 
+                ) OR (
+                    year(${this.columnNoToAlphabet(columnNoDate)}) = ${startYear} AND month(${this.columnNoToAlphabet(columnNoDate)}) <= ${startMonth - 1}
+                )
+                ORDER BY ${this.columnNoToAlphabet(columnNoDate)} DESC
+            `;
+
         }
 
         const computeUsedAmount = async () => {
@@ -400,33 +468,21 @@ export class GoogleSheetOperator implements SheetOperator {
 
         const carrySummeryHeaderColIndex = await this.fetchTableHeaderColumnIndex(CarryOverSummaryFormat.title);
 
-        const columnNoCategoryID = carrySummeryHeaderColIndex[CarryOverSummaryFormat.headerCategoryID] + 1;
-        const columnNoMeasurementYearMonth = carrySummeryHeaderColIndex[CarryOverSummaryFormat.headerMeasurementYearMonth] + 1;
-        const columnNoCarryOverAmount = carrySummeryHeaderColIndex[CarryOverSummaryFormat.headerCarryOverAmount] + 1;
-
-        if (
-            columnNoCategoryID === undefined ||
-            columnNoMeasurementYearMonth === undefined ||
-            columnNoCarryOverAmount === undefined
-        ) {
-            throw new Error("必要なヘッダが存在しません");
-        }
-
         const budgetDisplayCategories = await fetchBudgetDisplayCategories();
 
         const latestSummeryCategoryIDtoCarryOver = await fetchLatestCarryOverSummery(
-            CarryOverSummaryFormat.title,
-            columnNoCategoryID,
-            columnNoMeasurementYearMonth,
-            columnNoCarryOverAmount,
+            carrySummeryHeaderColIndex,
             targetYear,
             targetMonth - 1 // get last month
         );
+
+        const paymentHeaderColIndex = await this.fetchTableHeaderColumnIndex(PaymentTableFormat.title);
 
         // TODO:used memo payment table
         const categoryIDtoUsedAmount = await computeUsedAmount();
         const categoryIDtoBudgetAmount = await computeBudgetAmount();
 
+        console.log("latestSummeryCategoryIDtoCarryOver", latestSummeryCategoryIDtoCarryOver);
         console.log("budgetDisplayCategories", budgetDisplayCategories);
         console.log("categoryIDtoUsedAmount", categoryIDtoUsedAmount);
         console.log("categoryIDtoBudgetAmount", categoryIDtoBudgetAmount);
