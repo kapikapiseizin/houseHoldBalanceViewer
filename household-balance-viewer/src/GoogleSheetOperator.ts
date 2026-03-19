@@ -509,10 +509,25 @@ export class GoogleSheetOperator implements SheetOperator {
         console.log("paymentTableInPeriodOrderByDateAsc", paymentTableInPeriodOrderByDateAsc);
 
         const categoryIDtoUsedAmount = await computeUsedAmount(paymentHeaderColIndex, paymentTableInPeriodOrderByDateAsc);
+        console.log("categoryIDtoUsedAmount", categoryIDtoUsedAmount);
 
         const budgetHeaderColIndex = await this.fetchTableHeaderColumnIndex(BudgetMasterFormat.title);
 
-        console.log("categoryIDtoUsedAmount", categoryIDtoUsedAmount);
+        const columnNoBudgetTargetYearMonth = budgetHeaderColIndex[BudgetMasterFormat.headerTargetYearMonth] + 1;
+        if (columnNoBudgetTargetYearMonth === undefined) {
+            throw new Error("予算マスタに予算対象年月列が存在しません");
+        }
+
+        const budgetTableInPeriodOrderByDateAsc = await selectTableInPeriodOrderByDateAsc(
+            BudgetMasterFormat.title,
+            `${this.columnNoToAlphabet(columnNoBudgetTargetYearMonth)}`,
+            undefined,
+            undefined,
+            targetYear,
+            targetMonth
+        );
+
+        console.log("budgetTableInPeriodOrderByDateAsc", budgetTableInPeriodOrderByDateAsc);
 
         return Promise.resolve([
             { title: "テスト食費", budgetAmount: 50000, carryOverAmount: 10000, usedAmount: 60000 },
