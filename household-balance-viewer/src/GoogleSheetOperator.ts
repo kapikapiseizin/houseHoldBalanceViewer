@@ -382,42 +382,45 @@ export class GoogleSheetOperator implements SheetOperator {
             return rows;
         }
 
-        const computeUsedAmount = async () => {
-            const paymentColIndexMap = await this.fetchTableHeaderColumnIndex(PaymentTableFormat.title);
-
-            const columnNoID = paymentColIndexMap[PaymentTableFormat.headerPaymentID] + 1;
-            const columnNoDate = paymentColIndexMap[PaymentTableFormat.headerPaymentDate] + 1;
-            const columnNoTitle = paymentColIndexMap[PaymentTableFormat.headerTitle] + 1;
-            const columnNoCategory = paymentColIndexMap[PaymentTableFormat.headerCategoryID] + 1;
-            const columnNoAmount = paymentColIndexMap[PaymentTableFormat.headerAmount] + 1;
+        const computeUsedAmount = async (
+            headerColIndex: Record<string, number>,
+            rowsOrderByDateAsc: string[][]
+        ) => {
+            const columnNoPaymentDate = headerColIndex[PaymentTableFormat.headerPaymentDate] + 1;
+            const columnNoCategoryID = headerColIndex[PaymentTableFormat.headerCategoryID] + 1;
+            const columnNoAmount = headerColIndex[PaymentTableFormat.headerAmount] + 1;
 
             if (
-                columnNoID === undefined ||
-                columnNoDate === undefined ||
-                columnNoTitle === undefined ||
-                columnNoCategory === undefined ||
+                columnNoPaymentDate === undefined ||
+                columnNoCategoryID === undefined ||
                 columnNoAmount === undefined
             ) {
                 throw new Error("必要なヘッダが存在しません");
             }
 
-            // Visualization API用クエリ
-
-            const query = `
-                SELECT ${this.columnNoToAlphabet(columnNoCategory)}, SUM(${this.columnNoToAlphabet(columnNoAmount)})
-                WHERE year(${this.columnNoToAlphabet(columnNoDate)}) = ${targetYear} AND month(${this.columnNoToAlphabet(columnNoDate)}) = ${targetMonth - 1}
-                GROUP BY ${this.columnNoToAlphabet(columnNoCategory)}
-            `;
-
-            const res = await this.fetchSheetQuery(PaymentTableFormat.title, query);
-
-            const rowsCategoryIDtoUsedAmount = await this.getRowsByQueryResponse(res);
-
             const categoryIDtoUsedAmount = new Map<number, number>();
-            for (const row of rowsCategoryIDtoUsedAmount) {
-                const categoryID = Number(row[0]);
-                const usedAmount = Number(row[1]);
-                categoryIDtoUsedAmount.set(categoryID, usedAmount);
+            for (let rowIdx = rowsOrderByDateAsc.length - 1; rowIdx >= 0; rowIdx--) {
+                const row = rowsOrderByDateAsc[rowIdx];
+                const categoryID = Number(row[columnNoCategoryID - 1]);
+                const paymentAmount = Number(row[columnNoAmount - 1]);
+                const paymentDate = this.parseGvizDate(row[columnNoPaymentDate - 1]);
+                const paymentYear = paymentDate.getFullYear();
+                const paymentMonth = paymentDate.getMonth() + 1;
+
+                if (paymentYear < targetYear || (paymentYear === targetYear && paymentMonth < targetMonth)) {
+                    break;
+                }
+
+                if (paymentYear != targetYear || paymentMonth != targetMonth) {
+                    continue;
+                }
+
+                const sumAmount = categoryIDtoUsedAmount.get(categoryID);
+                if (sumAmount !== undefined) {
+                    categoryIDtoUsedAmount.set(categoryID, sumAmount + paymentAmount);
+                } else {
+                    categoryIDtoUsedAmount.set(categoryID, paymentAmount);
+                }
             }
 
             return categoryIDtoUsedAmount;
@@ -503,8 +506,7 @@ export class GoogleSheetOperator implements SheetOperator {
         console.log("latestSummeryCategoryIDtoCarryOver", latestSummeryCategoryIDtoCarryOver);
         console.log("paymentTableInPeriodOrderByDateAsc", paymentTableInPeriodOrderByDateAsc);
 
-        // TODO:used memo payment table
-        const categoryIDtoUsedAmount = await computeUsedAmount();
+        const categoryIDtoUsedAmount = await computeUsedAmount(paymentHeaderColIndex, paymentTableInPeriodOrderByDateAsc);
         const categoryIDtoBudgetAmount = await computeBudgetAmount();
 
         console.log("categoryIDtoUsedAmount", categoryIDtoUsedAmount);
