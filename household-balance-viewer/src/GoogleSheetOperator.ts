@@ -164,6 +164,35 @@ export class GoogleSheetOperator implements SheetOperator {
         )`;
     }
 
+    async selectTableInPeriodOrderByDateAsc(
+        tableName: string,
+        dateColumn: string,
+        startYear: number | undefined = undefined,
+        startMonth: number | undefined = undefined,
+        endYear: number,
+        endMonth: number
+    ): Promise<string[][]> {
+        const wherePeriod = startYear === undefined || startMonth === undefined ?
+            `${this.sqlWhereMaxYearMonth(dateColumn, endYear, endMonth)}`
+            : `(
+                    ${this.sqlWhereMinYearMonth(dateColumn, startYear, startMonth)}
+                    AND
+                    ${this.sqlWhereMaxYearMonth(dateColumn, endYear, endMonth)}
+                ) `;
+
+        const query = `
+                SELECT * 
+                WHERE ${wherePeriod}
+                ORDER BY ${dateColumn} ASC
+            `;
+
+        const res = await this.fetchSheetQuery(tableName, query);
+
+        const rows = await this.getRowsByQueryResponse(res);
+
+        return rows;
+    }
+
     async fetchSheetQuery(tableName: string, query: string, headerLineNo: number = 1): Promise<Response> {
         const encodedQuery = encodeURIComponent(query);
 
@@ -374,36 +403,9 @@ export class GoogleSheetOperator implements SheetOperator {
             return categoryIDToCarryOverAmount;
         }
 
-        const selectTableInPeriodOrderByDateAsc = async (
-            tableName: string,
-            dateColumn: string,
-            startYear: number | undefined = undefined,
-            startMonth: number | undefined = undefined,
-            endYear: number,
-            endMonth: number
-        ) => {
-            const wherePeriod = startYear === undefined || startMonth === undefined ?
-                `${this.sqlWhereMaxYearMonth(dateColumn, endYear, endMonth)}`
-                : `(
-                    ${this.sqlWhereMinYearMonth(dateColumn, startYear, startMonth)}
-                    AND
-                    ${this.sqlWhereMaxYearMonth(dateColumn, endYear, endMonth)}
-                ) `;
 
-            const query = `
-                SELECT * 
-                WHERE ${wherePeriod}
-                ORDER BY ${dateColumn} ASC
-            `;
 
-            const res = await this.fetchSheetQuery(tableName, query);
-
-            const rows = await this.getRowsByQueryResponse(res);
-
-            return rows;
-        }
-
-        const computeUsedAmount = async (
+        const calcUsedAmount = (
             headerColIndex: Record<string, number>,
             rowsOrderByDateAsc: string[][]
         ) => {
@@ -447,7 +449,60 @@ export class GoogleSheetOperator implements SheetOperator {
             return categoryIDtoUsedAmount;
         }
 
+        const calcCategoryIDtoBudgetAmount = (
+            headerColIndex: Record<string, number>,
+            rowsOrderByDateAsc: string[][],
+            selectCategoryIDs: number[]
+        ) => {
+            const columnNoCategoryIndex = headerColIndex[BudgetMasterFormat.headerCategoryID];
+            const columnNoTargetYearMonth = headerColIndex[BudgetMasterFormat.headerTargetYearMonth];
+            const columnNoBudgetAmount = headerColIndex[BudgetMasterFormat.headerBudgetAmount];
 
+            if (
+                columnNoCategoryIndex === undefined ||
+                columnNoTargetYearMonth === undefined ||
+                columnNoBudgetAmount === undefined
+            ) {
+                throw new Error("必要なヘッダが存在しません");
+            }
+
+            const setSelectCategoryIDs = new Set<number>(selectCategoryIDs);
+
+            const categoryIDtoBudgetAmount = new Map<number, number>();
+            for (let rowIdx = rowsOrderByDateAsc.length - 1; rowIdx >= 0; rowIdx--) {
+                const row = rowsOrderByDateAsc[rowIdx];
+                const categoryID = Number(row[columnNoCategoryIndex]);
+                const budgetYearMonth = this.parseGvizDate(row[columnNoTargetYearMonth]);
+                const budgetAmount = Number(row[columnNoBudgetAmount]);
+                const budgetYear = budgetYearMonth.getFullYear();
+                const budgetMonth = budgetYearMonth.getMonth() + 1;
+
+                if (!setSelectCategoryIDs.has(categoryID)) {
+                    // 対象外の分類IDは無視する
+                    continue;
+                }
+
+                if (budgetYear > targetYear || (budgetYear === targetYear && budgetMonth > targetMonth)) {
+                    // 未来の予算は無視する
+                    continue;
+                }
+
+                if (categoryIDtoBudgetAmount.has(categoryID)) {
+                    // 既に設定されている場合は無視する
+                    continue;
+                }
+
+                // 対象年月が最も近いものを採用する
+                categoryIDtoBudgetAmount.set(categoryID, budgetAmount);
+
+                if (categoryIDtoBudgetAmount.size === setSelectCategoryIDs.size) {
+                    // 全ての分類IDが設定された場合は終了する
+                    break;
+                }
+            }
+
+            return categoryIDtoBudgetAmount;
+        }
 
         const carrySummeryHeaderColIndex = await this.fetchTableHeaderColumnIndex(CarryOverSummaryFormat.title);
 
@@ -495,7 +550,7 @@ export class GoogleSheetOperator implements SheetOperator {
             throw new Error("決済テーブルに決済日列が存在しません");
         }
 
-        const paymentTableInPeriodOrderByDateAsc = await selectTableInPeriodOrderByDateAsc(
+        const paymentTableInPeriodOrderByDateAsc = await this.selectTableInPeriodOrderByDateAsc(
             PaymentTableFormat.title,
             `${this.columnNoToAlphabet(columnNoPaymentDate)}`,
             startPeriodPaymentYear,
@@ -508,7 +563,7 @@ export class GoogleSheetOperator implements SheetOperator {
         console.log("latestSummeryCategoryIDtoCarryOver", latestSummeryCategoryIDtoCarryOver);
         console.log("paymentTableInPeriodOrderByDateAsc", paymentTableInPeriodOrderByDateAsc);
 
-        const categoryIDtoUsedAmount = await computeUsedAmount(paymentHeaderColIndex, paymentTableInPeriodOrderByDateAsc);
+        const categoryIDtoUsedAmount = calcUsedAmount(paymentHeaderColIndex, paymentTableInPeriodOrderByDateAsc);
         console.log("categoryIDtoUsedAmount", categoryIDtoUsedAmount);
 
         const budgetHeaderColIndex = await this.fetchTableHeaderColumnIndex(BudgetMasterFormat.title);
@@ -518,7 +573,7 @@ export class GoogleSheetOperator implements SheetOperator {
             throw new Error("予算マスタに予算対象年月列が存在しません");
         }
 
-        const budgetTableInPeriodOrderByDateAsc = await selectTableInPeriodOrderByDateAsc(
+        const budgetTableInPeriodOrderByDateAsc = await this.selectTableInPeriodOrderByDateAsc(
             BudgetMasterFormat.title,
             `${this.columnNoToAlphabet(columnNoBudgetTargetYearMonth)}`,
             undefined,
@@ -528,6 +583,9 @@ export class GoogleSheetOperator implements SheetOperator {
         );
 
         console.log("budgetTableInPeriodOrderByDateAsc", budgetTableInPeriodOrderByDateAsc);
+
+        const categoryIDtoBudgetAmount = calcCategoryIDtoBudgetAmount(budgetHeaderColIndex, budgetTableInPeriodOrderByDateAsc, budgetDisplayCategories);
+        console.log("categoryIDtoBudgetAmount", categoryIDtoBudgetAmount);
 
         return Promise.resolve([
             { title: "テスト食費", budgetAmount: 50000, carryOverAmount: 10000, usedAmount: 60000 },
