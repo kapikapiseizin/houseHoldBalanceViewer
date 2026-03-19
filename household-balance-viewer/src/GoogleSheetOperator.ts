@@ -295,8 +295,6 @@ export class GoogleSheetOperator implements SheetOperator {
 
             const rows = await this.getRowsByQueryResponse(res);
 
-            console.log("fetchLatestCarryOverSummery rows", rows);
-
             const categoryIDToCarryOverAmount = new Map<number, { measurementYear: number, measurementMonth: number, carryOverAmount: number }>();
             for (const row of rows) {
                 const measureDate = this.parseGvizDate(row[columnNoMeasurementYearMonth - 1]);
@@ -424,8 +422,6 @@ export class GoogleSheetOperator implements SheetOperator {
             targetYear,
             targetMonth - 1 // get last month
         );
-
-        console.log("latestSummeryCategoryIDtoCarryOver", latestSummeryCategoryIDtoCarryOver);
 
         // TODO:used memo payment table
         const categoryIDtoUsedAmount = await computeUsedAmount();
