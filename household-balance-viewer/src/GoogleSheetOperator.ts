@@ -595,8 +595,8 @@ export class GoogleSheetOperator implements SheetOperator {
         const budgetTableInPeriodOrderByDateAsc = await this.selectTableInPeriodOrderByDateAsc(
             BudgetMasterFormat.title,
             `${this.columnNoToAlphabet(columnNoBudgetTargetYearMonth)}`,
-            undefined,
-            undefined,
+            startPeriodPaymentYear,
+            startPeriodPaymentMonth,
             targetYear,
             targetMonth
         );
