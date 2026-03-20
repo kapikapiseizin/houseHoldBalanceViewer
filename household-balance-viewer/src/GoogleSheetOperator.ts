@@ -1,5 +1,5 @@
 import type { Category, PaymentRequest, BalanceResponse, SheetOperator } from "./SheetOperator";
-import { CategoryMasterFormat, PaymentTableFormat, BudgetDisplayCategoryMasterFormat, BudgetMasterFormat, CarryOverSummaryFormat } from "./SheetFormat";
+import { CategoryMasterFormat, PaymentTableFormat, BudgetDisplayCategoryMasterFormat, BudgetMasterFormat } from "./SheetFormat";
 
 export class GoogleSheetOperator implements SheetOperator {
 
@@ -358,253 +358,23 @@ export class GoogleSheetOperator implements SheetOperator {
             return rows.map(r => r.categoryID);
         }
 
-        const fetchLatestCarryOverSummery = async (
-            headerColIndex: Record<string, number>,
-            targetYear: number,
-            targetMonth: number
-        ) => {
-            const tableName = CarryOverSummaryFormat.title;
-            const columnNoCategoryID = headerColIndex[CarryOverSummaryFormat.headerCategoryID] + 1;
-            const columnNoMeasurementYearMonth = headerColIndex[CarryOverSummaryFormat.headerMeasurementYearMonth] + 1;
-            const columnNoCarryOverAmount = headerColIndex[CarryOverSummaryFormat.headerCarryOverAmount] + 1;
-
-            if (
-                columnNoCategoryID === undefined ||
-                columnNoMeasurementYearMonth === undefined ||
-                columnNoCarryOverAmount === undefined
-            ) {
-                throw new Error("必要なヘッダが存在しません");
-            }
-
-
-            const query = `
-                SELECT *
-                WHERE ${this.sqlWhereMaxYearMonth(this.columnNoToAlphabet(columnNoMeasurementYearMonth), targetYear, targetMonth)}
-                ORDER BY ${this.columnNoToAlphabet(columnNoMeasurementYearMonth)} DESC
-            `;
-
-            const res = await this.fetchSheetQuery(tableName, query);
-
-            const rows = await this.getRowsByQueryResponse(res);
-
-            const categoryIDToCarryOverAmount = new Map<number, { measurementYearMonth: Date, carryOverAmount: number }>();
-            for (const row of rows) {
-                const measurementYearMonth = this.parseGvizDate(row[columnNoMeasurementYearMonth - 1]);
-                const categoryID = Number(row[columnNoCategoryID - 1]);
-                const carryOverAmount = Number(row[columnNoCarryOverAmount - 1]);
-
-                if (categoryIDToCarryOverAmount.has(categoryID)) {
-                    continue;
-                }
-
-                categoryIDToCarryOverAmount.set(categoryID, { measurementYearMonth, carryOverAmount });
-            }
-
-            return categoryIDToCarryOverAmount;
-        }
-
-
-
-        const calcUsedAmount = (
-            headerColIndex: Record<string, number>,
-            rowsOrderByDateAsc: string[][]
-        ) => {
-            const columnNoPaymentDate = headerColIndex[PaymentTableFormat.headerPaymentDate] + 1;
-            const columnNoCategoryID = headerColIndex[PaymentTableFormat.headerCategoryID] + 1;
-            const columnNoAmount = headerColIndex[PaymentTableFormat.headerAmount] + 1;
-
-            if (
-                columnNoPaymentDate === undefined ||
-                columnNoCategoryID === undefined ||
-                columnNoAmount === undefined
-            ) {
-                throw new Error("必要なヘッダが存在しません");
-            }
-
-            const categoryIDtoUsedAmount = new Map<number, number>();
-            for (let rowIdx = rowsOrderByDateAsc.length - 1; rowIdx >= 0; rowIdx--) {
-                const row = rowsOrderByDateAsc[rowIdx];
-                const categoryID = Number(row[columnNoCategoryID - 1]);
-                const paymentAmount = Number(row[columnNoAmount - 1]);
-                const paymentDate = this.parseGvizDate(row[columnNoPaymentDate - 1]);
-                const paymentYear = paymentDate.getFullYear();
-                const paymentMonth = paymentDate.getMonth() + 1;
-
-                if (paymentYear < targetYear || (paymentYear === targetYear && paymentMonth < targetMonth)) {
-                    break;
-                }
-
-                if (paymentYear != targetYear || paymentMonth != targetMonth) {
-                    continue;
-                }
-
-                const sumAmount = categoryIDtoUsedAmount.get(categoryID);
-                if (sumAmount !== undefined) {
-                    categoryIDtoUsedAmount.set(categoryID, sumAmount + paymentAmount);
-                } else {
-                    categoryIDtoUsedAmount.set(categoryID, paymentAmount);
-                }
-            }
-
-            return categoryIDtoUsedAmount;
-        }
-
-        const calcCategoryIDtoBudgetAmount = (
-            headerColIndex: Record<string, number>,
-            rowsOrderByDateAsc: string[][],
-        ) => {
-            const columnNoCategoryIndex = headerColIndex[BudgetMasterFormat.headerCategoryID];
-            const columnNoTargetYearMonth = headerColIndex[BudgetMasterFormat.headerTargetYearMonth];
-            const columnNoBudgetAmount = headerColIndex[BudgetMasterFormat.headerBudgetAmount];
-
-            if (
-                columnNoCategoryIndex === undefined ||
-                columnNoTargetYearMonth === undefined ||
-                columnNoBudgetAmount === undefined
-            ) {
-                throw new Error("必要なヘッダが存在しません");
-            }
-
-            const categoryIDtoBudgetAmount = new Map<number, number>();
-            for (let rowIdx = rowsOrderByDateAsc.length - 1; rowIdx >= 0; rowIdx--) {
-                const row = rowsOrderByDateAsc[rowIdx];
-                const categoryID = Number(row[columnNoCategoryIndex]);
-                const budgetYearMonth = this.parseGvizDate(row[columnNoTargetYearMonth]);
-                const budgetAmount = Number(row[columnNoBudgetAmount]);
-                const budgetYear = budgetYearMonth.getFullYear();
-                const budgetMonth = budgetYearMonth.getMonth() + 1;
-
-                if (budgetYear > targetYear || (budgetYear === targetYear && budgetMonth > targetMonth)) {
-                    // 未来の予算は無視する
-                    continue;
-                }
-
-                if (budgetYear < targetYear || (budgetYear === targetYear && budgetMonth < targetMonth)) {
-                    // 過去の予算なら読込終了
-                    break;
-                }
-
-                // 対象年月が同じものを採用する
-                categoryIDtoBudgetAmount.set(categoryID, budgetAmount);
-            }
-
-            return categoryIDtoBudgetAmount;
-        }
-
-        const computeCarryOverAmount = async (
-            latestSummeryCategoryIDtoCarryOver: Map<number, { measurementYearMonth: Date, carryOverAmount: number }>,
-            paymentHeaderColIndex: Record<string, number>,
-            paymentTableInPeriodOrderByDateAsc: string[][],
-            budgetHeaderColIndex: Record<string, number>,
-            budgetTableInPeriodOrderByDateAsc: string[][]
-        ) => {
-            // 回答用のmapにサマリが対象昨月ならもう仕舞う
-            // サマリの日付が対象昨月でない分類IDの未処理setを作成
-            // categoryIDtoSumAmountを作成
-            // forで決済テーブルを読む
-            // サマリの翌月以上対象年月昨月以下の決済を集計
-            // サマリに存在しないなら対象年月昨月以下の決済を集計する
-            // categoryIDtoSumBudgetAmountを作成
-            // forで予算テーブルを読む
-            // サマリの翌月以上対象年月昨月以下の予算を集計
-            // サマリに存在しないなら対象年月昨月以下の予算を集計する
-            // 未処理分類IDsetを回す
-            // 確定した繰り越し金額を回答用mapにセット
-            // 表に登録する
-            // 回答用mapを返す
-        }
-
-        const carrySummeryHeaderColIndex = await this.fetchTableHeaderColumnIndex(CarryOverSummaryFormat.title);
-
         const budgetDisplayCategories = await fetchBudgetDisplayCategories();
         console.log("budgetDisplayCategories", budgetDisplayCategories);
 
         const { year: lastMonthTargetYear, month: lastMonthTargetMonth } = this.addYearMonth(targetYear, targetMonth, 0, -1);
 
-        const latestSummeryCategoryIDtoCarryOver = await fetchLatestCarryOverSummery(
-            carrySummeryHeaderColIndex,
-            lastMonthTargetYear,
-            lastMonthTargetMonth
-        );
+        console.log("lastMonthTargetYear", lastMonthTargetYear);
+        console.log("lastMonthTargetMonth", lastMonthTargetMonth);
 
-        let minSummeryYear: number | undefined = undefined;
-        let minSummeryMonth: number | undefined = undefined;
-        let startPeriodPaymentYear: number | undefined = undefined;
-        let startPeriodPaymentMonth: number | undefined = undefined;
-        if (latestSummeryCategoryIDtoCarryOver.size > 0) {
-            const minYearMonth = Array.from(latestSummeryCategoryIDtoCarryOver.values())
-                .reduce((prev, curr) => {
-                    if (prev.measurementYearMonth < curr.measurementYearMonth) {
-                        return prev;
-                    }
-                    return curr;
-                });
-            minSummeryYear = minYearMonth.measurementYearMonth.getFullYear();
-            minSummeryMonth = minYearMonth.measurementYearMonth.getMonth() + 1;
+        const categories = await this.fetchCategories();
+        const categoryIDtoName = new Map<number, string>();
+        for (const category of categories) {
+            categoryIDtoName.set(category.categoryID, category.name);
         }
 
-
-        if (minSummeryYear !== undefined && minSummeryMonth !== undefined) {
-            ({ year: startPeriodPaymentYear, month: startPeriodPaymentMonth } = this.addYearMonth(minSummeryYear, minSummeryMonth, 0, 1));
-        }
-
-        for (const categoryID of budgetDisplayCategories) {
-            if (!latestSummeryCategoryIDtoCarryOver.has(categoryID)) {
-                startPeriodPaymentYear = undefined;
-                startPeriodPaymentMonth = undefined;
-                break;
-            }
-        }
-
-        console.log("minSummeryYear", minSummeryYear);
-        console.log("minSummeryMonth", minSummeryMonth);
-        console.log("startPeriodPaymentYear", startPeriodPaymentYear);
-        console.log("startPeriodPaymentMonth", startPeriodPaymentMonth);
+        console.log("categoryIDtoName", categoryIDtoName);
 
         const paymentHeaderColIndex = await this.fetchTableHeaderColumnIndex(PaymentTableFormat.title);
-
-        const columnNoPaymentDate = paymentHeaderColIndex[PaymentTableFormat.headerPaymentDate] + 1;
-
-        if (columnNoPaymentDate === undefined) {
-            throw new Error("決済テーブルに決済日列が存在しません");
-        }
-
-        const paymentTableInPeriodOrderByDateAsc = await this.selectTableInPeriodOrderByDateAsc(
-            PaymentTableFormat.title,
-            `${this.columnNoToAlphabet(columnNoPaymentDate)}`,
-            startPeriodPaymentYear,
-            startPeriodPaymentMonth,
-            targetYear,
-            targetMonth
-        );
-
-        console.log("budgetDisplayCategories", budgetDisplayCategories);
-        console.log("latestSummeryCategoryIDtoCarryOver", latestSummeryCategoryIDtoCarryOver);
-        console.log("paymentTableInPeriodOrderByDateAsc", paymentTableInPeriodOrderByDateAsc);
-
-        const categoryIDtoUsedAmount = calcUsedAmount(paymentHeaderColIndex, paymentTableInPeriodOrderByDateAsc);
-        console.log("categoryIDtoUsedAmount", categoryIDtoUsedAmount);
-
-        const budgetHeaderColIndex = await this.fetchTableHeaderColumnIndex(BudgetMasterFormat.title);
-
-        const columnNoBudgetTargetYearMonth = budgetHeaderColIndex[BudgetMasterFormat.headerTargetYearMonth] + 1;
-        if (columnNoBudgetTargetYearMonth === undefined) {
-            throw new Error("予算マスタに予算対象年月列が存在しません");
-        }
-
-        const budgetTableInPeriodOrderByDateAsc = await this.selectTableInPeriodOrderByDateAsc(
-            BudgetMasterFormat.title,
-            `${this.columnNoToAlphabet(columnNoBudgetTargetYearMonth)}`,
-            startPeriodPaymentYear,
-            startPeriodPaymentMonth,
-            targetYear,
-            targetMonth
-        );
-
-        console.log("budgetTableInPeriodOrderByDateAsc", budgetTableInPeriodOrderByDateAsc);
-
-        const categoryIDtoBudgetAmount = calcCategoryIDtoBudgetAmount(budgetHeaderColIndex, budgetTableInPeriodOrderByDateAsc);
-        console.log("categoryIDtoBudgetAmount", categoryIDtoBudgetAmount);
 
         return Promise.resolve([
             { title: "テスト食費", budgetAmount: 50000, carryOverAmount: 10000, usedAmount: 60000 },

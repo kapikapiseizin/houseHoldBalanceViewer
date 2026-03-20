@@ -31,13 +31,6 @@ export class PaymentTableFormat {
     static readonly title = "決済テーブル";
 }
 
-export class CarryOverSummaryFormat {
-    static readonly headerCategoryID = headerCategoryID;
-    static readonly headerMeasurementYearMonth = "計測年月";
-    static readonly headerCarryOverAmount = "繰越金額";
-    static readonly title = "繰越サマリ";
-}
-
 export class BudgetDisplayCategoryMasterFormat {
     static readonly headerCategoryID = headerCategoryID;
     static readonly headerDisplayOrder = "昇順上位表示優先度";
@@ -57,10 +50,6 @@ export const SHEET_FORMAT: SheetFormat = {
         {
             title: PaymentTableFormat.title,
             headers: [PaymentTableFormat.headerPaymentID, PaymentTableFormat.headerPaymentDate, PaymentTableFormat.headerTitle, PaymentTableFormat.headerCategoryID, PaymentTableFormat.headerAmount]
-        },
-        {
-            title: CarryOverSummaryFormat.title,
-            headers: [CarryOverSummaryFormat.headerCategoryID, CarryOverSummaryFormat.headerMeasurementYearMonth, CarryOverSummaryFormat.headerCarryOverAmount]
         },
         {
             title: BudgetDisplayCategoryMasterFormat.title,
