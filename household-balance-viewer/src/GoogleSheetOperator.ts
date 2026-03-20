@@ -164,6 +164,45 @@ export class GoogleSheetOperator implements SheetOperator {
         )`;
     }
 
+    async fetchIDtoSumInPeriod(
+        tableName: string,
+        idColumn: string,
+        dateColumn: string,
+        amountColumn: string,
+        startYear: number | undefined = undefined,
+        startMonth: number | undefined = undefined,
+        endYear: number,
+        endMonth: number
+    ): Promise<Map<number, number>> {
+        const wherePeriod = startYear === undefined || startMonth === undefined ?
+            `${this.sqlWhereMaxYearMonth(dateColumn, endYear, endMonth)}`
+            : `(
+                    ${this.sqlWhereMinYearMonth(dateColumn, startYear, startMonth)}
+                    AND
+                    ${this.sqlWhereMaxYearMonth(dateColumn, endYear, endMonth)}
+                ) `;
+
+        const query = `
+                SELECT ${idColumn}, SUM(${amountColumn})
+                WHERE ${wherePeriod}
+                GROUP BY ${idColumn}
+            `;
+
+        const res = await this.fetchSheetQuery(tableName, query);
+
+        const rows = await this.getRowsByQueryResponse(res);
+
+        const idToSumMap: Map<number, number> = new Map();
+
+        rows.forEach((row) => {
+            const id = Number(row[0]);
+            const amount = Number(row[1]);
+            idToSumMap.set(id, amount);
+        });
+
+        return idToSumMap;
+    }
+
     async selectTableInPeriodOrderByDateAsc(
         tableName: string,
         dateColumn: string,
@@ -375,6 +414,44 @@ export class GoogleSheetOperator implements SheetOperator {
         console.log("categoryIDtoName", categoryIDtoName);
 
         const paymentHeaderColIndex = await this.fetchTableHeaderColumnIndex(PaymentTableFormat.title);
+
+        const paymentColNoHeaderCategoryID = paymentHeaderColIndex[PaymentTableFormat.headerCategoryID] + 1;
+        const paymentColNoHeaderPaymentDate = paymentHeaderColIndex[PaymentTableFormat.headerPaymentDate] + 1;
+        const paymentColNoHeaderAmount = paymentHeaderColIndex[PaymentTableFormat.headerAmount] + 1;
+
+        if (paymentColNoHeaderCategoryID === undefined ||
+            paymentColNoHeaderPaymentDate === undefined ||
+            paymentColNoHeaderAmount === undefined) {
+            throw new Error("必要なヘッダが存在しません");
+        }
+
+        const targetCategoryIDtoUsedAmount = await this.fetchIDtoSumInPeriod(
+            PaymentTableFormat.title,
+            this.columnNoToAlphabet(paymentColNoHeaderCategoryID),
+            this.columnNoToAlphabet(paymentColNoHeaderPaymentDate),
+            this.columnNoToAlphabet(paymentColNoHeaderAmount),
+            targetYear,
+            targetMonth,
+            targetYear,
+            targetMonth
+        );
+
+        console.log("targetCategoryIDtoUsedAmount", targetCategoryIDtoUsedAmount);
+
+        const lastCategoryIDtoUsedAmount = await this.fetchIDtoSumInPeriod(
+            PaymentTableFormat.title,
+            this.columnNoToAlphabet(paymentColNoHeaderCategoryID),
+            this.columnNoToAlphabet(paymentColNoHeaderPaymentDate),
+            this.columnNoToAlphabet(paymentColNoHeaderAmount),
+            undefined,
+            undefined,
+            lastMonthTargetYear,
+            lastMonthTargetMonth
+        );
+
+        console.log("lastCategoryIDtoUsedAmount", lastCategoryIDtoUsedAmount);
+
+
 
         return Promise.resolve([
             { title: "テスト食費", budgetAmount: 50000, carryOverAmount: 10000, usedAmount: 60000 },
