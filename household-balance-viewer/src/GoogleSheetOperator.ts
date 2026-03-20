@@ -234,9 +234,6 @@ export class GoogleSheetOperator implements SheetOperator {
 
     async fetchSheetQuery(tableName: string, query: string, headerLineNo: number = 1): Promise<Response> {
         const encodedQuery = encodeURIComponent(query);
-
-        console.log("query", query);
-
         const url = `https://docs.google.com/spreadsheets/d/${this.spreadSheetID}/gviz/tq?sheet=${encodeURIComponent(tableName)}&headers=${headerLineNo}&tq=${encodedQuery}`;
 
         // 取得
@@ -398,20 +395,14 @@ export class GoogleSheetOperator implements SheetOperator {
         }
 
         const budgetDisplayCategories = await fetchBudgetDisplayCategories();
-        console.log("budgetDisplayCategories", budgetDisplayCategories);
 
         const { year: lastMonthTargetYear, month: lastMonthTargetMonth } = this.addYearMonth(targetYear, targetMonth, 0, -1);
-
-        console.log("lastMonthTargetYear", lastMonthTargetYear);
-        console.log("lastMonthTargetMonth", lastMonthTargetMonth);
 
         const categories = await this.fetchCategories();
         const categoryIDtoName = new Map<number, string>();
         for (const category of categories) {
             categoryIDtoName.set(category.categoryID, category.name);
         }
-
-        console.log("categoryIDtoName", categoryIDtoName);
 
         const paymentHeaderColIndex = await this.fetchTableHeaderColumnIndex(PaymentTableFormat.title);
 
@@ -436,8 +427,6 @@ export class GoogleSheetOperator implements SheetOperator {
             targetMonth
         );
 
-        console.log("targetCategoryIDtoUsedAmount", targetCategoryIDtoUsedAmount);
-
         const lastCategoryIDtoUsedAmount = await this.fetchIDtoSumInPeriod(
             PaymentTableFormat.title,
             this.columnNoToAlphabet(paymentColNoHeaderCategoryID),
@@ -448,8 +437,6 @@ export class GoogleSheetOperator implements SheetOperator {
             lastMonthTargetYear,
             lastMonthTargetMonth
         );
-
-        console.log("lastCategoryIDtoUsedAmount", lastCategoryIDtoUsedAmount);
 
         const budgetMasterHeaderColIndex = await this.fetchTableHeaderColumnIndex(BudgetMasterFormat.title);
 
@@ -474,8 +461,6 @@ export class GoogleSheetOperator implements SheetOperator {
             targetMonth
         );
 
-        console.log("targetCategoryIDtoBudgetAmount", targetCategoryIDtoBudgetAmount);
-
         const lastCategoryIDtoBudgetAmount = await this.fetchIDtoSumInPeriod(
             BudgetMasterFormat.title,
             this.columnNoToAlphabet(budgetColNoHeaderCategoryID),
@@ -486,8 +471,6 @@ export class GoogleSheetOperator implements SheetOperator {
             lastMonthTargetYear,
             lastMonthTargetMonth
         );
-
-        console.log("lastCategoryIDtoBudgetAmount", lastCategoryIDtoBudgetAmount);
 
         const balanceResponses: BalanceResponse[] = [];
         for (const categoryID of budgetDisplayCategories) {
