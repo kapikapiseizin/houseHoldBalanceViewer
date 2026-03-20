@@ -451,7 +451,43 @@ export class GoogleSheetOperator implements SheetOperator {
 
         console.log("lastCategoryIDtoUsedAmount", lastCategoryIDtoUsedAmount);
 
+        const budgetMasterHeaderColIndex = await this.fetchTableHeaderColumnIndex(BudgetMasterFormat.title);
 
+        const budgetColNoHeaderCategoryID = budgetMasterHeaderColIndex[BudgetMasterFormat.headerCategoryID] + 1;
+        const budgetColNoHeaderTargetYearMonth = budgetMasterHeaderColIndex[BudgetMasterFormat.headerTargetYearMonth] + 1;
+        const budgetColNoHeaderBudgetAmount = budgetMasterHeaderColIndex[BudgetMasterFormat.headerBudgetAmount] + 1;
+
+        if (budgetColNoHeaderCategoryID === undefined ||
+            budgetColNoHeaderTargetYearMonth === undefined ||
+            budgetColNoHeaderBudgetAmount === undefined) {
+            throw new Error("必要なヘッダが存在しません");
+        }
+
+        const targetCategoryIDtoBudgetAmount = await this.fetchIDtoSumInPeriod(
+            BudgetMasterFormat.title,
+            this.columnNoToAlphabet(budgetColNoHeaderCategoryID),
+            this.columnNoToAlphabet(budgetColNoHeaderTargetYearMonth),
+            this.columnNoToAlphabet(budgetColNoHeaderBudgetAmount),
+            targetYear,
+            targetMonth,
+            targetYear,
+            targetMonth
+        );
+
+        console.log("targetCategoryIDtoBudgetAmount", targetCategoryIDtoBudgetAmount);
+
+        const lastCategoryIDtoBudgetAmount = await this.fetchIDtoSumInPeriod(
+            BudgetMasterFormat.title,
+            this.columnNoToAlphabet(budgetColNoHeaderCategoryID),
+            this.columnNoToAlphabet(budgetColNoHeaderTargetYearMonth),
+            this.columnNoToAlphabet(budgetColNoHeaderBudgetAmount),
+            undefined,
+            undefined,
+            lastMonthTargetYear,
+            lastMonthTargetMonth
+        );
+
+        console.log("lastCategoryIDtoBudgetAmount", lastCategoryIDtoBudgetAmount);
 
         return Promise.resolve([
             { title: "テスト食費", budgetAmount: 50000, carryOverAmount: 10000, usedAmount: 60000 },
