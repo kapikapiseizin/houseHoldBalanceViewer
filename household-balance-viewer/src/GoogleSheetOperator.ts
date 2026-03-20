@@ -517,6 +517,7 @@ export class GoogleSheetOperator implements SheetOperator {
         const carrySummeryHeaderColIndex = await this.fetchTableHeaderColumnIndex(CarryOverSummaryFormat.title);
 
         const budgetDisplayCategories = await fetchBudgetDisplayCategories();
+        console.log("budgetDisplayCategories", budgetDisplayCategories);
 
         const { year: lastMonthTargetYear, month: lastMonthTargetMonth } = this.addYearMonth(targetYear, targetMonth, 0, -1);
 
@@ -542,13 +543,21 @@ export class GoogleSheetOperator implements SheetOperator {
             minSummeryMonth = minYearMonth.measurementYearMonth.getMonth() + 1;
         }
 
-        console.log("minSummeryYear", minSummeryYear);
-        console.log("minSummeryMonth", minSummeryMonth);
 
         if (minSummeryYear !== undefined && minSummeryMonth !== undefined) {
             ({ year: startPeriodPaymentYear, month: startPeriodPaymentMonth } = this.addYearMonth(minSummeryYear, minSummeryMonth, 0, 1));
         }
 
+        for (const categoryID of budgetDisplayCategories) {
+            if (!latestSummeryCategoryIDtoCarryOver.has(categoryID)) {
+                startPeriodPaymentYear = undefined;
+                startPeriodPaymentMonth = undefined;
+                break;
+            }
+        }
+
+        console.log("minSummeryYear", minSummeryYear);
+        console.log("minSummeryMonth", minSummeryMonth);
         console.log("startPeriodPaymentYear", startPeriodPaymentYear);
         console.log("startPeriodPaymentMonth", startPeriodPaymentMonth);
 
