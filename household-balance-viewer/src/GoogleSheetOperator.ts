@@ -489,10 +489,19 @@ export class GoogleSheetOperator implements SheetOperator {
 
         console.log("lastCategoryIDtoBudgetAmount", lastCategoryIDtoBudgetAmount);
 
-        return Promise.resolve([
-            { title: "テスト食費", budgetAmount: 50000, carryOverAmount: 10000, usedAmount: 60000 },
-            { title: "テスト日用品", budgetAmount: 20000, carryOverAmount: 10000, usedAmount: 15000 },
-            { title: "テスト娯楽", budgetAmount: 10000, carryOverAmount: 0, usedAmount: 2000 }
-        ]);
+        const balanceResponses: BalanceResponse[] = [];
+        for (const categoryID of budgetDisplayCategories) {
+            const title = categoryIDtoName.get(categoryID) ?? "";
+            const budgetAmount = targetCategoryIDtoBudgetAmount.get(categoryID) ?? 0;
+            const usedAmount = targetCategoryIDtoUsedAmount.get(categoryID) ?? 0;
+
+            const lastBudgetAmount = lastCategoryIDtoBudgetAmount.get(categoryID) ?? 0;
+            const lastUsedAmount = lastCategoryIDtoUsedAmount.get(categoryID) ?? 0;
+            const carryOverAmount = Math.max(0, lastBudgetAmount - lastUsedAmount);
+
+            balanceResponses.push({ title, budgetAmount, carryOverAmount, usedAmount });
+        }
+
+        return Promise.resolve(balanceResponses);
     }
 }

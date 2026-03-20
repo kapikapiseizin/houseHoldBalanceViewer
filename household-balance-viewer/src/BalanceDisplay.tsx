@@ -7,7 +7,7 @@ type BalanceDisplayProps = {
 
 export default function BalanceDisplay({ title, budgetAmount, carryOverAmount, usedAmount }: BalanceDisplayProps) {
     const totalAmount = budgetAmount + carryOverAmount;
-    const remainingAmount = totalAmount - usedAmount;
+    const remainingAmount = Math.max(0, totalAmount - usedAmount);
 
     const usedPercent = totalAmount > 0 ? (usedAmount / totalAmount) * 100 : 0;
     const carryOverPercent = totalAmount > 0 ? (carryOverAmount / totalAmount) * 100 : 0;
