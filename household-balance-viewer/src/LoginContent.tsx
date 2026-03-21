@@ -148,7 +148,21 @@ export type LoginContentProps = {
 };
 
 export default function LoginContent({ sheetOperator, onLogout }: LoginContentProps) {
+  const now = new Date();
+  const nowYear = now.getFullYear();
+  const nowMonth = now.getMonth() + 1;
+
   const [page, setPage] = useState<"budget" | "input" | "menu">("budget");
+  const [isPropagateLoading, setIsPropagateLoading] = useState(false);
+
+  useEffect(() => {
+    setIsPropagateLoading(true);
+    sheetOperator.propagateLatestBudgetUntilTarget(nowYear, nowMonth).finally(() => setIsPropagateLoading(false));
+  }, [sheetOperator]);
+
+  if (isPropagateLoading) {
+    return <LoadingContent title="予算を更新中" />;
+  }
 
   return (
     <div className="app">

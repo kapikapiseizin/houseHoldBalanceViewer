@@ -24,4 +24,8 @@ export interface SheetOperator {
         targetYear: number,
         targetMonth: number
     ): Promise<BalanceResponse[]>;
+    propagateLatestBudgetUntilTarget(
+        targetYear: number,
+        targetMonth: number
+    ): Promise<void>;
 }

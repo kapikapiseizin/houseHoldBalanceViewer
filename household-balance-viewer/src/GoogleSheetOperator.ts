@@ -487,4 +487,10 @@ export class GoogleSheetOperator implements SheetOperator {
 
         return Promise.resolve(balanceResponses);
     }
+
+    async propagateLatestBudgetUntilTarget(
+        targetYear: number,
+        targetMonth: number
+    ): Promise<void> {
+    }
 }
