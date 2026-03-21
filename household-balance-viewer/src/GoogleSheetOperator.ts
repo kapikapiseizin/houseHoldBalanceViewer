@@ -492,5 +492,41 @@ export class GoogleSheetOperator implements SheetOperator {
         targetYear: number,
         targetMonth: number
     ): Promise<void> {
+        const budgetMasterHeaderColIndex = await this.fetchTableHeaderColumnIndex(BudgetMasterFormat.title);
+
+        const budgetColNoHeaderCategoryID = budgetMasterHeaderColIndex[BudgetMasterFormat.headerCategoryID] + 1;
+        const budgetColNoHeaderTargetYearMonth = budgetMasterHeaderColIndex[BudgetMasterFormat.headerTargetYearMonth] + 1;
+        const budgetColNoHeaderBudgetAmount = budgetMasterHeaderColIndex[BudgetMasterFormat.headerBudgetAmount] + 1;
+
+        if (budgetColNoHeaderCategoryID === undefined ||
+            budgetColNoHeaderTargetYearMonth === undefined ||
+            budgetColNoHeaderBudgetAmount === undefined) {
+            throw new Error("必要なヘッダが存在しません");
+        }
+
+        const rowsBudgetOrderByDateAsc = await this.selectTableInPeriodOrderByDateAsc(
+            BudgetMasterFormat.title,
+            this.columnNoToAlphabet(budgetColNoHeaderTargetYearMonth),
+            undefined,
+            undefined,
+            targetYear,
+            targetMonth
+        );
+
+        console.log("rowsBudgetOrderByDateAsc", rowsBudgetOrderByDateAsc);
+
+        const categoryIDtoLatestBudget = new Map<number, { year: number, month: number, budgetAmount: number }>();
+        for (const row of rowsBudgetOrderByDateAsc) {
+            const budgetCategoryID = Number(row[budgetColNoHeaderCategoryID - 1]);
+            const budgetAmount = Number(row[budgetColNoHeaderBudgetAmount - 1]);
+
+            const budgetDate = this.parseGvizDate(row[budgetColNoHeaderTargetYearMonth - 1]);
+            const budgetYear = budgetDate.getFullYear();
+            const budgetMonth = budgetDate.getMonth() + 1;
+
+            categoryIDtoLatestBudget.set(budgetCategoryID, { year: budgetYear, month: budgetMonth, budgetAmount });
+        }
+
+        console.log("categoryIDtoLatestBudget", categoryIDtoLatestBudget);
     }
 }
