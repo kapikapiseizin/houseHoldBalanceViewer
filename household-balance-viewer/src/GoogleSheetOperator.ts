@@ -271,6 +271,22 @@ export class GoogleSheetOperator implements SheetOperator {
         return rows;
     }
 
+    async requestAddRowsToTable(tableName: string, rows: string[][]): Promise<void> {
+        await fetch(
+            `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}/values/${encodeURIComponent(tableName)}!A1:append?valueInputOption=USER_ENTERED`,
+            {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${this.accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    values: rows
+                })
+            }
+        );
+    }
+
     async requestAddPayment(payment: PaymentRequest): Promise<void> {
         const sheetName = PaymentTableFormat.title;
 
@@ -312,20 +328,7 @@ export class GoogleSheetOperator implements SheetOperator {
         }
 
         // 5. 追記
-        await fetch(
-            `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}/values/${encodeURIComponent(sheetName)}!A1:append?valueInputOption=USER_ENTERED`,
-            {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${this.accessToken}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    values: [newRow]
-                })
-            }
-        );
-        return Promise.resolve();
+        await this.requestAddRowsToTable(sheetName, [newRow]);
     }
 
     async computeBalance(targetYear: number, targetMonth: number): Promise<BalanceResponse[]> {
@@ -528,5 +531,13 @@ export class GoogleSheetOperator implements SheetOperator {
         }
 
         console.log("categoryIDtoLatestBudget", categoryIDtoLatestBudget);
+
+        for (const [categoryID, latestBudget] of categoryIDtoLatestBudget.entries()) {
+            if (latestBudget.year === targetYear && latestBudget.month === targetMonth) {
+                continue;
+            }
+
+
+        }
     }
 }
