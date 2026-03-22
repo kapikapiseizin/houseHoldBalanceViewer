@@ -516,8 +516,6 @@ export class GoogleSheetOperator implements SheetOperator {
             targetMonth
         );
 
-        console.log("rowsBudgetOrderByDateAsc", rowsBudgetOrderByDateAsc);
-
         const categoryIDtoLatestBudget = new Map<number, { year: number, month: number, budgetAmount: number }>();
         for (const row of rowsBudgetOrderByDateAsc) {
             const budgetCategoryID = Number(row[budgetColNoHeaderCategoryID - 1]);
@@ -530,14 +528,35 @@ export class GoogleSheetOperator implements SheetOperator {
             categoryIDtoLatestBudget.set(budgetCategoryID, { year: budgetYear, month: budgetMonth, budgetAmount });
         }
 
-        console.log("categoryIDtoLatestBudget", categoryIDtoLatestBudget);
+        const rowsToAdd: string[][] = [];
 
         for (const [categoryID, latestBudget] of categoryIDtoLatestBudget.entries()) {
             if (latestBudget.year === targetYear && latestBudget.month === targetMonth) {
                 continue;
             }
 
+            const targetMonthCount = targetYear * 12 + targetMonth;
+            const latestMonthCount = latestBudget.year * 12 + latestBudget.month;
 
+            const diffMonthCount = targetMonthCount - latestMonthCount;
+
+            let currentYear = latestBudget.year;
+            let currentMonth = latestBudget.month;
+            for (let i = 0; i < diffMonthCount; i++) {
+                const { year: nextYear, month: nextMonth } = this.addYearMonth(currentYear, currentMonth, 0, 1);
+                currentYear = nextYear;
+                currentMonth = nextMonth;
+
+                const row = new Array(3);
+                row[budgetColNoHeaderCategoryID - 1] = categoryID;
+                row[budgetColNoHeaderTargetYearMonth - 1] = `${String(currentYear)}-${String(currentMonth).padStart(2, "0")}`;
+                row[budgetColNoHeaderBudgetAmount - 1] = latestBudget.budgetAmount;
+                rowsToAdd.push(row);
+            }
+        }
+
+        if (rowsToAdd.length > 0) {
+            await this.requestAddRowsToTable(BudgetMasterFormat.title, rowsToAdd);
         }
     }
 }
