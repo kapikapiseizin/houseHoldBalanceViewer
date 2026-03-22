@@ -3,7 +3,7 @@ import "./App.css";
 
 import AccessAccount, { type LoginInfo } from "./AccessAccount";
 import AccessSheet from "./AccessSheet";
-import LoginContent from "./LoginContent";
+import LoginContent from "./login_content/LoginContent";
 import { GoogleSheetOperator } from "./GoogleSheetOperator";
 
 export default function App() {
