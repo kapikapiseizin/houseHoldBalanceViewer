@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import ListDropdownInput from './ListDropdownInput';
-import TextInput from './TextInput';
+import ListDropdownInput from './ui/ListDropdownInput';
+import TextInput from './ui/TextInput';
 import { SHEET_FORMAT } from './SheetFormat';
-import LoadingContent from './LoadingContent';
+import LoadingContent from './ui/LoadingContent';
 
 async function createTable(accessToken: string, spreadsheetId: string, tableFormat: { title: string; headers: string[] }) {
   // Create sheet

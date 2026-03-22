@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import DateInput from "./DateInput";
-import TextInput from "./TextInput";
-import ListDropdownInput from "./ListDropdownInput";
-import MoneyInput from "./MoneyInput";
-import BalanceDisplay from "./BalanceDisplay";
+import DateInput from "./ui/DateInput";
+import TextInput from "./ui/TextInput";
+import ListDropdownInput from "./ui/ListDropdownInput";
+import MoneyInput from "./ui/MoneyInput";
+import BalanceDisplay from "./ui/BalanceDisplay";
 import type { SheetOperator, Category, BalanceResponse } from "./SheetOperator";
-import LoadingContent from "./LoadingContent";
+import LoadingContent from "./ui/LoadingContent";
 
 type BudgetPageProps = {
   sheetOperator: SheetOperator;
