@@ -11,7 +11,7 @@ export default function App() {
   const LAST_LOGIN_EMAIL_KEY = "lastLoginEmail";
   const LAST_SPREADSHEET_ID_KEY = "lastSpreadsheetId";
 
-  const [phase, setPhase] = useState<"loginRequired" | "sheetRequired" | "ready" | "initialDataWizard">("loginRequired");
+  const [phase, setPhase] = useState<"loginRequired" | "sheetRequired" | "ready" | "initialDataWizard">("initialDataWizard");
 
   const [access_token, setAccessToken] = useState<string>("");
   const [spreadsheetId, setSpreadsheetId] = useState<string>("");
