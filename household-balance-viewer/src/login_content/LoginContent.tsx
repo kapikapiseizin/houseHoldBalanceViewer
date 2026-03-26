@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "../App.css";
 import DateInput from "../ui/DateInput";
-import TextInput from "../ui/TextInput";
+import TitledTextInput from "../ui/TitledTextInput";
 import ListDropdownInput from "../ui/ListDropdownInput";
 import MoneyInput from "../ui/MoneyInput";
 import BalanceDisplay from "../ui/BalanceDisplay";
@@ -109,7 +109,7 @@ function InputPage({ sheetOperator }: InputPageProps) {
   return (
     <div>
       <DateInput title="入力日" date={inputDate} onChange={(e) => setInputDate(e.target.value)} />
-      <TextInput
+      <TitledTextInput
         title="タイトル"
         value={title}
         onChange={handleTitleChange}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import ListDropdownInput from './ui/ListDropdownInput';
-import TextInput from './ui/TextInput';
+import TitledTextInput from './ui/TitledTextInput';
 import { SHEET_FORMAT } from './SheetFormat';
 import LoadingContent from './ui/LoadingContent';
 
@@ -278,7 +278,7 @@ function CreateSheet({ accessToken, onCreate, onBack }: CreateSheetProps) {
 
   return (
     <div>
-      <TextInput
+      <TitledTextInput
         title="シート名を入力"
         value={sheetName}
         onChange={(e) => setSheetName(e.target.value)}

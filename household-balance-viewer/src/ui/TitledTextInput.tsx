@@ -1,10 +1,10 @@
-type TextInputProps = {
+type TitledTextInputProps = {
     title: string;
     value: string;
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
-export default function TextInput({ title, value, onChange }: TextInputProps) {
+export default function TitledTextInput({ title, value, onChange }: TitledTextInputProps) {
     return (
         <div>
             <div>{title}</div>
