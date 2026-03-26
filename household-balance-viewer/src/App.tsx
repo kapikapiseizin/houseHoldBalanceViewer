@@ -5,12 +5,13 @@ import AccessAccount, { type LoginInfo } from "./AccessAccount";
 import AccessSheet from "./AccessSheet";
 import LoginContent from "./login_content/LoginContent";
 import { GoogleSheetOperator } from "./GoogleSheetOperator";
+import InitialDataWizard from "./edit_table/InitialDataWizard";
 
 export default function App() {
   const LAST_LOGIN_EMAIL_KEY = "lastLoginEmail";
   const LAST_SPREADSHEET_ID_KEY = "lastSpreadsheetId";
 
-  const [phase, setPhase] = useState<"loginRequired" | "sheetRequired" | "ready">("loginRequired");
+  const [phase, setPhase] = useState<"loginRequired" | "sheetRequired" | "ready" | "initialDataWizard">("initialDataWizard");
 
   const [access_token, setAccessToken] = useState<string>("");
   const [spreadsheetId, setSpreadsheetId] = useState<string>("");
@@ -90,6 +91,7 @@ export default function App() {
     <>
       {phase === "loginRequired" && <AccessAccount onSuccess={handleLoginSuccess} loginHintEmail={tryLoadLastLoginEmail()} onNewLogin={storeLoginInfo} />}
       {phase === "sheetRequired" && <AccessSheet accessToken={access_token} onSuccess={handleSheetSuccess} onFailure={handleSheetFailure} onLogout={handleLogout} initializeSpreadSheetID={tryLoadLastSpreadsheetId()} />}
+      {phase === "initialDataWizard" && <InitialDataWizard onFinish={() => setPhase("ready")} />}
       {phase === "ready" && <LoginContent sheetOperator={new GoogleSheetOperator(access_token, spreadsheetId)} onLogout={handleLogout} />}
     </>
   );

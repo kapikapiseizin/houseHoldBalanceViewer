@@ -5,7 +5,7 @@ type ToggleTextInputProps = {
     onChange: (value: string) => void;
 };
 
-export const ToggleTextInput: React.FC<ToggleTextInputProps> = ({ value, onChange }) => {
+export default function ToggleTextInput({ value, onChange }: ToggleTextInputProps) {
     const [isEditing, setIsEditing] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
