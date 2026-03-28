@@ -1,10 +1,5 @@
 import React from "react";
-
-export type TextListItem = {
-    id: any;
-    text: string;
-};
-
+import type { TextListItem } from "./TextListItem";
 
 type UnorderedTextListProps = {
     value: TextListItem[];
