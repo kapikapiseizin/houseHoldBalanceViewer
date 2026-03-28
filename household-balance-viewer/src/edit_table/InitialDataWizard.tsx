@@ -4,6 +4,7 @@ import PlainTextItem from "../ui/PlainTextItem";
 import UnorderedTextList from "../ui/UnorderedTextList";
 import OrderedTextList from "../ui/OrderedTextList";
 import AnyTextAdd from "../ui/AnyTextAdd";
+import ListedTextAdd from "../ui/ListedTextAdd";
 
 type InitialDataWizardProps = {
     onFinish: () => void;
@@ -16,6 +17,11 @@ export default function InitialDataWizard({ onFinish }: InitialDataWizardProps) 
         { id: "2", text: "test2" },
         { id: "3", text: "test3" },
     ]);
+    const [listedText, setListedText] = useState([
+        { id: "4", text: "addtest" },
+        { id: "5", text: "addtest2" },
+        { id: "6", text: "addtest3" },
+    ]);
 
     return (
         <div>
@@ -25,6 +31,12 @@ export default function InitialDataWizard({ onFinish }: InitialDataWizardProps) 
             <UnorderedTextList value={list} onRenderItem={(item) => <PlainTextItem data={item.text} />} onRequestDelete={(item) => { setList(list.filter((i) => i.id !== item.id)); }} />
             <OrderedTextList value={list} onRenderItem={(item) => <PlainTextItem data={item.text} />} onRequestDelete={(item) => { setList(list.filter((i) => i.id !== item.id)); }} onChangeOrder={(items) => { setList(items); }} />
             <AnyTextAdd onConfirm={(text) => { setList([...list, { id: crypto.randomUUID(), text }]); }} />
+            <ListedTextAdd
+                items={listedText}
+                onSelected={(item) => {
+                    setList([...list, { id: item.id, text: item.text }]);
+                    setListedText(listedText.filter((i) => i.id !== item.id));
+                }} />
         </div>
     );
 }
