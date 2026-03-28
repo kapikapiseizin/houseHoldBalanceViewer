@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import ToggleTextInput from "../ui/ToggleTextInput";
 import PlainTextItem from "../ui/PlainTextItem";
 import UnorderedTextList from "../ui/UnorderedTextList";
+import OrderedTextList from "../ui/OrderedTextList";
 
 type InitialDataWizardProps = {
     onFinish: () => void;
@@ -21,6 +22,7 @@ export default function InitialDataWizard({ onFinish }: InitialDataWizardProps) 
             <ToggleTextInput value={name} onChange={(value) => setName(value)} />
             <PlainTextItem data="Plain Text" />
             <UnorderedTextList value={list} onRenderItem={(item) => <PlainTextItem data={item.text} />} onRequestDelete={(item) => { setList(list.filter((i) => i.id !== item.id)); }} />
+            <OrderedTextList value={list} onRenderItem={(item) => <PlainTextItem data={item.text} />} onRequestDelete={(item) => { setList(list.filter((i) => i.id !== item.id)); }} onChangeOrder={(items) => { setList(items); }} />
         </div>
     );
 }
