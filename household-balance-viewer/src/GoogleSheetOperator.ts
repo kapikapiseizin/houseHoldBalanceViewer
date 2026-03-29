@@ -559,4 +559,22 @@ export class GoogleSheetOperator implements SheetOperator {
             await this.requestAddRowsToTable(BudgetMasterFormat.title, rowsToAdd);
         }
     }
+
+    async requestAddCategory(name: string): Promise<void> {
+        const categoryMasterHeaderColIndex = await this.fetchTableHeaderColumnIndex(CategoryMasterFormat.title);
+        const categoryIDColIndex = categoryMasterHeaderColIndex[CategoryMasterFormat.headerCategoryID];
+        const categoryNameColIndex = categoryMasterHeaderColIndex[CategoryMasterFormat.headerName];
+
+        if (categoryIDColIndex === undefined || categoryNameColIndex === undefined) {
+            throw new Error("必要なヘッダが存在しません");
+        }
+
+        const row = [];
+        row[categoryIDColIndex] = crypto.randomUUID();
+        row[categoryNameColIndex] = name;
+        await this.requestAddRowsToTable(CategoryMasterFormat.title, [row]);
+    }
+
+    async requestDeleteCategory(categoryID: string): Promise<void> {
+    }
 }

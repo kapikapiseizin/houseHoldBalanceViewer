@@ -19,6 +19,8 @@ export type BalanceResponse = {
 
 export interface SheetOperator {
     fetchCategories(): Promise<Category[]>;
+    requestAddCategory(name: string): Promise<void>;
+    requestDeleteCategory(categoryID: string): Promise<void>;
     requestAddPayment(payment: PaymentRequest): Promise<void>;
     computeBalance(
         targetYear: number,
