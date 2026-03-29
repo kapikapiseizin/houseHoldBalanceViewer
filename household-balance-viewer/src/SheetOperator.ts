@@ -1,12 +1,12 @@
 export type Category = {
-    categoryID: number;
+    categoryID: string;
     name: string;
 }
 
 export type PaymentRequest = {
     date: string;
     title: string;
-    categoryID: number;
+    categoryID: string;
     amount: number;
 }
 

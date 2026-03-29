@@ -9,7 +9,8 @@ type EditBudgetMasterProps = {
 export default function EditBudgetMaster({ onFinish }: EditBudgetMasterProps) {
     return (
         <div>
-            <h1>EditBudgetMaster</h1>
+            <h1>分類の編集</h1>
+
         </div>
     );
 }

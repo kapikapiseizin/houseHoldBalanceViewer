@@ -82,7 +82,7 @@ export class GoogleSheetOperator implements SheetOperator {
 
             if (categoryIDStr !== undefined && name !== undefined) {
                 categories.push({
-                    categoryID: Number(categoryIDStr),
+                    categoryID: categoryIDStr,
                     name: name
                 });
             }
@@ -173,7 +173,7 @@ export class GoogleSheetOperator implements SheetOperator {
         startMonth: number | undefined = undefined,
         endYear: number,
         endMonth: number
-    ): Promise<Map<number, number>> {
+    ): Promise<Map<string, number>> {
         const wherePeriod = startYear === undefined || startMonth === undefined ?
             `${this.sqlWhereMaxYearMonth(dateColumn, endYear, endMonth)}`
             : `(
@@ -192,10 +192,10 @@ export class GoogleSheetOperator implements SheetOperator {
 
         const rows = await this.getRowsByQueryResponse(res);
 
-        const idToSumMap: Map<number, number> = new Map();
+        const idToSumMap: Map<string, number> = new Map();
 
         rows.forEach((row) => {
-            const id = Number(row[0]);
+            const id = row[0];
             const amount = Number(row[1]);
             idToSumMap.set(id, amount);
         });
@@ -368,7 +368,7 @@ export class GoogleSheetOperator implements SheetOperator {
             }
 
             // 3. データ取得
-            const rows: { categoryID: number; displayOrder: number }[] = [];
+            const rows: { categoryID: string; displayOrder: number }[] = [];
 
             for (let i = 1; i < values.length; i++) {
                 const row = values[i];
@@ -379,10 +379,10 @@ export class GoogleSheetOperator implements SheetOperator {
                 // 空行スキップ
                 if (!rawCategoryID || !rawDisplayOrder) continue;
 
-                const categoryID = Number(rawCategoryID);
+                const categoryID = rawCategoryID;
                 const displayOrder = Number(rawDisplayOrder);
 
-                if (isNaN(categoryID) || isNaN(displayOrder)) continue;
+                if (isNaN(displayOrder)) continue;
 
                 rows.push({
                     categoryID,
@@ -402,7 +402,7 @@ export class GoogleSheetOperator implements SheetOperator {
         const { year: lastMonthTargetYear, month: lastMonthTargetMonth } = this.addYearMonth(targetYear, targetMonth, 0, -1);
 
         const categories = await this.fetchCategories();
-        const categoryIDtoName = new Map<number, string>();
+        const categoryIDtoName = new Map<string, string>();
         for (const category of categories) {
             categoryIDtoName.set(category.categoryID, category.name);
         }
