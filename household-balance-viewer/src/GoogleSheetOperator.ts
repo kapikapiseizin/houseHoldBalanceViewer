@@ -288,9 +288,6 @@ export class GoogleSheetOperator implements SheetOperator {
     }
 
     async requestAddPayment(payment: PaymentRequest): Promise<void> {
-        console.log("requestAddPayment");
-        console.log(payment);
-
         const sheetName = PaymentTableFormat.title;
 
         const colIndexMap = await this.fetchTableHeaderColumnIndex(sheetName);
@@ -329,8 +326,6 @@ export class GoogleSheetOperator implements SheetOperator {
                 newRow[i] = "";
             }
         }
-        console.log("categoryID" + payment.categoryID);
-        console.log(newRow);
 
         // 5. 追記
         await this.requestAddRowsToTable(sheetName, [newRow]);
