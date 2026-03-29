@@ -54,7 +54,7 @@ function InputPage({ sheetOperator }: InputPageProps) {
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
   const [inputDate, setInputDate] = useState(today);
-  const [categoryId, setCategoryId] = useState(0);
+  const [categoryId, setCategoryId] = useState("");
   const [isTitleManuallyEdited, setIsTitleManuallyEdited] = useState(false);
   const [manualTitle, setManualTitle] = useState("");
   const [amount, setAmount] = useState(0);
@@ -66,7 +66,7 @@ function InputPage({ sheetOperator }: InputPageProps) {
   const defaultTitle = selectedCategory ? selectedCategory.name : "";
   const title = isTitleManuallyEdited ? manualTitle : defaultTitle;
 
-  const handleCategoryChange = (id: number) => {
+  const handleCategoryChange = (id: string) => {
     console.log("handleCategoryChange", id);
     setCategoryId(id);
   };
@@ -92,9 +92,22 @@ function InputPage({ sheetOperator }: InputPageProps) {
     window.confirm("決済を登録しました");
   };
 
-  useEffect(() => {
+  const fetchCategories = async () => {
     setIsFetchLoading(true);
-    sheetOperator.fetchCategories().then(setDropdownItems).finally(() => setIsFetchLoading(false));
+    try {
+      const categories = await sheetOperator.fetchCategories();
+      setDropdownItems(categories);
+
+      if (categories.length > 0) {
+        setCategoryId(categories[0].categoryID);
+      }
+    } finally {
+      setIsFetchLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchCategories();
   }, [sheetOperator]);
 
   if (isFetchLoading) {
