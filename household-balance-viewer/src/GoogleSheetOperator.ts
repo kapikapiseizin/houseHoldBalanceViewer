@@ -92,6 +92,7 @@ export class GoogleSheetOperator implements SheetOperator {
     }
 
     columnNoToAlphabet = (colNo: number) => String.fromCharCode(64 + colNo);
+    readonly rowNoFunction = '=ROW()';
 
     parseGvizDate(dateStr: string): Date {
         // 文字列から数字（2026, 2, 1）だけを取り出す
@@ -297,13 +298,15 @@ export class GoogleSheetOperator implements SheetOperator {
         const idxTitle = colIndexMap[PaymentTableFormat.headerTitle];
         const idxCategory = colIndexMap[PaymentTableFormat.headerCategoryID];
         const idxAmount = colIndexMap[PaymentTableFormat.headerAmount];
+        const idxRowNo = colIndexMap[PaymentTableFormat.headerRowNo];
 
         if (
             idxID === undefined ||
             idxDate === undefined ||
             idxTitle === undefined ||
             idxCategory === undefined ||
-            idxAmount === undefined
+            idxAmount === undefined ||
+            idxRowNo === undefined
         ) {
             throw new Error("必要なヘッダが存在しません");
         }
@@ -318,6 +321,7 @@ export class GoogleSheetOperator implements SheetOperator {
         newRow[idxTitle] = payment.title;
         newRow[idxCategory] = payment.categoryID;
         newRow[idxAmount] = String(payment.amount);
+        newRow[idxRowNo] = this.rowNoFunction;
 
         // undefined埋め（列ズレ防止）
         const maxCol = Math.max(idxID, idxDate, idxTitle, idxCategory, idxAmount);
@@ -564,14 +568,18 @@ export class GoogleSheetOperator implements SheetOperator {
         const categoryMasterHeaderColIndex = await this.fetchTableHeaderColumnIndex(CategoryMasterFormat.title);
         const categoryIDColIndex = categoryMasterHeaderColIndex[CategoryMasterFormat.headerCategoryID];
         const categoryNameColIndex = categoryMasterHeaderColIndex[CategoryMasterFormat.headerName];
+        const categoryRowNoColIndex = categoryMasterHeaderColIndex[CategoryMasterFormat.headerRowNo];
 
-        if (categoryIDColIndex === undefined || categoryNameColIndex === undefined) {
+        if (categoryIDColIndex === undefined ||
+            categoryNameColIndex === undefined ||
+            categoryRowNoColIndex === undefined) {
             throw new Error("必要なヘッダが存在しません");
         }
 
         const row = [];
         row[categoryIDColIndex] = crypto.randomUUID();
         row[categoryNameColIndex] = name;
+        row[categoryRowNoColIndex] = this.rowNoFunction;
         await this.requestAddRowsToTable(CategoryMasterFormat.title, [row]);
     }
 
