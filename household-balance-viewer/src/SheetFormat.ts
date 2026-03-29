@@ -8,10 +8,12 @@ interface SheetFormat {
 }
 
 const headerCategoryID = "分類ID";
+const headerRowNo = "行番号";
 
 export class CategoryMasterFormat {
     static readonly headerCategoryID = headerCategoryID;
     static readonly headerName = "名前";
+    static readonly headerRowNo = headerRowNo;
     static readonly title = "分類マスタ";
 }
 
@@ -28,12 +30,14 @@ export class PaymentTableFormat {
     static readonly headerTitle = "タイトル";
     static readonly headerCategoryID = headerCategoryID;
     static readonly headerAmount = "金額";
+    static readonly headerRowNo = headerRowNo;
     static readonly title = "決済テーブル";
 }
 
 export class BudgetDisplayCategoryMasterFormat {
     static readonly headerCategoryID = headerCategoryID;
     static readonly headerDisplayOrder = "昇順上位表示優先度";
+    static readonly headerRowNo = headerRowNo;
     static readonly title = "予算表示分類マスタ";
 }
 
@@ -41,7 +45,7 @@ export const SHEET_FORMAT: SheetFormat = {
     tables: [
         {
             title: CategoryMasterFormat.title,
-            headers: [CategoryMasterFormat.headerCategoryID, CategoryMasterFormat.headerName]
+            headers: [CategoryMasterFormat.headerCategoryID, CategoryMasterFormat.headerName, CategoryMasterFormat.headerRowNo]
         },
         {
             title: BudgetMasterFormat.title,
@@ -49,11 +53,11 @@ export const SHEET_FORMAT: SheetFormat = {
         },
         {
             title: PaymentTableFormat.title,
-            headers: [PaymentTableFormat.headerPaymentID, PaymentTableFormat.headerPaymentDate, PaymentTableFormat.headerTitle, PaymentTableFormat.headerCategoryID, PaymentTableFormat.headerAmount]
+            headers: [PaymentTableFormat.headerPaymentID, PaymentTableFormat.headerPaymentDate, PaymentTableFormat.headerTitle, PaymentTableFormat.headerCategoryID, PaymentTableFormat.headerAmount, PaymentTableFormat.headerRowNo]
         },
         {
             title: BudgetDisplayCategoryMasterFormat.title,
-            headers: [BudgetDisplayCategoryMasterFormat.headerCategoryID, BudgetDisplayCategoryMasterFormat.headerDisplayOrder]
+            headers: [BudgetDisplayCategoryMasterFormat.headerCategoryID, BudgetDisplayCategoryMasterFormat.headerDisplayOrder, BudgetDisplayCategoryMasterFormat.headerRowNo]
         }
     ]
 } as const;
