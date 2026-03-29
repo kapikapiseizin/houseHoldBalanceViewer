@@ -5,8 +5,10 @@ import UnorderedTextList from "../ui/UnorderedTextList";
 import OrderedTextList from "../ui/OrderedTextList";
 import AnyTextAdd from "../ui/AnyTextAdd";
 import ListedTextAdd from "../ui/ListedTextAdd";
+import type { SheetOperator } from "../SheetOperator";
 
 type InitialDataWizardProps = {
+    sheetOperator: SheetOperator;
     onFinish: () => void;
 };
 
