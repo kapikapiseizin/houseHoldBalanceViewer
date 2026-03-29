@@ -70,6 +70,9 @@ export default function EditCategoryMaster({ sheetOperator, onFinish }: EditCate
                     await fetchCategories();
                 }}
             />
+            <div>
+                <button onClick={onFinish}>完了</button>
+            </div>
         </div>
     );
 }

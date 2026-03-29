@@ -10,9 +10,13 @@ type InitialDataWizardProps = {
 export default function InitialDataWizard({ sheetOperator, onFinish }: InitialDataWizardProps) {
     const [phase, setPhase] = useState<"categoryMaster">("categoryMaster");
 
+    const handleCategoryMasterFinish = () => {
+        onFinish();
+    };
+
     return (
         <div>
-            {phase === "categoryMaster" && <EditCategoryMaster sheetOperator={sheetOperator} onFinish={() => { }} />}
+            {phase === "categoryMaster" && <EditCategoryMaster sheetOperator={sheetOperator} onFinish={handleCategoryMasterFinish} />}
         </div>
     );
 }
