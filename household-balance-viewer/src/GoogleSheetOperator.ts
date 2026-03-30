@@ -1,4 +1,4 @@
-import type { Category, PaymentRequest, BalanceResponse, SheetOperator, Budget } from "./SheetOperator";
+import type { Category, PaymentRequest, BalanceResponse, SheetOperator, Budget, Payment } from "./SheetOperator";
 import { CategoryMasterFormat, PaymentTableFormat, BudgetDisplayCategoryMasterFormat, BudgetMasterFormat } from "./SheetFormat";
 
 export class GoogleSheetOperator implements SheetOperator {
@@ -414,16 +414,57 @@ export class GoogleSheetOperator implements SheetOperator {
         newRow[idxAmount] = String(payment.amount);
         newRow[idxRowNo] = this.rowNoFunction;
 
-        // undefined埋め（列ズレ防止）
-        const maxCol = Math.max(idxID, idxDate, idxTitle, idxCategory, idxAmount);
-        for (let i = 0; i <= maxCol; i++) {
-            if (newRow[i] === undefined) {
-                newRow[i] = "";
-            }
-        }
-
         // 5. 追記
         await this.requestAddRowsToTable(sheetName, [newRow]);
+    }
+
+    async fetchPaymentsOrderByDateAsc(year: number, month: number): Promise<Payment[]> {
+        const paymentHeaderColIndex = await this.fetchTableHeaderColumnIndex(PaymentTableFormat.title);
+
+        const paymentIDColNo = paymentHeaderColIndex[PaymentTableFormat.headerPaymentID] + 1;
+        const dateColNo = paymentHeaderColIndex[PaymentTableFormat.headerPaymentDate] + 1;
+        const titleColNo = paymentHeaderColIndex[PaymentTableFormat.headerTitle] + 1;
+        const categoryIDColNo = paymentHeaderColIndex[PaymentTableFormat.headerCategoryID] + 1;
+        const amountColNo = paymentHeaderColIndex[PaymentTableFormat.headerAmount] + 1;
+
+        if (
+            paymentIDColNo === undefined ||
+            dateColNo === undefined ||
+            titleColNo === undefined ||
+            categoryIDColNo === undefined ||
+            amountColNo === undefined
+        ) {
+            throw new Error("必要なヘッダが存在しません");
+        }
+
+        const rows = await this.selectTableInPeriodOrderByDateAsc(
+            PaymentTableFormat.title,
+            this.columnNoToAlphabet(dateColNo),
+            year,
+            month,
+            year,
+            month
+        );
+
+        const payments: Payment[] = [];
+
+        for (const row of rows) {
+            const paymentID = row[paymentIDColNo - 1];
+            const date = row[dateColNo - 1];
+            const title = row[titleColNo - 1];
+            const categoryID = row[categoryIDColNo - 1];
+            const amount = Number(row[amountColNo - 1]);
+
+            payments.push({
+                paymentID,
+                date,
+                title,
+                categoryID,
+                amount
+            });
+        }
+
+        return payments;
     }
 
     async computeBalance(targetYear: number, targetMonth: number): Promise<BalanceResponse[]> {

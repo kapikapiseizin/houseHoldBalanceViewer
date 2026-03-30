@@ -10,6 +10,14 @@ export type PaymentRequest = {
     amount: number;
 }
 
+export type Payment = {
+    paymentID: string;
+    date: string;
+    title: string;
+    categoryID: string;
+    amount: number;
+}
+
 export type BalanceResponse = {
     title: string;
     budgetAmount: number;
@@ -27,6 +35,7 @@ export interface SheetOperator {
     requestAddCategory(name: string): Promise<void>;
     requestDeleteCategory(categoryID: string): Promise<void>;
     requestAddPayment(payment: PaymentRequest): Promise<void>;
+    fetchPaymentsOrderByDateAsc(year: number, month: number): Promise<Payment[]>;
     computeBalance(
         targetYear: number,
         targetMonth: number
