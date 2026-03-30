@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import "../App.css";
-import TitledInput from "../ui/TitledInput";
-import ListDropdownInput from "../ui/ListDropdownInput";
-import MoneyInput from "../ui/MoneyInput";
+import PaymentInput from "../ui/PaymentInput";
 import BalanceDisplay from "../ui/BalanceDisplay";
 import type { SheetOperator, Category, BalanceResponse } from "../SheetOperator";
 import LoadingContent from "../ui/LoadingContent";
@@ -66,14 +64,9 @@ function InputPage({ sheetOperator }: InputPageProps) {
   const defaultTitle = selectedCategory ? selectedCategory.name : "";
   const title = isTitleManuallyEdited ? manualTitle : defaultTitle;
 
-  const handleCategoryChange = (id: string) => {
-    console.log("handleCategoryChange", id);
-    setCategoryId(id);
-  };
-
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTitleChange = (title: string) => {
     setIsTitleManuallyEdited(true);
-    setManualTitle(e.target.value);
+    setManualTitle(title);
   };
 
   const handleSubmit = async () => {
@@ -120,28 +113,16 @@ function InputPage({ sheetOperator }: InputPageProps) {
 
   return (
     <div>
-      <TitledInput
-        inputType="date"
-        title="入力日"
-        value={inputDate}
-        onChange={(e) => setInputDate(e.target.value)}
-      />
-      <TitledInput
-        inputType="text"
-        title="タイトル"
-        value={title}
-        onChange={handleTitleChange}
-      />
-      <ListDropdownInput
-        title="種類"
-        valueId={categoryId}
-        items={dropdownItems.map(item => ({ id: item.categoryID, displayName: item.name }))}
-        onChange={handleCategoryChange}
-      />
-      <MoneyInput
-        title="金額"
+      <PaymentInput
+        inputDate={inputDate}
+        onChangeDate={setInputDate}
+        title={title}
+        onChangeTitle={handleTitleChange}
+        categoryId={categoryId}
+        dropdownItems={dropdownItems}
+        onChangeCategoryID={setCategoryId}
         amount={amount}
-        onChange={setAmount}
+        onChanngeAmount={setAmount}
       />
       <button onClick={handleSubmit}>登録</button>
     </div>

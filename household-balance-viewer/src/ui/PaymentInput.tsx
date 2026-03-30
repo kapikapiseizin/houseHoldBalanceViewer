@@ -1,0 +1,55 @@
+import TitledInput from "../ui/TitledInput";
+import ListDropdownInput from "../ui/ListDropdownInput";
+import MoneyInput from "../ui/MoneyInput";
+import type { Category } from "../SheetOperator";
+
+type PaymentInputProps = {
+    inputDate: string;
+    onChangeDate: (date: string) => void;
+    title: string;
+    onChangeTitle: (title: string) => void;
+    categoryId: string;
+    dropdownItems: Category[];
+    onChangeCategoryID: (categoryId: string) => void;
+    amount: number;
+    onChanngeAmount: (amount: number) => void;
+}
+
+export default function PaymentInput({
+    inputDate,
+    onChangeDate,
+    title,
+    onChangeTitle,
+    categoryId,
+    dropdownItems,
+    onChangeCategoryID,
+    amount,
+    onChanngeAmount,
+}: PaymentInputProps) {
+    return (
+        <div>
+            <TitledInput
+                inputType="date"
+                title="入力日"
+                value={inputDate}
+                onChange={(e) => onChangeDate(e.target.value)}
+            />
+            <TitledInput
+                title="タイトル"
+                value={title}
+                onChange={(e) => onChangeTitle(e.target.value)}
+            />
+            <ListDropdownInput
+                title="種類"
+                valueId={categoryId}
+                items={dropdownItems.map(item => ({ id: item.categoryID, displayName: item.name }))}
+                onChange={onChangeCategoryID}
+            />
+            <MoneyInput
+                title="金額"
+                amount={amount}
+                onChange={onChanngeAmount}
+            />
+        </div>
+    );
+}
