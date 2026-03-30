@@ -14,6 +14,7 @@ type EditBudgetDisplayCategoryMasterProps = {
 export default function EditBudgetDisplayCategoryMaster({ sheetOperator, onFinish }: EditBudgetDisplayCategoryMasterProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [displayCategories, setDisplayCategories] = useState<Category[]>([]);
+    const [unDisplayCategories, setUnDisplayCategories] = useState<Category[]>([]);
 
     const fetchCategories = async () => {
         setIsLoading(true);
@@ -28,6 +29,7 @@ export default function EditBudgetDisplayCategoryMaster({ sheetOperator, onFinis
                 }
             }
             setDisplayCategories(displayCategories);
+            setUnDisplayCategories(categories.filter((category) => !displayCategoryIDs.includes(category.categoryID)));
         } finally {
             setIsLoading(false);
         }
@@ -70,6 +72,24 @@ export default function EditBudgetDisplayCategoryMaster({ sheetOperator, onFinis
                     setIsLoading(true);
                     try {
                         await sheetOperator.updateOrderedBudgetDisplayCategories(items.map((item) => item.id));
+                    } finally {
+                        setIsLoading(false);
+                    }
+
+                    await fetchCategories();
+                }}
+            />
+            <ListedTextAdd
+                items={unDisplayCategories.map((c) => {
+                    return {
+                        id: c.categoryID,
+                        text: c.name,
+                    }
+                })}
+                onSelected={async (item) => {
+                    setIsLoading(true);
+                    try {
+                        await sheetOperator.requestAddDisplayBudget(item.id);
                     } finally {
                         setIsLoading(false);
                     }

@@ -300,13 +300,12 @@ export class GoogleSheetOperator implements SheetOperator {
 
     async requestAddRowsToTable(tableName: string, rows: string[][]): Promise<void> {
         await fetch(
-            `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID
-            } / values / ${encodeURIComponent(tableName)} !A1: append ? valueInputOption = USER_ENTERED`,
+            `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}/values/${encodeURIComponent(tableName)}!A1:append?valueInputOption=USER_ENTERED`,
             {
                 method: 'POST',
                 headers: {
-                    Authorization: `Bearer ${this.accessToken} `,
-                    'Content-Type': 'application/json'
+                    'Authorization': `Bearer ${this.accessToken}`,
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     values: rows
@@ -771,8 +770,9 @@ export class GoogleSheetOperator implements SheetOperator {
         const budgetDisplayHeaderColIndex = await this.fetchTableHeaderColumnIndex(BudgetDisplayCategoryMasterFormat.title);
         const categoryIDColIndex = budgetDisplayHeaderColIndex[BudgetDisplayCategoryMasterFormat.headerCategoryID];
         const orderColIndex = budgetDisplayHeaderColIndex[BudgetDisplayCategoryMasterFormat.headerDisplayOrder];
+        const rowNoColIndex = budgetDisplayHeaderColIndex[BudgetDisplayCategoryMasterFormat.headerRowNo];
 
-        if (categoryIDColIndex === undefined || orderColIndex === undefined) {
+        if (categoryIDColIndex === undefined || orderColIndex === undefined || rowNoColIndex === undefined) {
             throw new Error("必要なヘッダが存在しません");
         }
 
@@ -786,6 +786,7 @@ export class GoogleSheetOperator implements SheetOperator {
         const row = new Array(2);
         row[categoryIDColIndex] = categoryID;
         row[orderColIndex] = (maxOrder + 1).toString();
+        row[rowNoColIndex] = this.rowNoFunction;
         await this.requestAddRowsToTable(BudgetDisplayCategoryMasterFormat.title, [row]);
     }
 
