@@ -722,7 +722,7 @@ export class GoogleSheetOperator implements SheetOperator {
         await this.requestUpdateRows(CategoryMasterFormat.title, this.columnNoToAlphabet(categoryNameColNo), Number(findIDRows[0][0]), [[name]]);
     }
 
-    async fetchOrderedBudgetDisplayCategories(): Promise<Category[]> {
+    async fetchOrderedBudgetDisplayCategoryIDs(): Promise<string[]> {
         const categories = await this.fetchCategories();
 
         const budgetDisplayHeaderColIndex = await this.fetchTableHeaderColumnIndex(BudgetDisplayCategoryMasterFormat.title);
@@ -739,17 +739,7 @@ export class GoogleSheetOperator implements SheetOperator {
         const response = await this.fetchSheetQuery(BudgetDisplayCategoryMasterFormat.title, query);
         const rows = await this.getRowsByQueryResponse(response);
 
-        const sortedCategoryIDs = rows.map((row) => row[0]);
-        const sortedCategories: Category[] = [];
-
-        for (const categoryID of sortedCategoryIDs) {
-            const category = categories.find((category) => category.categoryID === categoryID);
-            if (category) {
-                sortedCategories.push(category);
-            }
-        }
-
-        return sortedCategories;
+        return rows.map((row) => row[0]);
     }
 
     async updateOrderedBudgetDisplayCategories(categoryIDs: string[]): Promise<void> {

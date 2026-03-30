@@ -18,8 +18,16 @@ export default function EditBudgetDisplayCategoryMaster({ sheetOperator, onFinis
     const fetchCategories = async () => {
         setIsLoading(true);
         try {
-            const categories = await sheetOperator.fetchOrderedBudgetDisplayCategories();
-            setDisplayCategories(categories);
+            const categories = await sheetOperator.fetchCategories();
+            const displayCategoryIDs = await sheetOperator.fetchOrderedBudgetDisplayCategoryIDs();
+            const displayCategories: Category[] = [];
+            for (const categoryID of displayCategoryIDs) {
+                const category = categories.find((category) => category.categoryID === categoryID);
+                if (category) {
+                    displayCategories.push(category);
+                }
+            }
+            setDisplayCategories(displayCategories);
         } finally {
             setIsLoading(false);
         }
