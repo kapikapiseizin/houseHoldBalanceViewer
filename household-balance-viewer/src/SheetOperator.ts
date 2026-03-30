@@ -31,4 +31,8 @@ export interface SheetOperator {
         targetMonth: number
     ): Promise<void>;
     updateCategory(category: Category): Promise<void>;
+    fetchOrderedBudgetDisplayCategories(): Promise<Category[]>;
+    requestSetOrderedBudgetDisplayCategories(categoryIDs: string[]): Promise<void>;
+    requestAddDisplayBudget(categoryID: string): Promise<void>;
+    requestDeleteDisplayBudget(categoryID: string): Promise<void>;
 }

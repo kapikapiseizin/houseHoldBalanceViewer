@@ -721,4 +721,104 @@ export class GoogleSheetOperator implements SheetOperator {
 
         await this.requestUpdateRows(CategoryMasterFormat.title, this.columnNoToAlphabet(categoryNameColNo), Number(findIDRows[0][0]), [[name]]);
     }
+
+    async fetchOrderedBudgetDisplayCategories(): Promise<Category[]> {
+        const categories = await this.fetchCategories();
+
+        const budgetDisplayHeaderColIndex = await this.fetchTableHeaderColumnIndex(BudgetDisplayCategoryMasterFormat.title);
+        const categoryIDColNo = budgetDisplayHeaderColIndex[BudgetDisplayCategoryMasterFormat.headerCategoryID] + 1;
+        const orderColNo = budgetDisplayHeaderColIndex[BudgetDisplayCategoryMasterFormat.headerDisplayOrder] + 1;
+
+        if (categoryIDColNo === undefined || orderColNo === undefined) {
+            throw new Error("必要なヘッダが存在しません");
+        }
+
+        const query = `
+            SELECT ${this.columnNoToAlphabet(categoryIDColNo)} 
+            ORDER BY ${this.columnNoToAlphabet(orderColNo)} ASC`;
+        const response = await this.fetchSheetQuery(BudgetDisplayCategoryMasterFormat.title, query);
+        const rows = await this.getRowsByQueryResponse(response);
+
+        const sortedCategoryIDs = rows.map((row) => row[0]);
+        const sortedCategories: Category[] = [];
+
+        for (const categoryID of sortedCategoryIDs) {
+            const category = categories.find((category) => category.categoryID === categoryID);
+            if (category) {
+                sortedCategories.push(category);
+            }
+        }
+
+        return sortedCategories;
+    }
+
+    async requestSetOrderedBudgetDisplayCategories(categoryIDs: string[]): Promise<void> {
+        const budgetDisplayHeaderColIndex = await this.fetchTableHeaderColumnIndex(BudgetDisplayCategoryMasterFormat.title);
+        const categoryIDColIndex = budgetDisplayHeaderColIndex[BudgetDisplayCategoryMasterFormat.headerCategoryID];
+        const orderColIndex = budgetDisplayHeaderColIndex[BudgetDisplayCategoryMasterFormat.headerDisplayOrder];
+
+        if (categoryIDColIndex === undefined || orderColIndex === undefined) {
+            throw new Error("必要なヘッダが存在しません");
+        }
+
+        const rows: string[][] = [];
+        for (const categoryID of categoryIDs) {
+            const row = new Array(2);
+            row[categoryIDColIndex] = categoryID;
+            row[orderColIndex] = (rows.length).toString();
+            rows.push(row);
+        }
+
+        await this.requestUpdateRows(
+            BudgetDisplayCategoryMasterFormat.title,
+            "A",
+            2,
+            rows
+        );
+    }
+
+    async requestAddDisplayBudget(categoryID: string): Promise<void> {
+        const budgetDisplayHeaderColIndex = await this.fetchTableHeaderColumnIndex(BudgetDisplayCategoryMasterFormat.title);
+        const categoryIDColIndex = budgetDisplayHeaderColIndex[BudgetDisplayCategoryMasterFormat.headerCategoryID];
+        const orderColIndex = budgetDisplayHeaderColIndex[BudgetDisplayCategoryMasterFormat.headerDisplayOrder];
+
+        if (categoryIDColIndex === undefined || orderColIndex === undefined) {
+            throw new Error("必要なヘッダが存在しません");
+        }
+
+        const maxOrderQuery = `
+        SELECT MAX(${this.columnNoToAlphabet(orderColIndex + 1)})
+        `;
+        const maxOrderResponse = await this.fetchSheetQuery(BudgetDisplayCategoryMasterFormat.title, maxOrderQuery);
+        const maxOrderRows = await this.getRowsByQueryResponse(maxOrderResponse);
+        const maxOrder = maxOrderRows.length > 0 ? Number(maxOrderRows[0][0]) : 0;
+
+        const row = new Array(2);
+        row[categoryIDColIndex] = categoryID;
+        row[orderColIndex] = (maxOrder + 1).toString();
+        await this.requestAddRowsToTable(BudgetDisplayCategoryMasterFormat.title, [row]);
+    }
+
+    async requestDeleteDisplayBudget(categoryID: string): Promise<void> {
+        const budgetDisplayHeaderColIndex = await this.fetchTableHeaderColumnIndex(BudgetDisplayCategoryMasterFormat.title);
+        const categoryIDColNo = budgetDisplayHeaderColIndex[BudgetDisplayCategoryMasterFormat.headerCategoryID] + 1;
+        const rowNoColNo = budgetDisplayHeaderColIndex[BudgetDisplayCategoryMasterFormat.headerRowNo] + 1;
+
+        if (categoryIDColNo === undefined || rowNoColNo === undefined) {
+            throw new Error("必要なヘッダが存在しません");
+        }
+
+        const findIDQuery = `
+        SELECT ${this.columnNoToAlphabet(rowNoColNo)}
+        WHERE ${this.columnNoToAlphabet(categoryIDColNo)} = '${encodeURIComponent(categoryID)}'
+        `;
+        const findIDResponse = await this.fetchSheetQuery(BudgetDisplayCategoryMasterFormat.title, findIDQuery);
+        const findIDRows = await this.getRowsByQueryResponse(findIDResponse);
+
+        if (findIDRows.length !== 1) {
+            throw new Error("カテゴリIDが存在しません");
+        }
+
+        await this.requestDeleteRow(BudgetDisplayCategoryMasterFormat.title, Number(findIDRows[0][0]));
+    }
 }
