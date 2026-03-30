@@ -13,13 +13,13 @@ type EditBudgetDisplayCategoryMasterProps = {
 
 export default function EditBudgetDisplayCategoryMaster({ sheetOperator, onFinish }: EditBudgetDisplayCategoryMasterProps) {
     const [isLoading, setIsLoading] = useState(true);
-    const [categories, setCategories] = useState<Category[]>([]);
+    const [displayCategories, setDisplayCategories] = useState<Category[]>([]);
 
     const fetchCategories = async () => {
         setIsLoading(true);
         try {
             const categories = await sheetOperator.fetchOrderedBudgetDisplayCategories();
-            setCategories(categories);
+            setDisplayCategories(categories);
         } finally {
             setIsLoading(false);
         }
@@ -37,7 +37,7 @@ export default function EditBudgetDisplayCategoryMaster({ sheetOperator, onFinis
         <div>
             <h1>予算の表示設定</h1>
             <OrderedTextList
-                value={categories.map((c) => {
+                value={displayCategories.map((c) => {
                     return {
                         id: c.categoryID,
                         text: c.name,
