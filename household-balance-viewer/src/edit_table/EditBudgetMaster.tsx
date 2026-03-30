@@ -77,7 +77,9 @@ export default function EditBudgetMaster({ sheetOperator, onFinish }: EditBudget
                         <ToggleTextInput
                             value={item.budgetAmount.toString()}
                             onChange={
-                                (value) => {
+                                async (newValue) => {
+                                    await sheetOperator.updateBudget(targetYear, targetMonth, item.categoryID, parseInt(newValue));
+                                    fetchBudgets();
                                 }
                             }
                         />

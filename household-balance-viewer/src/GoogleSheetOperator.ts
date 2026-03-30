@@ -842,4 +842,8 @@ export class GoogleSheetOperator implements SheetOperator {
 
         return budgets;
     }
+
+    async updateBudget(year: number, month: number, categoryID: string, budgetAmount: number): Promise<void> {
+
+    }
 }
