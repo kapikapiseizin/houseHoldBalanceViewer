@@ -61,6 +61,10 @@ export default function EditCategoryMaster({ sheetOperator, onFinish }: EditCate
                         }}
                     />}
                 onRequestDelete={async (item) => {
+                    if (!window.confirm("本当に削除しますか？")) {
+                        return;
+                    }
+
                     setIsUpdateLoading(true);
                     try {
                         await sheetOperator.requestDeleteCategory(item.id);

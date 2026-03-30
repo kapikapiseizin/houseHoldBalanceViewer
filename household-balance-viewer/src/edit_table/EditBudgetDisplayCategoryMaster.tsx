@@ -59,6 +59,10 @@ export default function EditBudgetDisplayCategoryMaster({ sheetOperator, onFinis
                     );
                 }}
                 onRequestDelete={async (item) => {
+                    if (!window.confirm("本当に削除しますか？")) {
+                        return;
+                    }
+
                     setIsLoading(true);
                     try {
                         await sheetOperator.requestDeleteDisplayBudget(item.id);
