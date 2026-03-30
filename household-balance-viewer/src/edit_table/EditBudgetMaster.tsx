@@ -75,6 +75,7 @@ export default function EditBudgetMaster({ sheetOperator, onFinish }: EditBudget
                     >
                         <PlainTextItem data={item.categoryName} />
                         <ToggleInput
+                            inputType="number"
                             value={item.budgetAmount.toString()}
                             onChange={
                                 async (newValue) => {
