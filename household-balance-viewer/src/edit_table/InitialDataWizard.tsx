@@ -3,6 +3,7 @@ import type { SheetOperator } from "../SheetOperator";
 import EditCategoryMaster from "./EditCategoryMaster";
 import EditBudgetDisplayCategoryMaster from "./EditBudgetDisplayCategoryMaster";
 import EditBudgetMaster from "./EditBudgetMaster";
+import EditPaymentTable from "./EditPaymentTable";
 
 type InitialDataWizardProps = {
     sheetOperator: SheetOperator;
@@ -10,7 +11,12 @@ type InitialDataWizardProps = {
 };
 
 export default function InitialDataWizard({ sheetOperator, onFinish }: InitialDataWizardProps) {
-    const [phase, setPhase] = useState<"categoryMaster" | "budgetDisplayCategoryMaster" | "budgetMaster">("categoryMaster");
+    const [phase, setPhase] = useState<
+        "categoryMaster" |
+        "budgetDisplayCategoryMaster" |
+        "budgetMaster" |
+        "paymentTable"
+    >("categoryMaster");
 
     const handleCategoryMasterFinish = () => {
         setPhase("budgetDisplayCategoryMaster");
@@ -21,7 +27,7 @@ export default function InitialDataWizard({ sheetOperator, onFinish }: InitialDa
     };
 
     const handleBudgetMasterFinish = () => {
-        onFinish();
+        setPhase("paymentTable");
     };
 
     return (
@@ -29,6 +35,7 @@ export default function InitialDataWizard({ sheetOperator, onFinish }: InitialDa
             {phase === "categoryMaster" && <EditCategoryMaster sheetOperator={sheetOperator} onFinish={handleCategoryMasterFinish} />}
             {phase === "budgetDisplayCategoryMaster" && <EditBudgetDisplayCategoryMaster sheetOperator={sheetOperator} onFinish={handleBudgetDisplayCategoryMasterFinish} />}
             {phase === "budgetMaster" && <EditBudgetMaster sheetOperator={sheetOperator} onFinish={handleBudgetMasterFinish} />}
+            {phase === "paymentTable" && <EditPaymentTable sheetOperator={sheetOperator} onFinish={onFinish} />}
         </div>
     );
 }
