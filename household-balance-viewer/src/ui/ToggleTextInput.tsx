@@ -8,6 +8,7 @@ type ToggleTextInputProps = {
 export default function ToggleTextInput({ value, onChange }: ToggleTextInputProps) {
     const [isEditing, setIsEditing] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
+    const [text, setText] = useState(value);
 
     useEffect(() => {
         if (isEditing) {
@@ -17,14 +18,15 @@ export default function ToggleTextInput({ value, onChange }: ToggleTextInputProp
 
     const finishEdit = () => {
         setIsEditing(false);
+        onChange(text);
     };
 
     if (isEditing) {
         return (
             <input
                 ref={inputRef}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
                 onBlur={finishEdit}
                 onKeyDown={(e) => {
                     if (e.key === "Enter") {

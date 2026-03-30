@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import type { SheetOperator, Category } from "../SheetOperator";
 import LoadingContent from "../ui/LoadingContent";
 import UnorderedTextList from "../ui/UnorderedTextList";
-import PlainTextItem from "../ui/PlainTextItem";
+import ToggleTextInput from "../ui/ToggleTextInput";
 import AnyTextAdd from "../ui/AnyTextAdd";
 
 type EditCategoryMasterProps = {
@@ -46,7 +46,20 @@ export default function EditCategoryMaster({ sheetOperator, onFinish }: EditCate
                     text: c.name,
                 }
             })}
-                onRenderItem={(item) => <PlainTextItem data={item.text} />}
+                onRenderItem={(item) =>
+                    <ToggleTextInput
+                        value={item.text}
+                        onChange={async (text) => {
+                            setIsUpdateLoading(true);
+                            try {
+                                await sheetOperator.updateCategory({ categoryID: item.id, name: text });
+                            } finally {
+                                setIsUpdateLoading(false);
+                            }
+
+                            await fetchCategories();
+                        }}
+                    />}
                 onRequestDelete={async (item) => {
                     setIsUpdateLoading(true);
                     try {

@@ -681,4 +681,8 @@ export class GoogleSheetOperator implements SheetOperator {
 
         await this.requestDeleteRow(CategoryMasterFormat.title, Number(findIDRows[0][0]));
     }
+
+    async updateCategory({ categoryID, name }: Category): Promise<void> {
+        console.log(`updateCategory: ${categoryID}, ${name}`);
+    }
 }

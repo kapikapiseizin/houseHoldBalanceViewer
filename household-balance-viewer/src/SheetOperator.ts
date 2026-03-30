@@ -30,4 +30,5 @@ export interface SheetOperator {
         targetYear: number,
         targetMonth: number
     ): Promise<void>;
+    updateCategory(category: Category): Promise<void>;
 }
