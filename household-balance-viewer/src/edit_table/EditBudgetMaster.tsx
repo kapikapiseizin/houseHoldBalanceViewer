@@ -9,11 +9,44 @@ type EditBudgetMasterProps = {
     onFinish: () => void;
 }
 
+type BudgetCache = {
+    categoryID: string;
+    categoryName: string;
+    budgetAmount: number;
+}
+
 export default function EditBudgetMaster({ sheetOperator, onFinish }: EditBudgetMasterProps) {
     const now = new Date();
     const [targetYear, setTargetYear] = useState(now.getFullYear());
     const [targetMonth, setTargetMonth] = useState(now.getMonth() + 1);
     const [isLoading, setIsLoading] = useState(false);
+    const [budgets, setBudgets] = useState<BudgetCache[]>([]);
+
+    const fetchBudgets = async () => {
+        setIsLoading(true);
+        try {
+            const categories = await sheetOperator.fetchCategories();
+            const budgets = await sheetOperator.fetchBudgets(targetYear, targetMonth);
+            const budgetList: BudgetCache[] = [];
+            for (const budget of budgets) {
+                const category = categories.find((category) => category.categoryID === budget.categoryID);
+                if (category) {
+                    budgetList.push({
+                        categoryID: budget.categoryID,
+                        categoryName: category.name,
+                        budgetAmount: budget.budgetAmount,
+                    });
+                }
+            }
+            setBudgets(budgetList);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchBudgets();
+    }, [sheetOperator, targetYear, targetMonth]);
 
     if (isLoading) {
         return <LoadingContent title="データを取得中" />;
