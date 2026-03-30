@@ -44,6 +44,32 @@ export class GoogleSheetOperator implements SheetOperator {
         return colIndexMap;
     }
 
+    async fetchTableNameToSheetID(): Promise<Map<string, number>> {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}`;
+
+        const tableNameToSheetID = new Map<string, number>();
+
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.accessToken}`,
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            const data = await response.json();
+            data.sheets.forEach((sheet: any) => {
+                tableNameToSheetID.set(sheet.properties.title, sheet.properties.sheetId);
+            });
+
+        } catch (error) {
+            console.error('Error fetching sheet ID:', error);
+        }
+
+        return tableNameToSheetID;
+    }
+
     async fetchCategories(): Promise<Category[]> {
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}/values/${encodeURIComponent(CategoryMasterFormat.title)}`;
         const response = await fetch(url, {
@@ -274,11 +300,12 @@ export class GoogleSheetOperator implements SheetOperator {
 
     async requestAddRowsToTable(tableName: string, rows: string[][]): Promise<void> {
         await fetch(
-            `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}/values/${encodeURIComponent(tableName)}!A1:append?valueInputOption=USER_ENTERED`,
+            `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID
+            } / values / ${encodeURIComponent(tableName)} !A1: append ? valueInputOption = USER_ENTERED`,
             {
                 method: 'POST',
                 headers: {
-                    Authorization: `Bearer ${this.accessToken}`,
+                    Authorization: `Bearer ${this.accessToken} `,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
@@ -286,6 +313,54 @@ export class GoogleSheetOperator implements SheetOperator {
                 })
             }
         );
+    }
+
+    async requestDeleteRow(tableName: string, rowNo: number): Promise<void> {
+        const sheetIDtoTableName = await this.fetchTableNameToSheetID();
+
+        const sheetID = sheetIDtoTableName.get(tableName);
+        if (sheetID === undefined) {
+            throw new Error("シートIDが存在しません");
+        }
+
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}:batchUpdate`;
+
+        const body = {
+            requests: [
+                {
+                    deleteDimension: {
+                        range: {
+                            sheetId: sheetID,
+                            dimension: "ROWS",
+                            startIndex: rowNo - 1,
+                            endIndex: rowNo
+                        }
+                    }
+                }
+            ]
+        };
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Error:', errorData);
+                return;
+            }
+
+            const result = await response.json();
+            console.log('Success:', result);
+        } catch (error) {
+            console.error('Fetch Error:', error);
+        }
     }
 
     async requestAddPayment(payment: PaymentRequest): Promise<void> {
@@ -588,15 +663,22 @@ export class GoogleSheetOperator implements SheetOperator {
 
         const categoryMasterHeaderColIndex = await this.fetchTableHeaderColumnIndex(CategoryMasterFormat.title);
         const categoryIDColNo = categoryMasterHeaderColIndex[CategoryMasterFormat.headerCategoryID] + 1;
+        const categoryRowNoColNo = categoryMasterHeaderColIndex[CategoryMasterFormat.headerRowNo] + 1;
 
-        if (categoryIDColNo === undefined) {
+        if (categoryIDColNo === undefined ||
+            categoryRowNoColNo === undefined ||
+            categoryRowNoColNo === undefined) {
             throw new Error("必要なヘッダが存在しません");
         }
 
-        const findIDQuery = `SELECT ${this.columnNoToAlphabet(categoryIDColNo)} WHERE ${this.columnNoToAlphabet(categoryIDColNo)} = '${encodeURIComponent(categoryID)}'`;
-        console.log("findIDQuery: " + findIDQuery);
+        const findIDQuery = `SELECT ${this.columnNoToAlphabet(categoryRowNoColNo)} WHERE ${this.columnNoToAlphabet(categoryIDColNo)} = '${encodeURIComponent(categoryID)}'`;
         const findIDResponse = await this.fetchSheetQuery(CategoryMasterFormat.title, findIDQuery);
         const findIDRows = await this.getRowsByQueryResponse(findIDResponse);
-        console.log(findIDRows);
+
+        if (findIDRows.length !== 1) {
+            throw new Error("カテゴリIDが存在しません");
+        }
+
+        await this.requestDeleteRow(CategoryMasterFormat.title, Number(findIDRows[0][0]));
     }
 }
