@@ -6,6 +6,7 @@ import MoneyInput from "../ui/MoneyInput";
 import BalanceDisplay from "../ui/BalanceDisplay";
 import type { SheetOperator, Category, BalanceResponse } from "../SheetOperator";
 import LoadingContent from "../ui/LoadingContent";
+import YearMonthSelect from "../ui/YearMonthSelect";
 
 type BudgetPageProps = {
   sheetOperator: SheetOperator;
@@ -13,9 +14,8 @@ type BudgetPageProps = {
 
 function BudgetPage({ sheetOperator }: BudgetPageProps) {
   const now = new Date();
-  const targetYear = now.getFullYear();
-  const targetMonth = now.getMonth() + 1;
-  const targetMonthYear = `${targetYear}-${String(targetMonth).padStart(2, '0')}`;
+  const [targetYear, setTargetYear] = useState(now.getFullYear());
+  const [targetMonth, setTargetMonth] = useState(now.getMonth() + 1);
 
   const [balance, setBalance] = useState<BalanceResponse[]>([]);
   const [isFetchLoading, setIsFetchLoading] = useState(false);
@@ -23,7 +23,7 @@ function BudgetPage({ sheetOperator }: BudgetPageProps) {
   useEffect(() => {
     setIsFetchLoading(true);
     sheetOperator.computeBalance(targetYear, targetMonth).then(setBalance).finally(() => setIsFetchLoading(false));
-  }, [sheetOperator]);
+  }, [sheetOperator, targetYear, targetMonth]);
 
   if (isFetchLoading) {
     return <LoadingContent title="データを取得中" />;
@@ -31,7 +31,7 @@ function BudgetPage({ sheetOperator }: BudgetPageProps) {
 
   return (
     <div className="budget-page">
-      <p>{targetMonthYear}</p>
+      <YearMonthSelect year={targetYear} month={targetMonth} onChange={(year, month) => { setTargetYear(year); setTargetMonth(month); }} />
       {balance.map((balance, index) => (
         <BalanceDisplay
           key={index}
