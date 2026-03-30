@@ -76,10 +76,8 @@ export default function EditBudgetMaster({ sheetOperator, onFinish }: EditBudget
                     <div
                         key={index}
                         style={{
-                            display: "grid",
-                            gridTemplateColumns: "1fr auto",
-                            gap: "8px",
-                            alignItems: "center",
+                            display: "flex",
+                            gap: "8px"
                         }}
                     >
                         <PlainTextItem data={item.categoryName} />
