@@ -21,6 +21,7 @@ export class BudgetMasterFormat {
     static readonly headerCategoryID = headerCategoryID;
     static readonly headerTargetYearMonth = "対象年月";
     static readonly headerBudgetAmount = "月次予算";
+    static readonly headerRowNo = headerRowNo;
     static readonly title = "予算マスタ";
 }
 
@@ -49,7 +50,7 @@ export const SHEET_FORMAT: SheetFormat = {
         },
         {
             title: BudgetMasterFormat.title,
-            headers: [BudgetMasterFormat.headerCategoryID, BudgetMasterFormat.headerTargetYearMonth, BudgetMasterFormat.headerBudgetAmount]
+            headers: [BudgetMasterFormat.headerCategoryID, BudgetMasterFormat.headerTargetYearMonth, BudgetMasterFormat.headerBudgetAmount, BudgetMasterFormat.headerRowNo]
         },
         {
             title: PaymentTableFormat.title,
