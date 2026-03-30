@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 
-type ToggleTextInputProps = {
+type ToggleInputProps = {
     value: string;
     onChange: (value: string) => void;
 };
 
-export default function ToggleTextInput({ value, onChange }: ToggleTextInputProps) {
+export default function ToggleInput({ value, onChange }: ToggleInputProps) {
     const [isEditing, setIsEditing] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const [text, setText] = useState(value);

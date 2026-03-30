@@ -3,7 +3,7 @@ import YearMonthSelect from "../ui/YearMonthSelect";
 import type { SheetOperator } from "../SheetOperator";
 import LoadingContent from "../ui/LoadingContent";
 import PlainTextItem from "../ui/PlainTextItem";
-import ToggleTextInput from "../ui/ToggleTextInput";
+import ToggleInput from "../ui/ToggleInput";
 
 
 type EditBudgetMasterProps = {
@@ -74,7 +74,7 @@ export default function EditBudgetMaster({ sheetOperator, onFinish }: EditBudget
                         }}
                     >
                         <PlainTextItem data={item.categoryName} />
-                        <ToggleTextInput
+                        <ToggleInput
                             value={item.budgetAmount.toString()}
                             onChange={
                                 async (newValue) => {
