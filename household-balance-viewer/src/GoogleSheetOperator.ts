@@ -363,6 +363,23 @@ export class GoogleSheetOperator implements SheetOperator {
         }
     }
 
+    async requestUpdateRows(tableName: string, column: string, rowNo: number, rows: string[][]): Promise<void> {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadSheetID}/values/${tableName}!${column}${rowNo}?valueInputOption=USER_ENTERED`;
+
+        const response = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${this.accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                values: rows
+            })
+        });
+
+        return await response.json();
+    }
+
     async requestAddPayment(payment: PaymentRequest): Promise<void> {
         const sheetName = PaymentTableFormat.title;
 
@@ -683,6 +700,25 @@ export class GoogleSheetOperator implements SheetOperator {
     }
 
     async updateCategory({ categoryID, name }: Category): Promise<void> {
-        console.log(`updateCategory: ${categoryID}, ${name}`);
+        const categoryMasterHeaderColIndex = await this.fetchTableHeaderColumnIndex(CategoryMasterFormat.title);
+        const categoryIDColNo = categoryMasterHeaderColIndex[CategoryMasterFormat.headerCategoryID] + 1;
+        const categoryNameColNo = categoryMasterHeaderColIndex[CategoryMasterFormat.headerName] + 1;
+        const categoryRowNoColNo = categoryMasterHeaderColIndex[CategoryMasterFormat.headerRowNo] + 1;
+
+        if (categoryIDColNo === undefined ||
+            categoryNameColNo === undefined ||
+            categoryRowNoColNo === undefined) {
+            throw new Error("必要なヘッダが存在しません");
+        }
+
+        const findIDQuery = `SELECT ${this.columnNoToAlphabet(categoryRowNoColNo)} WHERE ${this.columnNoToAlphabet(categoryIDColNo)} = '${encodeURIComponent(categoryID)}'`;
+        const findIDResponse = await this.fetchSheetQuery(CategoryMasterFormat.title, findIDQuery);
+        const findIDRows = await this.getRowsByQueryResponse(findIDResponse);
+
+        if (findIDRows.length !== 1) {
+            throw new Error("カテゴリIDが存在しません");
+        }
+
+        await this.requestUpdateRows(CategoryMasterFormat.title, this.columnNoToAlphabet(categoryNameColNo), Number(findIDRows[0][0]), [[name]]);
     }
 }
