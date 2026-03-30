@@ -78,7 +78,12 @@ export default function EditBudgetMaster({ sheetOperator, onFinish }: EditBudget
                             value={item.budgetAmount.toString()}
                             onChange={
                                 async (newValue) => {
-                                    await sheetOperator.updateBudget(targetYear, targetMonth, item.categoryID, parseInt(newValue));
+                                    const amount = parseInt(newValue);
+                                    if (isNaN(amount)) {
+                                        return;
+                                    }
+
+                                    await sheetOperator.updateBudget(targetYear, targetMonth, item.categoryID, amount);
                                     fetchBudgets();
                                 }
                             }
