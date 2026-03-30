@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import type { SheetOperator } from "../SheetOperator";
 import EditCategoryMaster from "./EditCategoryMaster";
+import EditBudgetDisplayCategoryMaster from "./EditBudgetDisplayCategoryMaster";
 
 type InitialDataWizardProps = {
     sheetOperator: SheetOperator;
@@ -8,15 +9,20 @@ type InitialDataWizardProps = {
 };
 
 export default function InitialDataWizard({ sheetOperator, onFinish }: InitialDataWizardProps) {
-    const [phase, setPhase] = useState<"categoryMaster">("categoryMaster");
+    const [phase, setPhase] = useState<"categoryMaster" | "budgetDisplayCategoryMaster">("categoryMaster");
 
     const handleCategoryMasterFinish = () => {
+        setPhase("budgetDisplayCategoryMaster");
+    };
+
+    const handleBudgetDisplayCategoryMasterFinish = () => {
         onFinish();
     };
 
     return (
         <div>
             {phase === "categoryMaster" && <EditCategoryMaster sheetOperator={sheetOperator} onFinish={handleCategoryMasterFinish} />}
+            {phase === "budgetDisplayCategoryMaster" && <EditBudgetDisplayCategoryMaster sheetOperator={sheetOperator} onFinish={handleBudgetDisplayCategoryMasterFinish} />}
         </div>
     );
 }

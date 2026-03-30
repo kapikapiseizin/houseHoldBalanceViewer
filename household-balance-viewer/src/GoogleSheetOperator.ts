@@ -752,7 +752,7 @@ export class GoogleSheetOperator implements SheetOperator {
         return sortedCategories;
     }
 
-    async requestSetOrderedBudgetDisplayCategories(categoryIDs: string[]): Promise<void> {
+    async updateOrderedBudgetDisplayCategories(categoryIDs: string[]): Promise<void> {
         const budgetDisplayHeaderColIndex = await this.fetchTableHeaderColumnIndex(BudgetDisplayCategoryMasterFormat.title);
         const categoryIDColIndex = budgetDisplayHeaderColIndex[BudgetDisplayCategoryMasterFormat.headerCategoryID];
         const orderColIndex = budgetDisplayHeaderColIndex[BudgetDisplayCategoryMasterFormat.headerDisplayOrder];

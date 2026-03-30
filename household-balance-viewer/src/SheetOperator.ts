@@ -32,7 +32,7 @@ export interface SheetOperator {
     ): Promise<void>;
     updateCategory(category: Category): Promise<void>;
     fetchOrderedBudgetDisplayCategories(): Promise<Category[]>;
-    requestSetOrderedBudgetDisplayCategories(categoryIDs: string[]): Promise<void>;
+    updateOrderedBudgetDisplayCategories(categoryIDs: string[]): Promise<void>;
     requestAddDisplayBudget(categoryID: string): Promise<void>;
     requestDeleteDisplayBudget(categoryID: string): Promise<void>;
 }
