@@ -42,4 +42,5 @@ export interface SheetOperator {
     requestDeleteDisplayBudget(categoryID: string): Promise<void>;
     fetchBudgets(year: number, month: number): Promise<Budget[]>;
     updateBudget(year: number, month: number, categoryID: string, budgetAmount: number): Promise<void>;
+    requestAddBudget(year: number, month: number, categoryID: string, budgetAmount: number): Promise<void>;
 }

@@ -4,7 +4,7 @@ import type { SheetOperator } from "../SheetOperator";
 import LoadingContent from "../ui/LoadingContent";
 import PlainTextItem from "../ui/PlainTextItem";
 import ToggleInput from "../ui/ToggleInput";
-
+import ListedTextAdd from "../ui/ListedTextAdd";
 
 type EditBudgetMasterProps = {
     sheetOperator: SheetOperator;
@@ -22,25 +22,34 @@ export default function EditBudgetMaster({ sheetOperator, onFinish }: EditBudget
     const [targetYear, setTargetYear] = useState(now.getFullYear());
     const [targetMonth, setTargetMonth] = useState(now.getMonth() + 1);
     const [isLoading, setIsLoading] = useState(false);
-    const [budgets, setBudgets] = useState<BudgetCache[]>([]);
+    const [writtenBudgets, setWrittenBudgets] = useState<BudgetCache[]>([]);
+    const [unWrittenBudgets, setUnWrittenBudgets] = useState<BudgetCache[]>([]);
 
     const fetchBudgets = async () => {
         setIsLoading(true);
         try {
             const categories = await sheetOperator.fetchCategories();
             const budgets = await sheetOperator.fetchBudgets(targetYear, targetMonth);
-            const budgetList: BudgetCache[] = [];
-            for (const budget of budgets) {
-                const category = categories.find((category) => category.categoryID === budget.categoryID);
-                if (category) {
-                    budgetList.push({
-                        categoryID: budget.categoryID,
+            const writtenBudgetList: BudgetCache[] = [];
+            const unWrittenBudgetList: BudgetCache[] = [];
+            for (const category of categories) {
+                const budget = budgets.find((budget) => budget.categoryID === category.categoryID);
+                if (budget) {
+                    writtenBudgetList.push({
+                        categoryID: category.categoryID,
                         categoryName: category.name,
                         budgetAmount: budget.budgetAmount,
                     });
+                } else {
+                    unWrittenBudgetList.push({
+                        categoryID: category.categoryID,
+                        categoryName: category.name,
+                        budgetAmount: 0,
+                    });
                 }
             }
-            setBudgets(budgetList);
+            setWrittenBudgets(writtenBudgetList);
+            setUnWrittenBudgets(unWrittenBudgetList);
         } finally {
             setIsLoading(false);
         }
@@ -63,7 +72,7 @@ export default function EditBudgetMaster({ sheetOperator, onFinish }: EditBudget
                 onChange={(year, month) => { setTargetYear(year); setTargetMonth(month); }}
             />
             {
-                budgets.map((item, index) => (
+                writtenBudgets.map((item, index) => (
                     <div
                         key={index}
                         style={{
@@ -96,7 +105,25 @@ export default function EditBudgetMaster({ sheetOperator, onFinish }: EditBudget
                         />
                     </div>
                 ))
-            }<button onClick={onFinish}>完了</button>
+            }
+            <ListedTextAdd
+                items={unWrittenBudgets.map((item) => {
+                    return {
+                        id: item.categoryID,
+                        text: item.categoryName,
+                    }
+                })}
+                onSelected={async (item) => {
+                    setIsLoading(true);
+                    try {
+                        await sheetOperator.requestAddBudget(targetYear, targetMonth, item.id, 0);
+                    } finally {
+                        setIsLoading(false);
+                    }
+                    fetchBudgets();
+                }}
+            />
+            <button onClick={onFinish}>完了</button>
         </div>
     );
 }

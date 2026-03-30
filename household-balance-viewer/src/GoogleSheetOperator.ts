@@ -872,4 +872,26 @@ export class GoogleSheetOperator implements SheetOperator {
 
         await this.requestUpdateRows(BudgetMasterFormat.title, this.columnNoToAlphabet(budgetAmountColNo), Number(findIDRows[0][0]), [[budgetAmount.toString()]]);
     }
+
+    async requestAddBudget(year: number, month: number, categoryID: string, budgetAmount: number): Promise<void> {
+        const budgetHeaderColIndex = await this.fetchTableHeaderColumnIndex(BudgetMasterFormat.title);
+        const categoryIDColIndex = budgetHeaderColIndex[BudgetMasterFormat.headerCategoryID];
+        const dateColIndex = budgetHeaderColIndex[BudgetMasterFormat.headerTargetYearMonth];
+        const budgetAmountColIndex = budgetHeaderColIndex[BudgetMasterFormat.headerBudgetAmount];
+        const rowNoColIndex = budgetHeaderColIndex[BudgetMasterFormat.headerRowNo];
+
+        if (categoryIDColIndex === undefined ||
+            dateColIndex === undefined ||
+            budgetAmountColIndex === undefined ||
+            rowNoColIndex === undefined) {
+            throw new Error("必要なヘッダが存在しません");
+        }
+
+        const row = new Array(4);
+        row[categoryIDColIndex] = categoryID;
+        row[dateColIndex] = `${year}-${month.toString().padStart(2, '0')}`;
+        row[budgetAmountColIndex] = budgetAmount.toString();
+        row[rowNoColIndex] = this.rowNoFunction;
+        await this.requestAddRowsToTable(BudgetMasterFormat.title, [row]);
+    }
 }
