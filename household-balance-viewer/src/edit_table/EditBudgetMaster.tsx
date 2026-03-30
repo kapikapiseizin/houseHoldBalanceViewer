@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import YearMonthSelect from "../ui/YearMonthSelect";
 import type { SheetOperator } from "../SheetOperator";
 import LoadingContent from "../ui/LoadingContent";
+import PlainTextItem from "../ui/PlainTextItem";
+import ToggleTextInput from "../ui/ToggleTextInput";
 
 
 type EditBudgetMasterProps = {
@@ -60,7 +62,28 @@ export default function EditBudgetMaster({ sheetOperator, onFinish }: EditBudget
                 month={targetMonth}
                 onChange={(year, month) => { setTargetYear(year); setTargetMonth(month); }}
             />
-            <button onClick={onFinish}>完了</button>
+            {
+                budgets.map((item, index) => (
+                    <div
+                        key={index}
+                        style={{
+                            display: "grid",
+                            gridTemplateColumns: "1fr auto",
+                            gap: "8px",
+                            alignItems: "center",
+                        }}
+                    >
+                        <PlainTextItem data={item.categoryName} />
+                        <ToggleTextInput
+                            value={item.budgetAmount.toString()}
+                            onChange={
+                                (value) => {
+                                }
+                            }
+                        />
+                    </div>
+                ))
+            }<button onClick={onFinish}>完了</button>
         </div>
     );
 }
