@@ -450,14 +450,17 @@ export class GoogleSheetOperator implements SheetOperator {
 
         for (const row of rows) {
             const paymentID = row[paymentIDColNo - 1];
-            const date = row[dateColNo - 1];
+
+            const date = this.parseGvizDate(row[dateColNo - 1]);
+            const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
             const title = row[titleColNo - 1];
             const categoryID = row[categoryIDColNo - 1];
             const amount = Number(row[amountColNo - 1]);
 
             payments.push({
                 paymentID,
-                date,
+                date: dateStr,
                 title,
                 categoryID,
                 amount
