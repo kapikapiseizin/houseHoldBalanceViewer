@@ -844,6 +844,32 @@ export class GoogleSheetOperator implements SheetOperator {
     }
 
     async updateBudget(year: number, month: number, categoryID: string, budgetAmount: number): Promise<void> {
+        const budgetHeaderColIndex = await this.fetchTableHeaderColumnIndex(BudgetMasterFormat.title);
+        const categoryIDColNo = budgetHeaderColIndex[BudgetMasterFormat.headerCategoryID] + 1;
+        const dateColNo = budgetHeaderColIndex[BudgetMasterFormat.headerTargetYearMonth] + 1;
+        const budgetAmountColNo = budgetHeaderColIndex[BudgetMasterFormat.headerBudgetAmount] + 1;
+        const rowNoColNo = budgetHeaderColIndex[BudgetMasterFormat.headerRowNo] + 1;
 
+        if (categoryIDColNo === undefined ||
+            dateColNo === undefined ||
+            budgetAmountColNo === undefined ||
+            rowNoColNo === undefined) {
+            throw new Error("必要なヘッダが存在しません");
+        }
+
+        const findIDQuery = `
+        SELECT ${this.columnNoToAlphabet(rowNoColNo)}
+        WHERE ${this.columnNoToAlphabet(categoryIDColNo)} = '${encodeURIComponent(categoryID)}'
+        AND ${this.sqlWhereMinYearMonth(this.columnNoToAlphabet(dateColNo), year, month)}
+        AND ${this.sqlWhereMaxYearMonth(this.columnNoToAlphabet(dateColNo), year, month)}
+        `;
+        const findIDResponse = await this.fetchSheetQuery(BudgetMasterFormat.title, findIDQuery);
+        const findIDRows = await this.getRowsByQueryResponse(findIDResponse);
+
+        if (findIDRows.length !== 1) {
+            throw new Error("予算が存在しません");
+        }
+
+        await this.requestUpdateRows(BudgetMasterFormat.title, this.columnNoToAlphabet(budgetAmountColNo), Number(findIDRows[0][0]), [[budgetAmount.toString()]]);
     }
 }

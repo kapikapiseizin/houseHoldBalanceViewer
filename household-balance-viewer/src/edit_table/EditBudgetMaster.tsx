@@ -84,7 +84,12 @@ export default function EditBudgetMaster({ sheetOperator, onFinish }: EditBudget
                                         return;
                                     }
 
-                                    await sheetOperator.updateBudget(targetYear, targetMonth, item.categoryID, amount);
+                                    setIsLoading(true);
+                                    try {
+                                        await sheetOperator.updateBudget(targetYear, targetMonth, item.categoryID, amount);
+                                    } finally {
+                                        setIsLoading(false);
+                                    }
                                     fetchBudgets();
                                 }
                             }
