@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 
 type ToggleInputProps = {
+    inputType?: string;
     value: string;
     onChange: (value: string) => void;
 };
 
-export default function ToggleInput({ value, onChange }: ToggleInputProps) {
+export default function ToggleInput({ inputType = "text", value, onChange }: ToggleInputProps) {
     const [isEditing, setIsEditing] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const [text, setText] = useState(value);
@@ -26,6 +27,7 @@ export default function ToggleInput({ value, onChange }: ToggleInputProps) {
             <input
                 ref={inputRef}
                 value={text}
+                type={inputType}
                 onChange={(e) => setText(e.target.value)}
                 onBlur={finishEdit}
                 onKeyDown={(e) => {
