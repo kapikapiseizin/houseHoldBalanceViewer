@@ -17,6 +17,11 @@ export type BalanceResponse = {
     usedAmount: number;
 }
 
+export type Budget = {
+    categoryID: string;
+    budgetAmount: number;
+}
+
 export interface SheetOperator {
     fetchCategories(): Promise<Category[]>;
     requestAddCategory(name: string): Promise<void>;
@@ -35,4 +40,5 @@ export interface SheetOperator {
     updateOrderedBudgetDisplayCategories(categoryIDs: string[]): Promise<void>;
     requestAddDisplayBudget(categoryID: string): Promise<void>;
     requestDeleteDisplayBudget(categoryID: string): Promise<void>;
+    fetchBudgets(year: number, month: number): Promise<Budget[]>;
 }

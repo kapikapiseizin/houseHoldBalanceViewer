@@ -1,4 +1,4 @@
-import type { Category, PaymentRequest, BalanceResponse, SheetOperator } from "./SheetOperator";
+import type { Category, PaymentRequest, BalanceResponse, SheetOperator, Budget } from "./SheetOperator";
 import { CategoryMasterFormat, PaymentTableFormat, BudgetDisplayCategoryMasterFormat, BudgetMasterFormat } from "./SheetFormat";
 
 export class GoogleSheetOperator implements SheetOperator {
@@ -811,5 +811,35 @@ export class GoogleSheetOperator implements SheetOperator {
         }
 
         await this.requestDeleteRow(BudgetDisplayCategoryMasterFormat.title, Number(findIDRows[0][0]));
+    }
+
+    async fetchBudgets(year: number, month: number): Promise<Budget[]> {
+        const budgetHeaderColIndex = await this.fetchTableHeaderColumnIndex(BudgetMasterFormat.title);
+        const categoryIDColNo = budgetHeaderColIndex[BudgetMasterFormat.headerCategoryID] + 1;
+        const dateColNo = budgetHeaderColIndex[BudgetMasterFormat.headerTargetYearMonth] + 1;
+        const budgetAmountColNo = budgetHeaderColIndex[BudgetMasterFormat.headerBudgetAmount] + 1;
+
+        if (categoryIDColNo === undefined || dateColNo === undefined || budgetAmountColNo === undefined) {
+            throw new Error("必要なヘッダが存在しません");
+        }
+
+        const rowInPeriod = await this.selectTableInPeriodOrderByDateAsc(
+            BudgetMasterFormat.title,
+            this.columnNoToAlphabet(dateColNo),
+            year,
+            month,
+            year,
+            month
+        );
+
+        const budgets: Budget[] = [];
+        for (const row of rowInPeriod) {
+            budgets.push({
+                categoryID: row[categoryIDColNo - 1],
+                budgetAmount: Number(row[budgetAmountColNo - 1])
+            });
+        }
+
+        return budgets;
     }
 }
