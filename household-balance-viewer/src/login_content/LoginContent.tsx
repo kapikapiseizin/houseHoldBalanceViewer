@@ -252,6 +252,16 @@ export default function LoginContent({ sheetOperator, onLogout }: LoginContentPr
     );
   }
 
+  const buttonStyle = {
+    background: "transparent", /* 背景を透明に */
+    color: "white",            /* 文字色を白に */
+    fontSize: "1.2em",        /* フォントサイズ指定 */
+    flex: 1,
+    cursor: "pointer",         /* ホバー時に指マークにする */
+    padding: "10px 20px",      /* クリックエリアを広げる（任意） */
+    border: "none",
+  };
+
   return (
     <div style={{
       display: 'flex',
@@ -280,15 +290,16 @@ export default function LoginContent({ sheetOperator, onLogout }: LoginContentPr
         width: '100%',
         height: '10vh',
         display: 'flex',
-        justifyContent: 'space-between',
+        justifyContent: 'space-around',
         alignItems: 'center',
         backgroundColor: '#5fbdff', // 背景色が白だと文字が見えないため仮の色
         padding: '0 20px',
-        boxSizing: 'border-box' // パディングを含めて100%にする
+        boxSizing: 'border-box', // パディングを含めて100%にする
+        whiteSpace: "nowrap"
       }}>
-        <button onClick={() => setPage(Phase.BUDGET)}>予算</button>
-        <button onClick={() => setPage(Phase.INPUT)}>入力</button>
-        <button onClick={() => setPage(Phase.MENU)}>メニュー</button>
+        <button style={buttonStyle} onClick={() => setPage(Phase.BUDGET)}>予算</button>
+        <button style={buttonStyle} onClick={() => setPage(Phase.INPUT)}>入力</button>
+        <button style={buttonStyle} onClick={() => setPage(Phase.MENU)}>メニュー</button>
       </nav>
     </div >
   );
