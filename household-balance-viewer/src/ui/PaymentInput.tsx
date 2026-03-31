@@ -1,4 +1,5 @@
 import TitledInput from "../ui/TitledInput";
+import TitledDateInput from "../ui/TitledDateInput";
 import ListDropdownInput from "../ui/ListDropdownInput";
 import MoneyInput from "../ui/MoneyInput";
 import type { Category } from "../SheetOperator";
@@ -31,8 +32,7 @@ export default function PaymentInput({
 
     return (
         <div>
-            <TitledInput
-                inputType="date"
+            <TitledDateInput
                 title="入力日"
                 value={inputDate}
                 onChange={(e) => onChangeDate(e.target.value)}

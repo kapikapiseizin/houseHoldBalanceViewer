@@ -23,7 +23,7 @@ export default function ListDropdownInput({ title, valueId, items, onChange, onF
                 onFinishEdit();
             }
         }
-    }, [title, valueId, items, onChange, onFinishEdit]);
+    }, [valueId, onFinishEdit]);
 
     return (
         <div>
