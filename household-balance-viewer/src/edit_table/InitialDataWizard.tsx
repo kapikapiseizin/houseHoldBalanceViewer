@@ -3,7 +3,6 @@ import type { SheetOperator } from "../SheetOperator";
 import EditCategoryMaster from "./EditCategoryMaster";
 import EditBudgetDisplayCategoryMaster from "./EditBudgetDisplayCategoryMaster";
 import EditBudgetMaster from "./EditBudgetMaster";
-import EditPaymentTable from "./EditPaymentTable";
 
 type InitialDataWizardProps = {
     sheetOperator: SheetOperator;
@@ -16,7 +15,6 @@ export default function InitialDataWizard({ sheetOperator, onCancel, onFinish }:
         CategoryMaster: 0,
         BudgetDisplayCategoryMaster: 1,
         BudgetMaster: 2,
-        PaymentTable: 3,
     } as const;
 
     type EditPhase = typeof EditPhase[keyof typeof EditPhase];
@@ -25,7 +23,7 @@ export default function InitialDataWizard({ sheetOperator, onCancel, onFinish }:
     const [isDisplayButtons, setIsDisplayButtons] = useState(true);
 
     const handleNextPhase = () => {
-        if (phase == EditPhase.PaymentTable) {
+        if (phase == EditPhase.BudgetMaster) {
             onFinish();
             return;
         }
@@ -47,7 +45,6 @@ export default function InitialDataWizard({ sheetOperator, onCancel, onFinish }:
             {phase === EditPhase.CategoryMaster && <EditCategoryMaster sheetOperator={sheetOperator} />}
             {phase === EditPhase.BudgetDisplayCategoryMaster && <EditBudgetDisplayCategoryMaster sheetOperator={sheetOperator} />}
             {phase === EditPhase.BudgetMaster && <EditBudgetMaster sheetOperator={sheetOperator} />}
-            {phase === EditPhase.PaymentTable && <EditPaymentTable sheetOperator={sheetOperator} onEnterTableUpdateUI={() => setIsDisplayButtons(false)} onExitTableUpdateUI={() => setIsDisplayButtons(true)} />}
             {isDisplayButtons && <button onClick={handlePreviousPhase}>戻る</button>}
             {isDisplayButtons && <button onClick={handleNextPhase}>次へ</button>}
         </div>

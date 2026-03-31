@@ -3,6 +3,8 @@ import ListDropdownInput from './ui/ListDropdownInput';
 import TitledInput from './ui/TitledInput';
 import { SHEET_FORMAT } from './SheetFormat';
 import LoadingContent from './ui/LoadingContent';
+import InitialDataWizard from './edit_table/InitialDataWizard';
+import { GoogleSheetOperator } from './GoogleSheetOperator';
 
 async function createTable(accessToken: string, spreadsheetId: string, tableFormat: { title: string; headers: string[] }) {
   // Create sheet
@@ -103,13 +105,14 @@ type AccessSheetProps = {
   initializeSpreadSheetID: string | undefined;
 };
 
-type Phase = 'selectMode' | 'createSheet' | 'selectSheet';
+type Phase = 'selectMode' | 'createSheet' | 'selectSheet' | 'initializeSheet';
 
 export default function AccessSheet({ accessToken, onSuccess, onFailure, onLogout, initializeSpreadSheetID }: AccessSheetProps) {
   const [phase, setPhase] = useState<Phase>('selectMode');
   const sheetFormatSuccess = "Sheet format is valid";
   const sheetFormatError = "Sheet format is invalid";
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [createSpreadSheetID, setCreateSpreadSheetID] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (!initializeSpreadSheetID) {
@@ -126,7 +129,7 @@ export default function AccessSheet({ accessToken, onSuccess, onFailure, onLogou
         } else {
           console.error(sheetFormatError);
           window.confirm(sheetFormatError);
-          onFailure();
+          setPhase('selectMode');
         }
       } finally {
         setIsLoading(false);
@@ -160,11 +163,12 @@ export default function AccessSheet({ accessToken, onSuccess, onFailure, onLogou
             const isValid = await checkSheetFormat(accessToken, spreadSheetID);
             if (isValid) {
               console.log(sheetFormatSuccess);
-              onSuccess(spreadSheetID);
+              setCreateSpreadSheetID(spreadSheetID);
+              setPhase('initializeSheet');
             } else {
               console.error(sheetFormatError);
               window.confirm(sheetFormatError);
-              onFailure();
+              setPhase('selectMode');
             }
           } finally {
             setIsLoading(false);
@@ -189,7 +193,7 @@ export default function AccessSheet({ accessToken, onSuccess, onFailure, onLogou
             } else {
               console.error(sheetFormatError);
               window.confirm(sheetFormatError);
-              onFailure();
+              setPhase('selectMode');
             }
           } finally {
             setIsLoading(false);
@@ -199,6 +203,16 @@ export default function AccessSheet({ accessToken, onSuccess, onFailure, onLogou
           onFailure();
         }}
         onBack={() => setPhase('selectMode')}
+      />
+    );
+  }
+
+  if (phase === 'initializeSheet' && createSpreadSheetID) {
+    return (
+      <InitialDataWizard
+        sheetOperator={new GoogleSheetOperator(accessToken, createSpreadSheetID)}
+        onCancel={() => setPhase('selectMode')}
+        onFinish={() => onSuccess(createSpreadSheetID)}
       />
     );
   }
