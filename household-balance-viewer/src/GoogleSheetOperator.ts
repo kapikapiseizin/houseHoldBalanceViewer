@@ -470,6 +470,29 @@ export class GoogleSheetOperator implements SheetOperator {
         return payments;
     }
 
+    async requestDeletePayment(paymentID: string): Promise<void> {
+        const paymentHeaderColIndex = await this.fetchTableHeaderColumnIndex(PaymentTableFormat.title);
+        const paymentIDColNo = paymentHeaderColIndex[PaymentTableFormat.headerPaymentID] + 1;
+        const rowNoColNo = paymentHeaderColIndex[PaymentTableFormat.headerRowNo] + 1;
+
+        if (paymentIDColNo === undefined || rowNoColNo === undefined) {
+            throw new Error("必要なヘッダが存在しません");
+        }
+
+        const findIDQuery = `
+        SELECT ${this.columnNoToAlphabet(rowNoColNo)} 
+        WHERE ${this.columnNoToAlphabet(paymentIDColNo)} = "${paymentID}"`;
+        const findIDResponse = await this.fetchSheetQuery(PaymentTableFormat.title, findIDQuery);
+        const findIDRows = await this.getRowsByQueryResponse(findIDResponse);
+
+        if (findIDRows.length !== 1) {
+            throw new Error("決済が見つかりません");
+        }
+
+        await this.requestDeleteRow(PaymentTableFormat.title, Number(findIDRows[0][0]));
+    }
+
+
     async computeBalance(targetYear: number, targetMonth: number): Promise<BalanceResponse[]> {
         const fetchBudgetDisplayCategories = async () => {
             const sheetName = BudgetDisplayCategoryMasterFormat.title;

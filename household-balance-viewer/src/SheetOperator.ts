@@ -36,6 +36,7 @@ export interface SheetOperator {
     requestDeleteCategory(categoryID: string): Promise<void>;
     requestAddPayment(payment: PaymentRequest): Promise<void>;
     fetchPaymentsOrderByDateAsc(year: number, month: number): Promise<Payment[]>;
+    requestDeletePayment(paymentID: string): Promise<void>;
     computeBalance(
         targetYear: number,
         targetMonth: number
