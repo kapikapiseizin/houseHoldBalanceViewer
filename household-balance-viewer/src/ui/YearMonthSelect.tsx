@@ -33,11 +33,29 @@ export default function YearMonthSelect({ year, month, onChange }: YearMonthSele
 
     const formatted = `${year}-${String(month).padStart(2, "0")}`;
 
+    const buttonStyle = {
+        color: "#FFFFFF",
+        fontSize: "1.5em",
+        backgroundColor: "transparent",
+        border: "none",
+        cursor: "pointer",
+    };
+
     return (
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <button onClick={handlePrev}>◀</button>
+        <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "8px",
+            fontSize: "1.5em",
+            height: "10vh",
+            width: "100%",
+            backgroundColor: "#7b66ff",
+            color: "#FFFFFF",
+        }}>
+            <button onClick={handlePrev} style={buttonStyle}>&lt;</button>
             <span>{formatted}</span>
-            <button onClick={handleNext}>▶</button>
+            <button onClick={handleNext} style={buttonStyle}>&gt;</button>
         </div>
     );
 };

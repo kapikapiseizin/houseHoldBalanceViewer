@@ -32,9 +32,14 @@ function BudgetPage({ sheetOperator, onClickDisplaySetting }: BudgetPageProps) {
   }
 
   return (
-    <div style={{
-      backgroundColor: "#f8fafc"
-    }}>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "column",
+      }}
+    >
       <YearMonthSelect year={targetYear} month={targetMonth} onChange={(year, month) => { setTargetYear(year); setTargetMonth(month); }} />
       {balance.map((balance, index) => (
         <BalanceDisplay
@@ -248,23 +253,43 @@ export default function LoginContent({ sheetOperator, onLogout }: LoginContentPr
   }
 
   return (
-    <div className="app">
-      <main className="main">
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column', // 縦に並べる
+    }}>
+      <div style={{
+        height: '90vh',
+        overflowY: 'auto',      // メインコンテンツ内はスクロール可能にする
+        backgroundColor: "#c5fff8"
+      }}>
         {page === Phase.BUDGET && <BudgetPage sheetOperator={sheetOperator} onClickDisplaySetting={() => handleEnterEditPhase(EditPhase.BUDGET_DISPLAY_CATEGORY_MASTER)} />}
         {page === Phase.INPUT && <InputPage sheetOperator={sheetOperator} />}
-        {page === Phase.MENU && <Menu
-          onLogout={onLogout}
-          onEditCategoryMaster={() => handleEnterEditPhase(EditPhase.CATEGORY_MASTER)}
-          onEditBudgetMaster={() => handleEnterEditPhase(EditPhase.BUDGET_MASTER)}
-          onEditPaymentTable={() => handleEnterEditPhase(EditPhase.PAYMENT_TABLE)}
-        />}
-      </main>
-
-      <nav className="menu">
+        {
+          page === Phase.MENU && <Menu
+            onLogout={onLogout}
+            onEditCategoryMaster={() => handleEnterEditPhase(EditPhase.CATEGORY_MASTER)}
+            onEditBudgetMaster={() => handleEnterEditPhase(EditPhase.BUDGET_MASTER)}
+            onEditPaymentTable={() => handleEnterEditPhase(EditPhase.PAYMENT_TABLE)}
+          />
+        }
+      </div>
+      <nav style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        width: '100%',
+        height: '10vh',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#5fbdff', // 背景色が白だと文字が見えないため仮の色
+        padding: '0 20px',
+        boxSizing: 'border-box' // パディングを含めて100%にする
+      }}>
         <button onClick={() => setPage(Phase.BUDGET)}>予算</button>
         <button onClick={() => setPage(Phase.INPUT)}>入力</button>
         <button onClick={() => setPage(Phase.MENU)}>メニュー</button>
       </nav>
-    </div>
+    </div >
   );
 }
