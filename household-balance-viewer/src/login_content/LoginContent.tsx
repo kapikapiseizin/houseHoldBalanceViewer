@@ -32,7 +32,9 @@ function BudgetPage({ sheetOperator, onClickDisplaySetting }: BudgetPageProps) {
   }
 
   return (
-    <div className="budget-page">
+    <div style={{
+      backgroundColor: "#f8fafc"
+    }}>
       <YearMonthSelect year={targetYear} month={targetMonth} onChange={(year, month) => { setTargetYear(year); setTargetMonth(month); }} />
       {balance.map((balance, index) => (
         <BalanceDisplay
