@@ -1,5 +1,4 @@
 import { useState } from "react";
-import "./App.css";
 
 import AccessAccount, { type LoginInfo } from "./AccessAccount";
 import AccessSheet from "./AccessSheet";

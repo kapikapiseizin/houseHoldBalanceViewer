@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import "../App.css";
 import PaymentInput from "../ui/PaymentInput";
 import BalanceDisplay from "../ui/BalanceDisplay";
 import type { SheetOperator, Category, BalanceResponse } from "../SheetOperator";
