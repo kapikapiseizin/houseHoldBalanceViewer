@@ -10,12 +10,18 @@ type ListDropdownInputProps = {
 
 export default function ListDropdownInput({ title, valueId, items, onChange, onFinishEdit = () => { } }: ListDropdownInputProps) {
     const [isFirstRender, setIsFirstRender] = useState(true);
+    const [prevValueId, setPrevValueId] = useState(valueId);
 
     useEffect(() => {
+        const cachePrevValueId = prevValueId;
+        setPrevValueId(valueId);
+
         if (isFirstRender) {
             setIsFirstRender(false);
         } else {
-            onFinishEdit();
+            if (cachePrevValueId !== valueId) {
+                onFinishEdit();
+            }
         }
     }, [title, valueId, items, onChange, onFinishEdit]);
 

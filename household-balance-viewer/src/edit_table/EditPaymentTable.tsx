@@ -187,14 +187,14 @@ function UpdatePaymentTable({
             <button onClick={() => onBackSelect()}>一覧に戻る</button>
             <PaymentInput
                 inputDate={inputDate}
-                onChangeDate={(date) => setInputDate(date)}
+                onChangeDate={setInputDate}
                 title={manualTitle}
-                onChangeTitle={(title) => setManualTitle(title)}
+                onChangeTitle={setManualTitle}
                 categoryId={categoryId}
                 dropdownItems={categories}
-                onChangeCategoryID={(categoryID) => setCategoryId(categoryID)}
+                onChangeCategoryID={setCategoryId}
                 amount={amount}
-                onChangeAmount={(amount) => setAmount(amount)}
+                onChangeAmount={setAmount}
                 onFinishEdit={handleFinishEdit}
             />
         </div>
