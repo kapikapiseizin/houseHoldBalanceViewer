@@ -12,7 +12,7 @@ type PaymentInputProps = {
     dropdownItems: Category[];
     onChangeCategoryID: (categoryId: string) => void;
     amount: number;
-    onChanngeAmount: (amount: number) => void;
+    onChangeAmount: (amount: number) => void;
     onFinishEdit?: () => void;
 }
 
@@ -25,7 +25,7 @@ export default function PaymentInput({
     dropdownItems,
     onChangeCategoryID,
     amount,
-    onChanngeAmount,
+    onChangeAmount: onChanngeAmount,
     onFinishEdit = () => { },
 }: PaymentInputProps) {
 

@@ -122,7 +122,7 @@ function InputPage({ sheetOperator }: InputPageProps) {
         dropdownItems={dropdownItems}
         onChangeCategoryID={setCategoryId}
         amount={amount}
-        onChanngeAmount={setAmount}
+        onChangeAmount={setAmount}
       />
       <button onClick={handleSubmit}>登録</button>
     </div>

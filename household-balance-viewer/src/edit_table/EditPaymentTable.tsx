@@ -183,7 +183,7 @@ function UpdatePaymentTable({
                 dropdownItems={categories}
                 onChangeCategoryID={(categoryID) => setCategoryId(categoryID)}
                 amount={amount}
-                onChanngeAmount={(amount) => setAmount(amount)}
+                onChangeAmount={(amount) => setAmount(amount)}
                 onFinishEdit={handleFinishEdit}
             />
         </div>
