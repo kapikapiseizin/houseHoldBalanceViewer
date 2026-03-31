@@ -137,12 +137,23 @@ function InputPage({ sheetOperator }: InputPageProps) {
 
 type MenuProps = {
   onLogout: () => void;
+  onEditCategoryMaster: () => void;
+  onEditBudgetMaster: () => void;
+  onEditPaymentTable: () => void;
 };
 
-function Menu({ onLogout }: MenuProps) {
+function Menu({
+  onLogout,
+  onEditCategoryMaster,
+  onEditBudgetMaster,
+  onEditPaymentTable
+}: MenuProps) {
   return (
     <div>
       <button onClick={onLogout}>Logout</button>
+      <button onClick={onEditCategoryMaster}>決済の種類</button>
+      <button onClick={onEditBudgetMaster}>予算を編集</button>
+      <button onClick={onEditPaymentTable}>決済を編集</button>
     </div>
   );
 }
@@ -216,7 +227,12 @@ export default function LoginContent({ sheetOperator, onLogout }: LoginContentPr
       <main className="main">
         {page === Phase.BUDGET && <BudgetPage sheetOperator={sheetOperator} onClickDisplaySetting={() => handleEnterEditPhase(Phase.EDIT_BUDGET_DISPLAY_CATEGORY_MASTER)} />}
         {page === Phase.INPUT && <InputPage sheetOperator={sheetOperator} />}
-        {page === Phase.MENU && <Menu onLogout={onLogout} />}
+        {page === Phase.MENU && <Menu
+          onLogout={onLogout}
+          onEditCategoryMaster={() => handleEnterEditPhase(Phase.EDIT_CATEGORY_MASTER)}
+          onEditBudgetMaster={() => handleEnterEditPhase(Phase.EDIT_BUDGET_MASTER)}
+          onEditPaymentTable={() => handleEnterEditPhase(Phase.EDIT_PAYMENT_TABLE)}
+        />}
       </main>
 
       <nav className="menu">
