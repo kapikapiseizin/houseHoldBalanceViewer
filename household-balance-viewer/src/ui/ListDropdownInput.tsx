@@ -26,8 +26,8 @@ export default function ListDropdownInput({ title, valueId, items, onChange, onF
     }, [valueId, onFinishEdit]);
 
     return (
-        <div>
-            <div>{title}</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <div style={{ fontSize: "13px", color: "#6B7280", fontWeight: 400 }}>{title}</div>
             <select
                 value={valueId}
                 onChange={(e) => {
@@ -36,6 +36,15 @@ export default function ListDropdownInput({ title, valueId, items, onChange, onF
                     if (item) {
                         onChange(item.id, item.displayName);
                     }
+                }}
+                style={{
+                    padding: "10px",
+                    fontSize: "16px",
+                    border: "1px solid #E5E7EB",
+                    borderRadius: "8px",
+                    backgroundColor: "#FFFFFF",
+                    color: "#111827",
+                    appearance: "none",
                 }}
             >
                 {items.map((item) => (

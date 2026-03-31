@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 
 type AnyTextAddProps = {
     onConfirm: (text: string) => void;
@@ -24,7 +24,19 @@ export default function AnyTextAdd({ onConfirm }: AnyTextAddProps) {
 
     if (!isEditing) {
         return (
-            <button onClick={() => setIsEditing(true)}>
+            <button
+                onClick={() => setIsEditing(true)}
+                style={{
+                    backgroundColor: "#5FBDFF",
+                    color: "#FFFFFF",
+                    border: "none",
+                    borderRadius: "8px",
+                    padding: "8px 16px",
+                    fontSize: "14px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                }}
+            >
                 追加
             </button>
         );
