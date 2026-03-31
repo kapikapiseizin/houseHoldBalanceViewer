@@ -65,6 +65,14 @@ function BudgetPage({ sheetOperator, onClickDisplaySetting }: BudgetPageProps) {
             position: "absolute",
             bottom: "20px",
             right: "20px",
+            fontSize: "3em",
+            color: "#FFFFFF",
+            backgroundColor: "#5FBDFF",
+            width: "1.5em",
+            height: "1.5em",
+            borderRadius: "50%",
+            border: "none",
+            cursor: "pointer",
           }}
           onClick={onClickDisplaySetting}>&#x2699;</button>
       </div>
