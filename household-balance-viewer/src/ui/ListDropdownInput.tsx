@@ -27,7 +27,7 @@ export default function ListDropdownInput({ title, valueId, items, onChange, onF
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <div style={{ fontSize: "13px", color: "#6B7280", fontWeight: 400 }}>{title}</div>
+            <div style={{ fontSize: "16px", color: "#6B7280", fontWeight: 400 }}>{title}</div>
             <select
                 value={valueId}
                 onChange={(e) => {

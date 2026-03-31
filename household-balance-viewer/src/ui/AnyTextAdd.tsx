@@ -58,9 +58,31 @@ export default function AnyTextAdd({ onConfirm }: AnyTextAddProps) {
                         handleConfirm();
                     }
                 }}
+                style={{
+                    border: "none",
+                    borderBottom: "1px solid #E5E7EB",
+                    outline: "none",
+                    fontSize: "16px",
+                    color: "#111827",
+                    padding: "4px 12px",
+                    flex: 1
+                }}
             />
 
-            <button onClick={handleConfirm}>
+            <button
+                onClick={handleConfirm}
+                style={{
+                    backgroundColor: "#5FBDFF",
+                    color: "#FFFFFF",
+                    border: "none",
+                    borderRadius: "8px",
+                    padding: "8px 16px",
+                    fontSize: "16px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap"
+                }}
+            >
                 確定
             </button>
         </div>

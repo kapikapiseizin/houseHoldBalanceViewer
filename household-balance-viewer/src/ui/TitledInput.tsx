@@ -8,8 +8,8 @@ type TitledInputProps = {
 
 export default function TitledInput({ inputType = "text", title, value, onChange, onFinishEdit = () => { } }: TitledInputProps) {
     return (
-        <div>
-            <div>{title}</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <div style={{ fontSize: "16px", color: "#6B7280", fontWeight: 400 }}>{title}</div>
             <input
                 type={inputType}
                 value={value}
@@ -19,6 +19,17 @@ export default function TitledInput({ inputType = "text", title, value, onChange
                     if (e.key === "Enter") {
                         onFinishEdit();
                     }
+                }}
+                style={{
+                    padding: "10px",
+                    fontSize: "16px",
+                    border: "1px solid #E5E7EB",
+                    borderRadius: "8px",
+                    backgroundColor: "#FFFFFF",
+                    color: "#111827",
+                    outline: "none",
+                    boxSizing: "border-box",
+                    width: "100%"
                 }}
             />
         </div>

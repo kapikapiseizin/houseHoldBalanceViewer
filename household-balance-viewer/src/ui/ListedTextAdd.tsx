@@ -9,11 +9,10 @@ export default function ListedTextAdd({ items, onSelected }: ListedTextAddProps)
     return (
         <div
             style={{
-                border: "1px solid #ccc",
-                padding: "8px",
+                padding: "8px 0",
                 display: "flex",
-                flexWrap: "wrap",       // ← 折り返し
-                gap: "8px",             // ← ボタン間の間隔
+                flexWrap: "wrap",
+                gap: "8px",
                 alignContent: "flex-start",
             }}
         >
@@ -22,7 +21,14 @@ export default function ListedTextAdd({ items, onSelected }: ListedTextAddProps)
                     key={String(item.id)}
                     onClick={() => onSelected(item)}
                     style={{
-                        whiteSpace: "nowrap", // ← サイズ固定（伸びない）
+                        whiteSpace: "nowrap",
+                        padding: "8px 12px",
+                        fontSize: "16px",
+                        backgroundColor: "#FFFFFF",
+                        color: "#111827",
+                        border: "1px solid #E5E7EB",
+                        borderRadius: "20px",
+                        cursor: "pointer"
                     }}
                 >
                     {item.text}
