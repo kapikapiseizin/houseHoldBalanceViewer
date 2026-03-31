@@ -22,6 +22,7 @@ export default function InitialDataWizard({ sheetOperator, onCancel, onFinish }:
     type EditPhase = typeof EditPhase[keyof typeof EditPhase];
 
     const [phase, setPhase] = useState<EditPhase>(EditPhase.CategoryMaster);
+    const [isDisplayButtons, setIsDisplayButtons] = useState(true);
 
     const handleNextPhase = () => {
         if (phase == EditPhase.PaymentTable) {
@@ -46,9 +47,9 @@ export default function InitialDataWizard({ sheetOperator, onCancel, onFinish }:
             {phase === EditPhase.CategoryMaster && <EditCategoryMaster sheetOperator={sheetOperator} />}
             {phase === EditPhase.BudgetDisplayCategoryMaster && <EditBudgetDisplayCategoryMaster sheetOperator={sheetOperator} />}
             {phase === EditPhase.BudgetMaster && <EditBudgetMaster sheetOperator={sheetOperator} />}
-            {phase === EditPhase.PaymentTable && <EditPaymentTable sheetOperator={sheetOperator} />}
-            <button onClick={handlePreviousPhase}>戻る</button>
-            <button onClick={handleNextPhase}>次へ</button>
+            {phase === EditPhase.PaymentTable && <EditPaymentTable sheetOperator={sheetOperator} onEnterTableUpdateUI={() => setIsDisplayButtons(false)} onExitTableUpdateUI={() => setIsDisplayButtons(true)} />}
+            {isDisplayButtons && <button onClick={handlePreviousPhase}>戻る</button>}
+            {isDisplayButtons && <button onClick={handleNextPhase}>次へ</button>}
         </div>
     );
 }

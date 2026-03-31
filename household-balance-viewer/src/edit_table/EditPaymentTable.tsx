@@ -7,9 +7,11 @@ import PlainTextItem from "../ui/PlainTextItem";
 
 type EditPaymentTableProps = {
     sheetOperator: SheetOperator;
+    onEnterTableUpdateUI: () => void;
+    onExitTableUpdateUI: () => void;
 }
 
-export default function EditPaymentTable({ sheetOperator }: EditPaymentTableProps) {
+export default function EditPaymentTable({ sheetOperator, onEnterTableUpdateUI, onExitTableUpdateUI }: EditPaymentTableProps) {
 
     const [phase, setPhase] = useState<"select" | "edit">("select");
     const [payment, setPayment] = useState<Payment | undefined>(undefined);
@@ -19,6 +21,7 @@ export default function EditPaymentTable({ sheetOperator }: EditPaymentTableProp
     const handlePaymentSelect = (payment: Payment) => {
         console.log("handlePaymentSelect:", payment);
         setPayment(payment);
+        onEnterTableUpdateUI();
         setPhase("edit");
     }
 
@@ -31,6 +34,7 @@ export default function EditPaymentTable({ sheetOperator }: EditPaymentTableProp
         try {
             await sheetOperator.requestDeletePayment(paymentID);
             setPayment(undefined);
+            onExitTableUpdateUI();
             setPhase("select");
         } finally {
             setIsLoading(false);
@@ -39,6 +43,7 @@ export default function EditPaymentTable({ sheetOperator }: EditPaymentTableProp
 
     const handleBackSelect = () => {
         setPayment(undefined);
+        onExitTableUpdateUI();
         setPhase("select");
     }
 
