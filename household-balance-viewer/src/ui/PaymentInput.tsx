@@ -49,6 +49,7 @@ export default function PaymentInput({
                 valueId={categoryId}
                 items={dropdownItems.map(item => ({ id: item.categoryID, displayName: item.name }))}
                 onChange={onChangeCategoryID}
+                onFinishEdit={onFinishEdit}
             />
             <MoneyInput
                 title="金額"

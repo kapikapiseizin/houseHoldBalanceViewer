@@ -3,9 +3,10 @@ type ListDropdownInputProps = {
     valueId: any;
     items: { id: any; displayName: string }[];
     onChange: (id: any, displayName: string) => void;
+    onFinishEdit?: () => void;
 };
 
-export default function ListDropdownInput({ title, valueId, items, onChange }: ListDropdownInputProps) {
+export default function ListDropdownInput({ title, valueId, items, onChange, onFinishEdit = () => { } }: ListDropdownInputProps) {
     return (
         <div>
             <div>{title}</div>
