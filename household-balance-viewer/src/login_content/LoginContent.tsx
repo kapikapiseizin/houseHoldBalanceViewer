@@ -158,6 +158,39 @@ function Menu({
   );
 }
 
+const EditPhase = {
+  CATEGORY_MASTER: 0,
+  BUDGET_DISPLAY_CATEGORY_MASTER: 1,
+  BUDGET_MASTER: 2,
+  PAYMENT_TABLE: 3
+} as const;
+
+type EditPhase = typeof EditPhase[keyof typeof EditPhase];
+
+type EditPageProps = {
+  phase: EditPhase;
+  sheetOperator: SheetOperator;
+  onExitEditPhase: () => void;
+}
+
+function EditPage({ phase, sheetOperator, onExitEditPhase }: EditPageProps) {
+  const [isEditPrevButtonVisible, setIsEditPrevButtonVisible] = useState(true);
+
+  return (
+    <div>
+      {phase === EditPhase.CATEGORY_MASTER && <EditCategoryMaster sheetOperator={sheetOperator} />}
+      {phase === EditPhase.BUDGET_DISPLAY_CATEGORY_MASTER && <EditBudgetDisplayCategoryMaster sheetOperator={sheetOperator} />}
+      {phase === EditPhase.BUDGET_MASTER && <EditBudgetMaster sheetOperator={sheetOperator} />}
+      {phase === EditPhase.PAYMENT_TABLE && <EditPaymentTable
+        sheetOperator={sheetOperator}
+        onEnterTableUpdateUI={() => setIsEditPrevButtonVisible(false)}
+        onExitTableUpdateUI={() => setIsEditPrevButtonVisible(true)}
+      />}
+      {isEditPrevButtonVisible && <button onClick={onExitEditPhase}>戻る</button>}
+    </div>
+  );
+}
+
 export type LoginContentProps = {
   sheetOperator: SheetOperator;
   onLogout: () => void;
@@ -172,28 +205,25 @@ export default function LoginContent({ sheetOperator, onLogout }: LoginContentPr
     BUDGET: 0,
     INPUT: 1,
     MENU: 2,
-    EDIT_CATEGORY_MASTER: 3,
-    EDIT_BUDGET_DISPLAY_CATEGORY_MASTER: 4,
-    EDIT_BUDGET_MASTER: 5,
-    EDIT_PAYMENT_TABLE: 6
-  }
+    EDIT: 3
+  } as const;
 
   const [page, setPage] = useState<number>(Phase.BUDGET);
   const [isPropagateLoading, setIsPropagateLoading] = useState(false);
-  const [isEditPhase, setIsEditPhase] = useState(false);
   const [stackPage, setStackPage] = useState<number | undefined>(undefined);
+  const [editPhase, setEditPhase] = useState<EditPhase | undefined>(undefined);
 
-  const handleEnterEditPhase = (phase: number) => {
+  const handleEnterEditPhase = (phase: EditPhase) => {
     setStackPage(page);
-    setPage(phase);
-    setIsEditPhase(true);
+    setPage(Phase.EDIT);
+    setEditPhase(phase);
   }
 
   const handleExitEditPhase = () => {
-    setIsEditPhase(false);
     if (stackPage !== undefined) {
       setPage(stackPage);
       setStackPage(undefined);
+      setEditPhase(undefined);
     }
   }
 
@@ -206,32 +236,26 @@ export default function LoginContent({ sheetOperator, onLogout }: LoginContentPr
     return <LoadingContent title="予算を更新中" />;
   }
 
-  if (isEditPhase) {
+  if (page === Phase.EDIT && editPhase !== undefined) {
     return (
-      <div className="app">
-        <main className="main">
-          <div>
-            {page === Phase.EDIT_CATEGORY_MASTER && <EditCategoryMaster sheetOperator={sheetOperator} />}
-            {page === Phase.EDIT_BUDGET_DISPLAY_CATEGORY_MASTER && <EditBudgetDisplayCategoryMaster sheetOperator={sheetOperator} />}
-            {page === Phase.EDIT_BUDGET_MASTER && <EditBudgetMaster sheetOperator={sheetOperator} />}
-            {page === Phase.EDIT_PAYMENT_TABLE && <EditPaymentTable sheetOperator={sheetOperator} />}
-          </div>
-          <button onClick={handleExitEditPhase}>戻る</button>
-        </main>
-      </div>
+      <EditPage
+        phase={editPhase}
+        sheetOperator={sheetOperator}
+        onExitEditPhase={handleExitEditPhase}
+      />
     );
   }
 
   return (
     <div className="app">
       <main className="main">
-        {page === Phase.BUDGET && <BudgetPage sheetOperator={sheetOperator} onClickDisplaySetting={() => handleEnterEditPhase(Phase.EDIT_BUDGET_DISPLAY_CATEGORY_MASTER)} />}
+        {page === Phase.BUDGET && <BudgetPage sheetOperator={sheetOperator} onClickDisplaySetting={() => handleEnterEditPhase(EditPhase.BUDGET_DISPLAY_CATEGORY_MASTER)} />}
         {page === Phase.INPUT && <InputPage sheetOperator={sheetOperator} />}
         {page === Phase.MENU && <Menu
           onLogout={onLogout}
-          onEditCategoryMaster={() => handleEnterEditPhase(Phase.EDIT_CATEGORY_MASTER)}
-          onEditBudgetMaster={() => handleEnterEditPhase(Phase.EDIT_BUDGET_MASTER)}
-          onEditPaymentTable={() => handleEnterEditPhase(Phase.EDIT_PAYMENT_TABLE)}
+          onEditCategoryMaster={() => handleEnterEditPhase(EditPhase.CATEGORY_MASTER)}
+          onEditBudgetMaster={() => handleEnterEditPhase(EditPhase.BUDGET_MASTER)}
+          onEditPaymentTable={() => handleEnterEditPhase(EditPhase.PAYMENT_TABLE)}
         />}
       </main>
 
