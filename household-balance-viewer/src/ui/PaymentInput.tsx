@@ -13,6 +13,7 @@ type PaymentInputProps = {
     onChangeCategoryID: (categoryId: string) => void;
     amount: number;
     onChanngeAmount: (amount: number) => void;
+    onFinishEdit?: () => void;
 }
 
 export default function PaymentInput({
@@ -25,7 +26,9 @@ export default function PaymentInput({
     onChangeCategoryID,
     amount,
     onChanngeAmount,
+    onFinishEdit = () => { },
 }: PaymentInputProps) {
+
     return (
         <div>
             <TitledInput
@@ -33,11 +36,13 @@ export default function PaymentInput({
                 title="入力日"
                 value={inputDate}
                 onChange={(e) => onChangeDate(e.target.value)}
+                onFinishEdit={onFinishEdit}
             />
             <TitledInput
                 title="タイトル"
                 value={title}
                 onChange={(e) => onChangeTitle(e.target.value)}
+                onFinishEdit={onFinishEdit}
             />
             <ListDropdownInput
                 title="種類"
@@ -49,6 +54,7 @@ export default function PaymentInput({
                 title="金額"
                 amount={amount}
                 onChange={onChanngeAmount}
+                onFinishEdit={onFinishEdit}
             />
         </div>
     );

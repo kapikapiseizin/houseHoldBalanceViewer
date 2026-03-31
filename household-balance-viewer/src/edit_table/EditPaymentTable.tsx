@@ -17,6 +17,7 @@ export default function EditPaymentTable({ sheetOperator }: EditPaymentTableProp
     const [categories, setCategories] = useState<Category[]>([]);
 
     const handlePaymentSelect = (payment: Payment) => {
+        console.log("handlePaymentSelect:", payment);
         setPayment(payment);
         setPhase("edit");
     }
@@ -42,7 +43,7 @@ export default function EditPaymentTable({ sheetOperator }: EditPaymentTableProp
     }
 
     const handleUpdatePayment = (payment: Payment) => {
-
+        console.log("handleUpdatePayment:", payment);
     }
 
     const fetchCategories = async () => {
@@ -158,6 +159,16 @@ function UpdatePaymentTable({
     const [manualTitle, setManualTitle] = useState(payment.title);
     const [amount, setAmount] = useState(payment.amount);
 
+    const handleFinishEdit = () => {
+        onUpdatePayment({
+            paymentID: payment.paymentID,
+            date: inputDate,
+            categoryID: categoryId,
+            title: manualTitle,
+            amount: amount
+        });
+    }
+
     return (
         <div>
             <h1>決済編集</h1>
@@ -173,6 +184,7 @@ function UpdatePaymentTable({
                 onChangeCategoryID={(categoryID) => setCategoryId(categoryID)}
                 amount={amount}
                 onChanngeAmount={(amount) => setAmount(amount)}
+                onFinishEdit={handleFinishEdit}
             />
         </div>
     );
