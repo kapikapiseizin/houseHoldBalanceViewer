@@ -7,11 +7,11 @@ import PlainTextItem from "../ui/PlainTextItem";
 
 type EditPaymentTableProps = {
     sheetOperator: SheetOperator;
-    onEnterTableUpdateUI: () => void;
-    onExitTableUpdateUI: () => void;
+    onEnterTableUpdateUI?: () => void;
+    onExitTableUpdateUI?: () => void;
 }
 
-export default function EditPaymentTable({ sheetOperator, onEnterTableUpdateUI, onExitTableUpdateUI }: EditPaymentTableProps) {
+export default function EditPaymentTable({ sheetOperator, onEnterTableUpdateUI = () => { }, onExitTableUpdateUI = () => { } }: EditPaymentTableProps) {
 
     const [phase, setPhase] = useState<"select" | "edit">("select");
     const [payment, setPayment] = useState<Payment | undefined>(undefined);
