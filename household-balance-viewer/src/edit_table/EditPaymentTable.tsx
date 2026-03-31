@@ -41,16 +41,8 @@ export default function EditPaymentTable({ sheetOperator }: EditPaymentTableProp
         setPhase("select");
     }
 
-    const handleRequestSetDate = (date: string) => {
-    }
+    const handleUpdatePayment = (payment: Payment) => {
 
-    const handleRequestSetTitle = (title: string) => {
-    }
-
-    const handleRequestSetCategoryID = (categoryID: string) => {
-    }
-
-    const handleRequestSetAmount = (amount: number) => {
     }
 
     const fetchCategories = async () => {
@@ -81,10 +73,7 @@ export default function EditPaymentTable({ sheetOperator }: EditPaymentTableProp
                     categories={categories}
                     onRequestDelete={handleRequestPaymentDelete}
                     onBackSelect={handleBackSelect}
-                    onRequestSetDate={handleRequestSetDate}
-                    onRequestSetTitle={handleRequestSetTitle}
-                    onRequestSetCategoryID={handleRequestSetCategoryID}
-                    onRequestSetAmount={handleRequestSetAmount}
+                    onUpdatePayment={handleUpdatePayment}
                 />
             }
         </div>
@@ -154,10 +143,7 @@ type UpdatePaymentTableProps = {
     categories: Category[];
     onRequestDelete: (paymentID: string) => void;
     onBackSelect: () => void;
-    onRequestSetDate: (date: string) => void;
-    onRequestSetTitle: (title: string) => void;
-    onRequestSetCategoryID: (categoryID: string) => void;
-    onRequestSetAmount: (amount: number) => void;
+    onUpdatePayment: (payment: Payment) => void;
 }
 
 function UpdatePaymentTable({
@@ -165,11 +151,12 @@ function UpdatePaymentTable({
     categories,
     onRequestDelete,
     onBackSelect,
-    onRequestSetDate,
-    onRequestSetTitle,
-    onRequestSetCategoryID,
-    onRequestSetAmount
+    onUpdatePayment
 }: UpdatePaymentTableProps) {
+    const [inputDate, setInputDate] = useState(payment.date);
+    const [categoryId, setCategoryId] = useState(payment.categoryID);
+    const [manualTitle, setManualTitle] = useState(payment.title);
+    const [amount, setAmount] = useState(payment.amount);
 
     return (
         <div>
@@ -177,15 +164,15 @@ function UpdatePaymentTable({
             <button onClick={() => onRequestDelete(payment.paymentID)}>削除</button>
             <button onClick={() => onBackSelect()}>一覧に戻る</button>
             <PaymentInput
-                inputDate={payment.date}
-                onChangeDate={onRequestSetDate}
-                title={payment.title}
-                onChangeTitle={onRequestSetTitle}
-                categoryId={payment.categoryID}
+                inputDate={inputDate}
+                onChangeDate={(date) => setInputDate(date)}
+                title={manualTitle}
+                onChangeTitle={(title) => setManualTitle(title)}
+                categoryId={categoryId}
                 dropdownItems={categories}
-                onChangeCategoryID={onRequestSetCategoryID}
-                amount={payment.amount}
-                onChanngeAmount={onRequestSetAmount}
+                onChangeCategoryID={(categoryID) => setCategoryId(categoryID)}
+                amount={amount}
+                onChanngeAmount={(amount) => setAmount(amount)}
             />
         </div>
     );
