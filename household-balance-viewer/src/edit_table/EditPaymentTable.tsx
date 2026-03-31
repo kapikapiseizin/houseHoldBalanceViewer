@@ -47,8 +47,14 @@ export default function EditPaymentTable({ sheetOperator, onEnterTableUpdateUI, 
         setPhase("select");
     }
 
-    const handleUpdatePayment = (payment: Payment) => {
-        console.log("handleUpdatePayment:", payment);
+    const handleUpdatePayment = async (payment: Payment) => {
+        setIsLoading(true);
+        try {
+            await sheetOperator.updatePayment(payment);
+            setPayment(payment);
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     const fetchCategories = async () => {

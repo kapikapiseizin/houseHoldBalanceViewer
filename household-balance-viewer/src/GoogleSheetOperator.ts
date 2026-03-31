@@ -492,6 +492,46 @@ export class GoogleSheetOperator implements SheetOperator {
         await this.requestDeleteRow(PaymentTableFormat.title, Number(findIDRows[0][0]));
     }
 
+    async updatePayment(payment: Payment): Promise<void> {
+        const paymentHeaderColIndex = await this.fetchTableHeaderColumnIndex(PaymentTableFormat.title);
+        const paymentIDColNo = paymentHeaderColIndex[PaymentTableFormat.headerPaymentID] + 1;
+        const dateColNo = paymentHeaderColIndex[PaymentTableFormat.headerPaymentDate] + 1;
+        const titleColNo = paymentHeaderColIndex[PaymentTableFormat.headerTitle] + 1;
+        const categoryIDColNo = paymentHeaderColIndex[PaymentTableFormat.headerCategoryID] + 1;
+        const amountColNo = paymentHeaderColIndex[PaymentTableFormat.headerAmount] + 1;
+        const rowNoColNo = paymentHeaderColIndex[PaymentTableFormat.headerRowNo] + 1;
+
+        if (
+            paymentIDColNo === undefined ||
+            dateColNo === undefined ||
+            titleColNo === undefined ||
+            categoryIDColNo === undefined ||
+            amountColNo === undefined ||
+            rowNoColNo === undefined
+        ) {
+            throw new Error("必要なヘッダが存在しません");
+        }
+
+        const findIDQuery = `
+        SELECT ${this.columnNoToAlphabet(rowNoColNo)} 
+        WHERE ${this.columnNoToAlphabet(paymentIDColNo)} = "${payment.paymentID}"`;
+        const findIDResponse = await this.fetchSheetQuery(PaymentTableFormat.title, findIDQuery);
+        const findIDRows = await this.getRowsByQueryResponse(findIDResponse);
+
+        if (findIDRows.length !== 1) {
+            throw new Error("決済が見つかりません");
+        }
+
+        const newRow: string[] = [];
+        newRow[paymentIDColNo - 1] = payment.paymentID;
+        newRow[dateColNo - 1] = payment.date;
+        newRow[titleColNo - 1] = payment.title;
+        newRow[categoryIDColNo - 1] = payment.categoryID;
+        newRow[amountColNo - 1] = String(payment.amount);
+        newRow[rowNoColNo - 1] = this.rowNoFunction;
+
+        await this.requestUpdateRows(PaymentTableFormat.title, "A", Number(findIDRows[0][0]), [newRow]);
+    }
 
     async computeBalance(targetYear: number, targetMonth: number): Promise<BalanceResponse[]> {
         const fetchBudgetDisplayCategories = async () => {
