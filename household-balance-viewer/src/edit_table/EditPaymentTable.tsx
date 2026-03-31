@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { SheetOperator, Payment } from "../SheetOperator";
+import type { SheetOperator, Payment, Category } from "../SheetOperator";
 import YearMonthSelect from "../ui/YearMonthSelect";
 import PaymentInput from "../ui/PaymentInput";
 import LoadingContent from "../ui/LoadingContent";
@@ -14,6 +14,7 @@ export default function EditPaymentTable({ sheetOperator }: EditPaymentTableProp
     const [phase, setPhase] = useState<"select" | "edit">("select");
     const [payment, setPayment] = useState<Payment | undefined>(undefined);
     const [isLoading, setIsLoading] = useState(false);
+    const [categories, setCategories] = useState<Category[]>([]);
 
     const handlePaymentSelect = (payment: Payment) => {
         setPayment(payment);
@@ -40,6 +41,32 @@ export default function EditPaymentTable({ sheetOperator }: EditPaymentTableProp
         setPhase("select");
     }
 
+    const handleRequestSetDate = (date: string) => {
+    }
+
+    const handleRequestSetTitle = (title: string) => {
+    }
+
+    const handleRequestSetCategoryID = (categoryID: string) => {
+    }
+
+    const handleRequestSetAmount = (amount: number) => {
+    }
+
+    const fetchCategories = async () => {
+        setIsLoading(true);
+        try {
+            const categories = await sheetOperator.fetchCategories();
+            setCategories(categories);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        fetchCategories();
+    }, [sheetOperator]);
+
     if (isLoading) {
         return <LoadingContent title="データを取得中" />;
     }
@@ -47,7 +74,19 @@ export default function EditPaymentTable({ sheetOperator }: EditPaymentTableProp
     return (
         <div>
             {phase === "select" && <SelectPaymentTable sheetOperator={sheetOperator} onSelect={handlePaymentSelect} />}
-            {phase === "edit" && payment && <UpdatePaymentTable payment={payment} onRequestDelete={handleRequestPaymentDelete} onBackSelect={handleBackSelect} />}
+            {phase === "edit" &&
+                payment &&
+                <UpdatePaymentTable
+                    payment={payment}
+                    categories={categories}
+                    onRequestDelete={handleRequestPaymentDelete}
+                    onBackSelect={handleBackSelect}
+                    onRequestSetDate={handleRequestSetDate}
+                    onRequestSetTitle={handleRequestSetTitle}
+                    onRequestSetCategoryID={handleRequestSetCategoryID}
+                    onRequestSetAmount={handleRequestSetAmount}
+                />
+            }
         </div>
     );
 }
@@ -112,16 +151,42 @@ function SelectPaymentTable({ sheetOperator, onSelect }: SelectPaymentTableProps
 
 type UpdatePaymentTableProps = {
     payment: Payment;
+    categories: Category[];
     onRequestDelete: (paymentID: string) => void;
     onBackSelect: () => void;
+    onRequestSetDate: (date: string) => void;
+    onRequestSetTitle: (title: string) => void;
+    onRequestSetCategoryID: (categoryID: string) => void;
+    onRequestSetAmount: (amount: number) => void;
 }
 
-function UpdatePaymentTable({ payment, onRequestDelete, onBackSelect }: UpdatePaymentTableProps) {
+function UpdatePaymentTable({
+    payment,
+    categories,
+    onRequestDelete,
+    onBackSelect,
+    onRequestSetDate,
+    onRequestSetTitle,
+    onRequestSetCategoryID,
+    onRequestSetAmount
+}: UpdatePaymentTableProps) {
+
     return (
         <div>
             <h1>決済編集</h1>
             <button onClick={() => onRequestDelete(payment.paymentID)}>削除</button>
             <button onClick={() => onBackSelect()}>一覧に戻る</button>
+            <PaymentInput
+                inputDate={payment.date}
+                onChangeDate={onRequestSetDate}
+                title={payment.title}
+                onChangeTitle={onRequestSetTitle}
+                categoryId={payment.categoryID}
+                dropdownItems={categories}
+                onChangeCategoryID={onRequestSetCategoryID}
+                amount={payment.amount}
+                onChanngeAmount={onRequestSetAmount}
+            />
         </div>
     );
 }
