@@ -13,11 +13,11 @@ type EditPaymentTableProps = {
 export default function EditPaymentTable({ sheetOperator, onFinish }: EditPaymentTableProps) {
 
     const [phase, setPhase] = useState<"select" | "edit">("select");
-    const [payment, setPayment] = useState<Payment | null>(null);
+    const [paymentID, setPaymentID] = useState<string | undefined>(undefined);
     const [isLoading, setIsLoading] = useState(false);
 
-    const handlePaymentSelect = (payment: Payment) => {
-        setPayment(payment);
+    const handlePaymentSelect = (paymentID: string) => {
+        setPaymentID(paymentID);
         setPhase("edit");
     }
 
@@ -29,7 +29,7 @@ export default function EditPaymentTable({ sheetOperator, onFinish }: EditPaymen
         setIsLoading(true);
         try {
             await sheetOperator.requestDeletePayment(paymentID);
-            setPayment(null);
+            setPaymentID(undefined);
             setPhase("select");
         } finally {
             setIsLoading(false);
@@ -43,14 +43,14 @@ export default function EditPaymentTable({ sheetOperator, onFinish }: EditPaymen
     return (
         <div>
             {phase === "select" && <SelectPaymentTable sheetOperator={sheetOperator} onSelect={handlePaymentSelect} onFinish={onFinish} />}
-            {phase === "edit" && payment && <UpdatePaymentTable payment={payment} sheetOperator={sheetOperator} onRequestDelete={handleRequestPaymentDelete} onFinish={onFinish} />}
+            {phase === "edit" && paymentID && <UpdatePaymentTable paymentID={paymentID} sheetOperator={sheetOperator} onRequestDelete={handleRequestPaymentDelete} onFinish={onFinish} />}
         </div>
     );
 }
 
 type SelectPaymentTableProps = {
     sheetOperator: SheetOperator;
-    onSelect: (payment: Payment) => void;
+    onSelect: (paymentID: string) => void;
     onFinish: () => void;
 }
 
@@ -95,7 +95,7 @@ function SelectPaymentTable({ sheetOperator, onSelect, onFinish }: SelectPayment
                             display: "flex",
                             gap: "8px"
                         }}
-                        onClick={() => onSelect(item)}
+                        onClick={() => onSelect(item.paymentID)}
                     >
                         <PlainTextItem data={item.date} />
                         <PlainTextItem data={item.title} />
@@ -109,17 +109,17 @@ function SelectPaymentTable({ sheetOperator, onSelect, onFinish }: SelectPayment
 }
 
 type UpdatePaymentTableProps = {
-    payment: Payment;
+    paymentID: string;
     sheetOperator: SheetOperator;
     onRequestDelete: (paymentID: string) => void;
     onFinish: () => void;
 }
 
-function UpdatePaymentTable({ payment, sheetOperator, onRequestDelete, onFinish }: UpdatePaymentTableProps) {
+function UpdatePaymentTable({ paymentID, sheetOperator, onRequestDelete, onFinish }: UpdatePaymentTableProps) {
     return (
         <div>
             <h1>決済編集</h1>
-            <button onClick={() => onRequestDelete(payment.paymentID)}>削除</button>
+            <button onClick={() => onRequestDelete(paymentID)}>削除</button>
             <button onClick={onFinish}>完了</button>
         </div>
     );
