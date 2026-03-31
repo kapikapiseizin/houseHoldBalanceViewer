@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+
 type ListDropdownInputProps = {
     title: string;
     valueId: any;
@@ -7,6 +9,16 @@ type ListDropdownInputProps = {
 };
 
 export default function ListDropdownInput({ title, valueId, items, onChange, onFinishEdit = () => { } }: ListDropdownInputProps) {
+    const [isFirstRender, setIsFirstRender] = useState(true);
+
+    useEffect(() => {
+        if (isFirstRender) {
+            setIsFirstRender(false);
+        } else {
+            onFinishEdit();
+        }
+    }, [title, valueId, items, onChange, onFinishEdit]);
+
     return (
         <div>
             <div>{title}</div>
