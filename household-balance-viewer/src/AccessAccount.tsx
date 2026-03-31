@@ -81,10 +81,64 @@ export default function AccessAccount({ onSuccess, loginHintEmail, onNewLogin }:
   }, [onSuccess, onNewLogin, loginHintEmail]);
 
   return (
-    <div>
-      <button onClick={() => tokenClientRef.current?.requestAccessToken({ prompt: "" })}>
-        Login with Google
-      </button>
+    <div style={{
+      backgroundColor: "#F8FAFC",
+      minHeight: "100vh",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: "16px",
+      boxSizing: "border-box",
+      fontFamily: "system-ui, -apple-system, sans-serif"
+    }}>
+      <div style={{
+        backgroundColor: "#FFFFFF",
+        borderRadius: "12px",
+        padding: "24px",
+        border: "1px solid #E5E7EB",
+        width: "100%",
+        maxWidth: "400px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "24px",
+        boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)"
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <h1 style={{
+            fontSize: "20px",
+            fontWeight: 700,
+            color: "#111827",
+            margin: "0 0 8px 0"
+          }}>
+            Household Balance
+          </h1>
+          <p style={{
+            fontSize: "13px",
+            color: "#6B7280",
+            margin: 0
+          }}>
+            Welcome back. Please login with Google.
+          </p>
+        </div>
+        <button
+          onClick={() => tokenClientRef.current?.requestAccessToken({ prompt: "" })}
+          style={{
+            backgroundColor: "#5FBDFF",
+            color: "#FFFFFF",
+            border: "none",
+            borderRadius: "8px",
+            padding: "12px 16px",
+            fontSize: "16px",
+            fontWeight: 700,
+            cursor: "pointer",
+            width: "100%",
+            height: "44px"
+          }}
+        >
+          Login with Google
+        </button>
+      </div>
     </div>
   );
 }
