@@ -8,7 +8,6 @@ import ListedTextAdd from "../ui/ListedTextAdd";
 
 type EditBudgetMasterProps = {
     sheetOperator: SheetOperator;
-    onFinish: () => void;
 }
 
 type BudgetCache = {
@@ -17,7 +16,7 @@ type BudgetCache = {
     budgetAmount: number;
 }
 
-export default function EditBudgetMaster({ sheetOperator, onFinish }: EditBudgetMasterProps) {
+export default function EditBudgetMaster({ sheetOperator }: EditBudgetMasterProps) {
     const now = new Date();
     const [targetYear, setTargetYear] = useState(now.getFullYear());
     const [targetMonth, setTargetMonth] = useState(now.getMonth() + 1);
@@ -121,7 +120,6 @@ export default function EditBudgetMaster({ sheetOperator, onFinish }: EditBudget
                     fetchBudgets();
                 }}
             />
-            <button onClick={onFinish}>完了</button>
         </div>
     );
 }

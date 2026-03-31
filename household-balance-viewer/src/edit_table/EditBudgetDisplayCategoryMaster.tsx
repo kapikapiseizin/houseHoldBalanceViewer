@@ -8,10 +8,9 @@ import type { Category } from "../SheetOperator";
 
 type EditBudgetDisplayCategoryMasterProps = {
     sheetOperator: SheetOperator;
-    onFinish: () => void;
 }
 
-export default function EditBudgetDisplayCategoryMaster({ sheetOperator, onFinish }: EditBudgetDisplayCategoryMasterProps) {
+export default function EditBudgetDisplayCategoryMaster({ sheetOperator }: EditBudgetDisplayCategoryMasterProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [displayCategories, setDisplayCategories] = useState<Category[]>([]);
     const [unDisplayCategories, setUnDisplayCategories] = useState<Category[]>([]);
@@ -101,7 +100,6 @@ export default function EditBudgetDisplayCategoryMaster({ sheetOperator, onFinis
                     await fetchCategories();
                 }}
             />
-            <button onClick={onFinish}>完了</button>
         </div>
     );
 }

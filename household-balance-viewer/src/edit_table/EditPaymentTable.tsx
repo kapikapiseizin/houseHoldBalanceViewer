@@ -7,10 +7,9 @@ import PlainTextItem from "../ui/PlainTextItem";
 
 type EditPaymentTableProps = {
     sheetOperator: SheetOperator;
-    onFinish: () => void;
 }
 
-export default function EditPaymentTable({ sheetOperator, onFinish }: EditPaymentTableProps) {
+export default function EditPaymentTable({ sheetOperator }: EditPaymentTableProps) {
 
     const [phase, setPhase] = useState<"select" | "edit">("select");
     const [paymentID, setPaymentID] = useState<string | undefined>(undefined);
@@ -42,8 +41,8 @@ export default function EditPaymentTable({ sheetOperator, onFinish }: EditPaymen
 
     return (
         <div>
-            {phase === "select" && <SelectPaymentTable sheetOperator={sheetOperator} onSelect={handlePaymentSelect} onFinish={onFinish} />}
-            {phase === "edit" && paymentID && <UpdatePaymentTable paymentID={paymentID} sheetOperator={sheetOperator} onRequestDelete={handleRequestPaymentDelete} onFinish={onFinish} />}
+            {phase === "select" && <SelectPaymentTable sheetOperator={sheetOperator} onSelect={handlePaymentSelect} />}
+            {phase === "edit" && paymentID && <UpdatePaymentTable paymentID={paymentID} sheetOperator={sheetOperator} onRequestDelete={handleRequestPaymentDelete} />}
         </div>
     );
 }
@@ -51,10 +50,9 @@ export default function EditPaymentTable({ sheetOperator, onFinish }: EditPaymen
 type SelectPaymentTableProps = {
     sheetOperator: SheetOperator;
     onSelect: (paymentID: string) => void;
-    onFinish: () => void;
 }
 
-function SelectPaymentTable({ sheetOperator, onSelect, onFinish }: SelectPaymentTableProps) {
+function SelectPaymentTable({ sheetOperator, onSelect }: SelectPaymentTableProps) {
     const now = new Date();
     const [targetYear, setTargetYear] = useState(now.getFullYear());
     const [targetMonth, setTargetMonth] = useState(now.getMonth() + 1);
@@ -103,7 +101,6 @@ function SelectPaymentTable({ sheetOperator, onSelect, onFinish }: SelectPayment
                     </div>
                 ))
             }
-            <button onClick={onFinish}>完了</button>
         </div>
     );
 }
@@ -112,15 +109,13 @@ type UpdatePaymentTableProps = {
     paymentID: string;
     sheetOperator: SheetOperator;
     onRequestDelete: (paymentID: string) => void;
-    onFinish: () => void;
 }
 
-function UpdatePaymentTable({ paymentID, sheetOperator, onRequestDelete, onFinish }: UpdatePaymentTableProps) {
+function UpdatePaymentTable({ paymentID, sheetOperator, onRequestDelete }: UpdatePaymentTableProps) {
     return (
         <div>
             <h1>決済編集</h1>
             <button onClick={() => onRequestDelete(paymentID)}>削除</button>
-            <button onClick={onFinish}>完了</button>
         </div>
     );
 }

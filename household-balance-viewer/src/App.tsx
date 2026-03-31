@@ -87,11 +87,16 @@ export default function App() {
     setPhase("loginRequired");
   }
 
+  const handleInitialDataWizardCancel = () => {
+    localStorage.removeItem(LAST_SPREADSHEET_ID_KEY);
+    setPhase("sheetRequired");
+  }
+
   return (
     <>
       {phase === "loginRequired" && <AccessAccount onSuccess={handleLoginSuccess} loginHintEmail={tryLoadLastLoginEmail()} onNewLogin={storeLoginInfo} />}
       {phase === "sheetRequired" && <AccessSheet accessToken={access_token} onSuccess={handleSheetSuccess} onFailure={handleSheetFailure} onLogout={handleLogout} initializeSpreadSheetID={tryLoadLastSpreadsheetId()} />}
-      {phase === "initialDataWizard" && <InitialDataWizard sheetOperator={new GoogleSheetOperator(access_token, spreadsheetId)} onFinish={() => setPhase("ready")} />}
+      {phase === "initialDataWizard" && <InitialDataWizard sheetOperator={new GoogleSheetOperator(access_token, spreadsheetId)} onCancel={handleInitialDataWizardCancel} onFinish={() => setPhase("ready")} />}
       {phase === "ready" && <LoginContent sheetOperator={new GoogleSheetOperator(access_token, spreadsheetId)} onLogout={handleLogout} />}
     </>
   );

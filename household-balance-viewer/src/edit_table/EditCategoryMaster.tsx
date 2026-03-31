@@ -7,10 +7,9 @@ import AnyTextAdd from "../ui/AnyTextAdd";
 
 type EditCategoryMasterProps = {
     sheetOperator: SheetOperator;
-    onFinish: () => void;
 };
 
-export default function EditCategoryMaster({ sheetOperator, onFinish }: EditCategoryMasterProps) {
+export default function EditCategoryMaster({ sheetOperator }: EditCategoryMasterProps) {
     const [categories, setCategories] = useState<Category[]>([]);
     const [isFetchLoading, setIsFetchLoading] = useState<boolean>(false);
     const [isUpdateLoading, setIsUpdateLoading] = useState<boolean>(false);
@@ -87,9 +86,6 @@ export default function EditCategoryMaster({ sheetOperator, onFinish }: EditCate
                     await fetchCategories();
                 }}
             />
-            <div>
-                <button onClick={onFinish}>完了</button>
-            </div>
         </div>
     );
 }

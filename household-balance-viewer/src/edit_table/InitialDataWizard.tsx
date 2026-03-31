@@ -7,35 +7,48 @@ import EditPaymentTable from "./EditPaymentTable";
 
 type InitialDataWizardProps = {
     sheetOperator: SheetOperator;
+    onCancel: () => void;
     onFinish: () => void;
 };
 
-export default function InitialDataWizard({ sheetOperator, onFinish }: InitialDataWizardProps) {
-    const [phase, setPhase] = useState<
-        "categoryMaster" |
-        "budgetDisplayCategoryMaster" |
-        "budgetMaster" |
-        "paymentTable"
-    >("categoryMaster");
+export default function InitialDataWizard({ sheetOperator, onCancel, onFinish }: InitialDataWizardProps) {
+    const EditPhase = {
+        CategoryMaster: 0,
+        BudgetDisplayCategoryMaster: 1,
+        BudgetMaster: 2,
+        PaymentTable: 3,
+    } as const;
 
-    const handleCategoryMasterFinish = () => {
-        setPhase("budgetDisplayCategoryMaster");
+    type EditPhase = typeof EditPhase[keyof typeof EditPhase];
+
+    const [phase, setPhase] = useState<EditPhase>(EditPhase.CategoryMaster);
+
+    const handleNextPhase = () => {
+        if (phase == EditPhase.PaymentTable) {
+            onFinish();
+            return;
+        }
+
+        setPhase((phase + 1) as EditPhase);
     };
 
-    const handleBudgetDisplayCategoryMasterFinish = () => {
-        setPhase("budgetMaster");
-    };
+    const handlePreviousPhase = () => {
+        if (phase == EditPhase.CategoryMaster) {
+            onCancel();
+            return;
+        }
 
-    const handleBudgetMasterFinish = () => {
-        setPhase("paymentTable");
+        setPhase((phase - 1) as EditPhase);
     };
 
     return (
         <div>
-            {phase === "categoryMaster" && <EditCategoryMaster sheetOperator={sheetOperator} onFinish={handleCategoryMasterFinish} />}
-            {phase === "budgetDisplayCategoryMaster" && <EditBudgetDisplayCategoryMaster sheetOperator={sheetOperator} onFinish={handleBudgetDisplayCategoryMasterFinish} />}
-            {phase === "budgetMaster" && <EditBudgetMaster sheetOperator={sheetOperator} onFinish={handleBudgetMasterFinish} />}
-            {phase === "paymentTable" && <EditPaymentTable sheetOperator={sheetOperator} onFinish={onFinish} />}
+            {phase === EditPhase.CategoryMaster && <EditCategoryMaster sheetOperator={sheetOperator} />}
+            {phase === EditPhase.BudgetDisplayCategoryMaster && <EditBudgetDisplayCategoryMaster sheetOperator={sheetOperator} />}
+            {phase === EditPhase.BudgetMaster && <EditBudgetMaster sheetOperator={sheetOperator} />}
+            {phase === EditPhase.PaymentTable && <EditPaymentTable sheetOperator={sheetOperator} />}
+            <button onClick={handlePreviousPhase}>戻る</button>
+            <button onClick={handleNextPhase}>次へ</button>
         </div>
     );
 }
