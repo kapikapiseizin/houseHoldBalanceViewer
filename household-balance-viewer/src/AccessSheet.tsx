@@ -143,77 +143,113 @@ export default function AccessSheet({ accessToken, onSuccess, onFailure, onLogou
     return <LoadingContent title="シートの検証中" />;
   }
 
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <div style={{
+      backgroundColor: "#F8FAFC",
+      minHeight: "100vh",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: "16px",
+      boxSizing: "border-box",
+      fontFamily: "system-ui, -apple-system, sans-serif"
+    }}>
+      <div style={{
+        backgroundColor: "#FFFFFF",
+        borderRadius: "12px",
+        padding: "24px",
+        border: "1px solid #E5E7EB",
+        width: "100%",
+        maxWidth: "400px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "24px",
+        boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)"
+      }}>
+        {children}
+      </div>
+    </div>
+  );
+
   if (phase === 'selectMode') {
     return (
-      <SelectMode
-        onChoiceCreateSheet={() => setPhase('createSheet')}
-        onChoiceSelectSheet={() => setPhase('selectSheet')}
-        onLogout={onLogout}
-      />
+      <Wrapper>
+        <SelectMode
+          onChoiceCreateSheet={() => setPhase('createSheet')}
+          onChoiceSelectSheet={() => setPhase('selectSheet')}
+          onLogout={onLogout}
+        />
+      </Wrapper>
     );
   }
 
   if (phase === 'createSheet') {
     return (
-      <CreateSheet
-        accessToken={accessToken}
-        onCreate={async (spreadSheetID) => {
-          setIsLoading(true);
-          try {
-            const isValid = await checkSheetFormat(accessToken, spreadSheetID);
-            if (isValid) {
-              console.log(sheetFormatSuccess);
-              setCreateSpreadSheetID(spreadSheetID);
-              setPhase('initializeSheet');
-            } else {
-              console.error(sheetFormatError);
-              window.confirm(sheetFormatError);
-              setPhase('selectMode');
+      <Wrapper>
+        <CreateSheet
+          accessToken={accessToken}
+          onCreate={async (spreadSheetID) => {
+            setIsLoading(true);
+            try {
+              const isValid = await checkSheetFormat(accessToken, spreadSheetID);
+              if (isValid) {
+                console.log(sheetFormatSuccess);
+                setCreateSpreadSheetID(spreadSheetID);
+                setPhase('initializeSheet');
+              } else {
+                console.error(sheetFormatError);
+                window.confirm(sheetFormatError);
+                setPhase('selectMode');
+              }
+            } finally {
+              setIsLoading(false);
             }
-          } finally {
-            setIsLoading(false);
-          }
-        }}
-        onBack={() => setPhase('selectMode')}
-      />
+          }}
+          onBack={() => setPhase('selectMode')}
+        />
+      </Wrapper>
     );
   }
 
   if (phase === 'selectSheet') {
     return (
-      <SelectSheet
-        accessToken={accessToken}
-        onSelect={async (spreadSheetID) => {
-          setIsLoading(true);
-          try {
-            const isValid = await checkSheetFormat(accessToken, spreadSheetID);
-            if (isValid) {
-              console.log(sheetFormatSuccess);
-              onSuccess(spreadSheetID);
-            } else {
-              console.error(sheetFormatError);
-              window.confirm(sheetFormatError);
-              setPhase('selectMode');
+      <Wrapper>
+        <SelectSheet
+          accessToken={accessToken}
+          onSelect={async (spreadSheetID) => {
+            setIsLoading(true);
+            try {
+              const isValid = await checkSheetFormat(accessToken, spreadSheetID);
+              if (isValid) {
+                console.log(sheetFormatSuccess);
+                onSuccess(spreadSheetID);
+              } else {
+                console.error(sheetFormatError);
+                window.confirm(sheetFormatError);
+                setPhase('selectMode');
+              }
+            } finally {
+              setIsLoading(false);
             }
-          } finally {
-            setIsLoading(false);
-          }
-        }}
-        onFailure={() => {
-          onFailure();
-        }}
-        onBack={() => setPhase('selectMode')}
-      />
+          }}
+          onFailure={() => {
+            onFailure();
+          }}
+          onBack={() => setPhase('selectMode')}
+        />
+      </Wrapper>
     );
   }
 
   if (phase === 'initializeSheet' && createSpreadSheetID) {
     return (
-      <InitialDataWizard
-        sheetOperator={new GoogleSheetOperator(accessToken, createSpreadSheetID)}
-        onCancel={() => setPhase('selectMode')}
-        onFinish={() => onSuccess(createSpreadSheetID)}
-      />
+      <Wrapper>
+        <InitialDataWizard
+          sheetOperator={new GoogleSheetOperator(accessToken, createSpreadSheetID)}
+          onCancel={() => setPhase('selectMode')}
+          onFinish={() => onSuccess(createSpreadSheetID)}
+        />
+      </Wrapper>
     );
   }
 
@@ -227,11 +263,37 @@ type SelectModeProps = {
 };
 
 function SelectMode({ onChoiceCreateSheet, onChoiceSelectSheet, onLogout }: SelectModeProps) {
+  const btnPrimary = {
+    backgroundColor: "#5FBDFF",
+    color: "#FFFFFF",
+    border: "none",
+    borderRadius: "8px",
+    padding: "12px 16px",
+    fontSize: "16px",
+    fontWeight: 700,
+    cursor: "pointer",
+    width: "100%",
+    height: "48px"
+  };
+
+  const btnSecondary = {
+    backgroundColor: "transparent",
+    color: "#6B7280",
+    border: "1px solid #E5E7EB",
+    borderRadius: "8px",
+    padding: "10px 16px",
+    fontSize: "14px",
+    fontWeight: 400,
+    cursor: "pointer",
+    width: "100%"
+  };
+
   return (
-    <div>
-      <button onClick={onChoiceCreateSheet}>新規作成</button>
-      <button onClick={onChoiceSelectSheet}>既存のシートを選択</button>
-      <button onClick={onLogout}>ログアウト</button>
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px", alignItems: "center" }}>
+      <h1 style={{ fontSize: "20px", fontWeight: 700, color: "#111827", margin: "0 0 8px 0" }}>シートの準備</h1>
+      <button style={btnPrimary} onClick={onChoiceSelectSheet}>既存のシートを選択</button>
+      <button style={btnSecondary} onClick={onChoiceCreateSheet}>新規作成</button>
+      <button style={{ ...btnSecondary, border: "none", marginTop: "8px" }} onClick={onLogout}>ログアウト</button>
     </div>
   );
 }
@@ -245,6 +307,31 @@ type CreateSheetProps = {
 function CreateSheet({ accessToken, onCreate, onBack }: CreateSheetProps) {
   const [sheetName, setSheetName] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const btnPrimary = {
+    backgroundColor: "#5FBDFF",
+    color: "#FFFFFF",
+    border: "none",
+    borderRadius: "8px",
+    padding: "12px 16px",
+    fontSize: "16px",
+    fontWeight: 700,
+    cursor: "pointer",
+    width: "100%",
+    height: "48px"
+  };
+
+  const btnSecondary = {
+    backgroundColor: "transparent",
+    color: "#6B7280",
+    border: "1px solid #E5E7EB",
+    borderRadius: "8px",
+    padding: "10px 16px",
+    fontSize: "14px",
+    fontWeight: 400,
+    cursor: "pointer",
+    width: "100%"
+  };
 
   const handleCreate = async () => {
     setIsLoading(true);
@@ -291,15 +378,21 @@ function CreateSheet({ accessToken, onCreate, onBack }: CreateSheetProps) {
   }
 
   return (
-    <div>
-      <TitledInput
-        inputType="text"
-        title="シート名を入力"
-        value={sheetName}
-        onChange={(e) => setSheetName(e.target.value)}
-      />
-      <button onClick={handleCreate}>作成</button>
-      <button onClick={onBack}>戻る</button>
+    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+      <header style={{ textAlign: "center" }}>
+        <h1 style={{ fontSize: "20px", fontWeight: 700, color: "#111827", margin: "0 0 8px 0" }}>新規シート作成</h1>
+        <p style={{ fontSize: "13px", color: "#6B7280", margin: 0 }}>管理用のスプレッドシートを新しく作成します。</p>
+      </header>
+      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <TitledInput
+          inputType="text"
+          title="シート名"
+          value={sheetName}
+          onChange={(e) => setSheetName(e.target.value)}
+        />
+        <button style={btnPrimary} onClick={handleCreate}>作成して開始</button>
+        <button style={btnSecondary} onClick={onBack}>戻る</button>
+      </div>
     </div>
   );
 }
@@ -324,6 +417,31 @@ function SelectSheet({ accessToken, onSelect, onFailure, onBack }: SelectSheetPr
   const [spreadSheetID, setSpreadSheetID] = useState<string | undefined>(undefined);
   const [sheets, setSheets] = useState<SheetItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const btnPrimary = {
+    backgroundColor: "#5FBDFF",
+    color: "#FFFFFF",
+    border: "none",
+    borderRadius: "8px",
+    padding: "12px 16px",
+    fontSize: "16px",
+    fontWeight: 700,
+    cursor: "pointer",
+    width: "100%",
+    height: "48px"
+  };
+
+  const btnSecondary = {
+    backgroundColor: "transparent",
+    color: "#6B7280",
+    border: "1px solid #E5E7EB",
+    borderRadius: "8px",
+    padding: "10px 16px",
+    fontSize: "14px",
+    fontWeight: 400,
+    cursor: "pointer",
+    width: "100%"
+  };
 
   useEffect(() => {
     async function fetchSheets() {
@@ -377,19 +495,25 @@ function SelectSheet({ accessToken, onSelect, onFailure, onBack }: SelectSheetPr
   };
 
   return (
-    <div>
-      {sheets.length > 0 && (
-        <ListDropdownInput
-          title="シートを選択"
-          valueId={spreadSheetID}
-          items={sheets.map((item) => ({ id: item.id, displayName: item.title }))}
-          onChange={(id) => {
-            setSpreadSheetID(id);
-          }}
-        />
-      )}
-      <button onClick={handleSelect}>決定</button>
-      <button onClick={onBack}>戻る</button>
+    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+      <header style={{ textAlign: "center" }}>
+        <h1 style={{ fontSize: "20px", fontWeight: 700, color: "#111827", margin: "0 0 8px 0" }}>シートを選択</h1>
+        <p style={{ fontSize: "13px", color: "#6B7280", margin: 0 }}>既存の支出管理シートから選択します。</p>
+      </header>
+      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        {sheets.length > 0 && (
+          <ListDropdownInput
+            title="スプレッドシート"
+            valueId={spreadSheetID}
+            items={sheets.map((item) => ({ id: item.id, displayName: item.title }))}
+            onChange={(id) => {
+              setSpreadSheetID(id);
+            }}
+          />
+        )}
+        <button style={btnPrimary} onClick={handleSelect}>決定</button>
+        <button style={btnSecondary} onClick={onBack}>戻る</button>
+      </div>
     </div>
   );
 }
