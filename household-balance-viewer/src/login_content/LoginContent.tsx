@@ -35,23 +35,40 @@ function BudgetPage({ sheetOperator, onClickDisplaySetting }: BudgetPageProps) {
     <div
       style={{
         display: "flex",
+        flexDirection: "column",
+        flex: "1",
+      }}>
+      <YearMonthSelect year={targetYear} month={targetMonth} onChange={(year, month) => { setTargetYear(year); setTargetMonth(month); }} />
+      <div style={{
+        display: "flex",
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "column",
-      }}
-    >
-      <YearMonthSelect year={targetYear} month={targetMonth} onChange={(year, month) => { setTargetYear(year); setTargetMonth(month); }} />
-      {balance.map((balance, index) => (
-        <BalanceDisplay
-          key={index}
-          title={balance.title}
-          budgetAmount={balance.budgetAmount}
-          carryOverAmount={balance.carryOverAmount}
-          usedAmount={balance.usedAmount}
-        />
-      ))}
-      <button onClick={onClickDisplaySetting}>表示設定</button>
-    </div>
+      }}>
+
+        {balance.map((balance, index) => (
+          <BalanceDisplay
+            key={index}
+            title={balance.title}
+            budgetAmount={balance.budgetAmount}
+            carryOverAmount={balance.carryOverAmount}
+            usedAmount={balance.usedAmount}
+          />
+        ))}
+      </div>
+      <div style={{
+        flex: "1",
+        position: "relative",
+      }}>
+        <button
+          style={{
+            position: "absolute",
+            bottom: "20px",
+            right: "20px",
+          }}
+          onClick={onClickDisplaySetting}>&#x2699;</button>
+      </div>
+    </div >
   );
 }
 
@@ -270,7 +287,9 @@ export default function LoginContent({ sheetOperator, onLogout }: LoginContentPr
       <div style={{
         height: '90vh',
         overflowY: 'auto',      // メインコンテンツ内はスクロール可能にする
-        backgroundColor: "#c5fff8"
+        backgroundColor: "#c5fff8",
+        display: "flex",
+        flexDirection: "column",
       }}>
         {page === Phase.BUDGET && <BudgetPage sheetOperator={sheetOperator} onClickDisplaySetting={() => handleEnterEditPhase(EditPhase.BUDGET_DISPLAY_CATEGORY_MASTER)} />}
         {page === Phase.INPUT && <InputPage sheetOperator={sheetOperator} />}
