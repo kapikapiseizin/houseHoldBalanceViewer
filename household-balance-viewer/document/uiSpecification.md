@@ -45,7 +45,7 @@ export const semantic = {
 * Max 2 semantic colors per screen
 * No background usage of semantic colors
 * No gradients
-
+* Reference:https://colorhunt.co/palette/c5fff896efff5fbdff7b66ff
 ---
 
 ## 2. Typography
