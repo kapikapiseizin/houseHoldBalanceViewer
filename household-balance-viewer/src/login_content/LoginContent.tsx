@@ -5,12 +5,17 @@ import BalanceDisplay from "../ui/BalanceDisplay";
 import type { SheetOperator, Category, BalanceResponse } from "../SheetOperator";
 import LoadingContent from "../ui/LoadingContent";
 import YearMonthSelect from "../ui/YearMonthSelect";
+import EditCategoryMaster from "../edit_table/EditCategoryMaster";
+import EditBudgetDisplayCategoryMaster from "../edit_table/EditBudgetDisplayCategoryMaster";
+import EditBudgetMaster from "../edit_table/EditBudgetMaster";
+import EditPaymentTable from "../edit_table/EditPaymentTable";
 
 type BudgetPageProps = {
   sheetOperator: SheetOperator;
+  onClickDisplaySetting: () => void;
 }
 
-function BudgetPage({ sheetOperator }: BudgetPageProps) {
+function BudgetPage({ sheetOperator, onClickDisplaySetting }: BudgetPageProps) {
   const now = new Date();
   const [targetYear, setTargetYear] = useState(now.getFullYear());
   const [targetMonth, setTargetMonth] = useState(now.getMonth() + 1);
@@ -39,6 +44,7 @@ function BudgetPage({ sheetOperator }: BudgetPageProps) {
           usedAmount={balance.usedAmount}
         />
       ))}
+      <button onClick={onClickDisplaySetting}>表示設定</button>
     </div>
   );
 }
@@ -151,8 +157,34 @@ export default function LoginContent({ sheetOperator, onLogout }: LoginContentPr
   const nowYear = now.getFullYear();
   const nowMonth = now.getMonth() + 1;
 
-  const [page, setPage] = useState<"budget" | "input" | "menu">("budget");
+  const Phase = {
+    BUDGET: 0,
+    INPUT: 1,
+    MENU: 2,
+    EDIT_CATEGORY_MASTER: 3,
+    EDIT_BUDGET_DISPLAY_CATEGORY_MASTER: 4,
+    EDIT_BUDGET_MASTER: 5,
+    EDIT_PAYMENT_TABLE: 6
+  }
+
+  const [page, setPage] = useState<number>(Phase.BUDGET);
   const [isPropagateLoading, setIsPropagateLoading] = useState(false);
+  const [isEditPhase, setIsEditPhase] = useState(false);
+  const [stackPage, setStackPage] = useState<number | undefined>(undefined);
+
+  const handleEnterEditPhase = (phase: number) => {
+    setStackPage(page);
+    setPage(phase);
+    setIsEditPhase(true);
+  }
+
+  const handleExitEditPhase = () => {
+    setIsEditPhase(false);
+    if (stackPage !== undefined) {
+      setPage(stackPage);
+      setStackPage(undefined);
+    }
+  }
 
   useEffect(() => {
     setIsPropagateLoading(true);
@@ -163,18 +195,34 @@ export default function LoginContent({ sheetOperator, onLogout }: LoginContentPr
     return <LoadingContent title="予算を更新中" />;
   }
 
+  if (isEditPhase) {
+    return (
+      <div className="app">
+        <main className="main">
+          <div>
+            {page === Phase.EDIT_CATEGORY_MASTER && <EditCategoryMaster sheetOperator={sheetOperator} />}
+            {page === Phase.EDIT_BUDGET_DISPLAY_CATEGORY_MASTER && <EditBudgetDisplayCategoryMaster sheetOperator={sheetOperator} />}
+            {page === Phase.EDIT_BUDGET_MASTER && <EditBudgetMaster sheetOperator={sheetOperator} />}
+            {page === Phase.EDIT_PAYMENT_TABLE && <EditPaymentTable sheetOperator={sheetOperator} />}
+          </div>
+          <button onClick={handleExitEditPhase}>戻る</button>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="app">
       <main className="main">
-        {page === "budget" && <BudgetPage sheetOperator={sheetOperator} />}
-        {page === "input" && <InputPage sheetOperator={sheetOperator} />}
-        {page === "menu" && <Menu onLogout={onLogout} />}
+        {page === Phase.BUDGET && <BudgetPage sheetOperator={sheetOperator} onClickDisplaySetting={() => handleEnterEditPhase(Phase.EDIT_BUDGET_DISPLAY_CATEGORY_MASTER)} />}
+        {page === Phase.INPUT && <InputPage sheetOperator={sheetOperator} />}
+        {page === Phase.MENU && <Menu onLogout={onLogout} />}
       </main>
 
       <nav className="menu">
-        <button onClick={() => setPage("budget")}>予算</button>
-        <button onClick={() => setPage("input")}>入力</button>
-        <button onClick={() => setPage("menu")}>メニュー</button>
+        <button onClick={() => setPage(Phase.BUDGET)}>予算</button>
+        <button onClick={() => setPage(Phase.INPUT)}>入力</button>
+        <button onClick={() => setPage(Phase.MENU)}>メニュー</button>
       </nav>
     </div>
   );
