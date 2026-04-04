@@ -28,29 +28,37 @@ export default function MoneyInput({
       >
         {title}
       </div>
-      <input
-        type="number"
-        value={amount}
-        onChange={(e) => onChange(Number(e.target.value))}
-        onBlur={onFinishEdit}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            onFinishEdit();
-          }
-        }}
+      <div
         style={{
-          padding: "10px",
-          fontSize: "16px",
-          border: "1px solid #E5E7EB",
-          borderRadius: "8px",
-          backgroundColor: "#FFFFFF",
-          color: "#111827",
-          outline: "none",
-          boxSizing: "border-box",
-          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          gap: "4px",
         }}
-      />
-      円
+      >
+        <input
+          type="number"
+          value={amount}
+          onChange={(e) => onChange(Number(e.target.value))}
+          onBlur={onFinishEdit}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              onFinishEdit();
+            }
+          }}
+          style={{
+            padding: "10px",
+            fontSize: "16px",
+            border: "1px solid #E5E7EB",
+            borderRadius: "8px",
+            backgroundColor: "#FFFFFF",
+            color: "#111827",
+            outline: "none",
+            boxSizing: "border-box",
+            width: "100%",
+          }}
+        />
+        円
+      </div>
     </div>
   );
 }

@@ -13,6 +13,7 @@ import EditBudgetDisplayCategoryMaster from "../edit_table/EditBudgetDisplayCate
 import EditBudgetMaster from "../edit_table/EditBudgetMaster";
 import EditPaymentTable from "../edit_table/EditPaymentTable";
 import GridButton from "../ui/GridButton";
+import { headerStyle } from "../ui/HeaderStyle";
 
 type BudgetPageProps = {
   sheetOperator: SheetOperator;
@@ -84,21 +85,40 @@ function BudgetPage({ sheetOperator, onClickDisplaySetting }: BudgetPageProps) {
             position: "absolute",
             bottom: "20px",
             right: "20px",
-            fontSize: "4rem",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
             backgroundColor: "transparent",
-            width: "5rem",
-            height: "5rem",
+            color: "white",
             border: "none",
+            borderRadius: "12px",
             cursor: "pointer",
-            padding: 0,
-            backgroundImage: `url(./eye_blue3.png)`,
-            backgroundPosition: "center",
-            backgroundSize: "80%",
-            backgroundRepeat: "no-repeat",
-            overflow: "hidden",
+            padding: "10px",
+            gap: "1px",
+            width: "80px",
+            height: "80px",
           }}
           onClick={onClickDisplaySetting}
-        />
+        >
+          <img
+            style={{
+              width: "100%",
+              height: "100%",
+            }}
+            src="./eye_blue3.png"
+            alt="eye"
+          />
+          <span
+            style={{
+              fontSize: "0.9rem",
+              color: "#5FBDFF",
+              marginTop: "4px",
+            }}
+          >
+            表示設定
+          </span>
+        </button>
       </div>
     </div>
   );
@@ -184,21 +204,7 @@ function InputPage({ sheetOperator }: InputPageProps) {
         gap: "1rem",
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: "8px",
-          fontSize: "1.5em",
-          height: "10vh",
-          width: "100%",
-          backgroundColor: "#7b66ff",
-          color: "#FFFFFF",
-        }}
-      >
-        決済を入力
-      </div>
+      <div style={headerStyle}>決済を入力</div>
       <PaymentInput
         inputDate={inputDate}
         onChangeDate={setInputDate}
@@ -245,21 +251,7 @@ function Menu({
 }: MenuProps) {
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: "8px",
-          fontSize: "1.5em",
-          height: "10vh",
-          width: "100%",
-          backgroundColor: "#7b66ff",
-          color: "#FFFFFF",
-        }}
-      >
-        メニュー
-      </div>
+      <div style={headerStyle}>メニュー</div>
       <GridButton
         elements={[
           {
