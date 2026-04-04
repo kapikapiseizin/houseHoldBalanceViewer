@@ -1,5 +1,12 @@
 export default function PlainTextItem({ data }: { data: string }) {
-    return (
-        <p>{data}</p>
-    );
+  return (
+    <p
+      style={{
+        textAlign: "center",
+        flex: 1,
+      }}
+    >
+      {data}
+    </p>
+  );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import type { SheetOperator, Category } from "../SheetOperator";
 import LoadingContent from "../ui/LoadingContent";
 import UnorderedTextList from "../ui/UnorderedTextList";
