@@ -6,10 +6,14 @@ import LoginContent from "./login_content/LoginContent";
 import { GoogleSheetOperator } from "./GoogleSheetOperator";
 
 export default function App() {
+  console.log(import.meta.env.VITE_GOOGLE_CLIENT_ID);
+
   const LAST_LOGIN_EMAIL_KEY = "lastLoginEmail";
   const LAST_SPREADSHEET_ID_KEY = "lastSpreadsheetId";
 
-  const [phase, setPhase] = useState<"loginRequired" | "sheetRequired" | "ready">("loginRequired");
+  const [phase, setPhase] = useState<
+    "loginRequired" | "sheetRequired" | "ready"
+  >("loginRequired");
 
   const [access_token, setAccessToken] = useState<string>("");
   const [spreadsheetId, setSpreadsheetId] = useState<string>("");
@@ -83,13 +87,32 @@ export default function App() {
     localStorage.removeItem(LAST_LOGIN_EMAIL_KEY);
     localStorage.removeItem(LAST_SPREADSHEET_ID_KEY);
     setPhase("loginRequired");
-  }
+  };
 
   return (
     <>
-      {phase === "loginRequired" && <AccessAccount onSuccess={handleLoginSuccess} loginHintEmail={tryLoadLastLoginEmail()} onNewLogin={storeLoginInfo} />}
-      {phase === "sheetRequired" && <AccessSheet accessToken={access_token} onSuccess={handleSheetSuccess} onFailure={handleSheetFailure} onLogout={handleLogout} initializeSpreadSheetID={tryLoadLastSpreadsheetId()} />}
-      {phase === "ready" && <LoginContent sheetOperator={new GoogleSheetOperator(access_token, spreadsheetId)} onLogout={handleLogout} />}
+      {phase === "loginRequired" && (
+        <AccessAccount
+          onSuccess={handleLoginSuccess}
+          loginHintEmail={tryLoadLastLoginEmail()}
+          onNewLogin={storeLoginInfo}
+        />
+      )}
+      {phase === "sheetRequired" && (
+        <AccessSheet
+          accessToken={access_token}
+          onSuccess={handleSheetSuccess}
+          onFailure={handleSheetFailure}
+          onLogout={handleLogout}
+          initializeSpreadSheetID={tryLoadLastSpreadsheetId()}
+        />
+      )}
+      {phase === "ready" && (
+        <LoginContent
+          sheetOperator={new GoogleSheetOperator(access_token, spreadsheetId)}
+          onLogout={handleLogout}
+        />
+      )}
     </>
   );
 }
