@@ -243,12 +243,59 @@ function Menu({
   onEditBudgetMaster,
   onEditPaymentTable,
 }: MenuProps) {
+  const styleButton = {
+    backgroundColor: "#5FBDFF",
+    color: "#FFFFFF",
+    border: "none",
+    borderRadius: "8px",
+    padding: "12px 50px",
+    fontSize: "16px",
+    fontWeight: 700,
+    cursor: "pointer",
+    height: "44px",
+  };
+
   return (
     <div>
-      <button onClick={onLogout}>Logout</button>
-      <button onClick={onEditCategoryMaster}>決済の種類</button>
-      <button onClick={onEditBudgetMaster}>予算を編集</button>
-      <button onClick={onEditPaymentTable}>決済を編集</button>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "8px",
+          fontSize: "1.5em",
+          height: "10vh",
+          width: "100%",
+          backgroundColor: "#7b66ff",
+          color: "#FFFFFF",
+        }}
+      >
+        メニュー
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column", // 縦に並べる
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "8px",
+          flexWrap: "wrap",
+          padding: "20px",
+        }}
+      >
+        <button onClick={onLogout} style={styleButton}>
+          Logout
+        </button>
+        <button onClick={onEditCategoryMaster} style={styleButton}>
+          決済の種類
+        </button>
+        <button onClick={onEditBudgetMaster} style={styleButton}>
+          予算を編集
+        </button>
+        <button onClick={onEditPaymentTable} style={styleButton}>
+          決済を編集
+        </button>
+      </div>
     </div>
   );
 }
