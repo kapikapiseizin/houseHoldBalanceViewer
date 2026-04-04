@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import PaymentInput from "../ui/PaymentInput";
 import BalanceDisplay from "../ui/BalanceDisplay";
-import type { SheetOperator, Category, BalanceResponse } from "../SheetOperator";
+import type {
+  SheetOperator,
+  Category,
+  BalanceResponse,
+} from "../SheetOperator";
 import LoadingContent from "../ui/LoadingContent";
 import YearMonthSelect from "../ui/YearMonthSelect";
 import EditCategoryMaster from "../edit_table/EditCategoryMaster";
@@ -12,7 +16,7 @@ import EditPaymentTable from "../edit_table/EditPaymentTable";
 type BudgetPageProps = {
   sheetOperator: SheetOperator;
   onClickDisplaySetting: () => void;
-}
+};
 
 function BudgetPage({ sheetOperator, onClickDisplaySetting }: BudgetPageProps) {
   const now = new Date();
@@ -24,7 +28,10 @@ function BudgetPage({ sheetOperator, onClickDisplaySetting }: BudgetPageProps) {
 
   useEffect(() => {
     setIsFetchLoading(true);
-    sheetOperator.computeBalance(targetYear, targetMonth).then(setBalance).finally(() => setIsFetchLoading(false));
+    sheetOperator
+      .computeBalance(targetYear, targetMonth)
+      .then(setBalance)
+      .finally(() => setIsFetchLoading(false));
   }, [sheetOperator, targetYear, targetMonth]);
 
   if (isFetchLoading) {
@@ -37,15 +44,24 @@ function BudgetPage({ sheetOperator, onClickDisplaySetting }: BudgetPageProps) {
         display: "flex",
         flexDirection: "column",
         flex: "1",
-      }}>
-      <YearMonthSelect year={targetYear} month={targetMonth} onChange={(year, month) => { setTargetYear(year); setTargetMonth(month); }} />
-      <div style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
-      }}>
-
+      }}
+    >
+      <YearMonthSelect
+        year={targetYear}
+        month={targetMonth}
+        onChange={(year, month) => {
+          setTargetYear(year);
+          setTargetMonth(month);
+        }}
+      />
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+        }}
+      >
         {balance.map((balance, index) => (
           <BalanceDisplay
             key={index}
@@ -56,37 +72,47 @@ function BudgetPage({ sheetOperator, onClickDisplaySetting }: BudgetPageProps) {
           />
         ))}
       </div>
-      <div style={{
-        flex: "1",
-        position: "relative",
-      }}>
+      <div
+        style={{
+          flex: "1",
+          position: "relative",
+        }}
+      >
         <button
           style={{
             position: "absolute",
             bottom: "20px",
             right: "20px",
-            fontSize: "3em",
+            fontSize: "4rem",
             color: "#FFFFFF",
-            backgroundColor: "#5FBDFF",
-            width: "1.5em",
-            height: "1.5em",
+            backgroundColor: "#696969",
+            width: "5rem",
+            height: "5rem",
             borderRadius: "50%",
             border: "none",
             cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            lineHeight: "1",
+            padding: 0,
           }}
-          onClick={onClickDisplaySetting}>&#x2699;</button>
+          onClick={onClickDisplaySetting}
+        >
+          <span>&#x1f6e0;</span>
+        </button>
       </div>
-    </div >
+    </div>
   );
 }
 
 type InputPageProps = {
   sheetOperator: SheetOperator;
-}
+};
 
 function InputPage({ sheetOperator }: InputPageProps) {
   const now = new Date();
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
   const [inputDate, setInputDate] = useState(today);
   const [categoryId, setCategoryId] = useState("");
@@ -97,7 +123,9 @@ function InputPage({ sheetOperator }: InputPageProps) {
   const [isFetchLoading, setIsFetchLoading] = useState(false);
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
 
-  const selectedCategory = dropdownItems.find(item => item.categoryID === categoryId);
+  const selectedCategory = dropdownItems.find(
+    (item) => item.categoryID === categoryId,
+  );
   const defaultTitle = selectedCategory ? selectedCategory.name : "";
   const title = isTitleManuallyEdited ? manualTitle : defaultTitle;
 
@@ -113,7 +141,7 @@ function InputPage({ sheetOperator }: InputPageProps) {
         date: inputDate,
         categoryID: categoryId,
         title,
-        amount
+        amount,
       });
     } finally {
       setIsSubmitLoading(false);
@@ -134,7 +162,7 @@ function InputPage({ sheetOperator }: InputPageProps) {
     } finally {
       setIsFetchLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -149,7 +177,15 @@ function InputPage({ sheetOperator }: InputPageProps) {
   }
 
   return (
-    <div>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: "1rem",
+      }}
+    >
       <PaymentInput
         inputDate={inputDate}
         onChangeDate={setInputDate}
@@ -177,7 +213,7 @@ function Menu({
   onLogout,
   onEditCategoryMaster,
   onEditBudgetMaster,
-  onEditPaymentTable
+  onEditPaymentTable,
 }: MenuProps) {
   return (
     <div>
@@ -193,31 +229,41 @@ const EditPhase = {
   CATEGORY_MASTER: 0,
   BUDGET_DISPLAY_CATEGORY_MASTER: 1,
   BUDGET_MASTER: 2,
-  PAYMENT_TABLE: 3
+  PAYMENT_TABLE: 3,
 } as const;
 
-type EditPhase = typeof EditPhase[keyof typeof EditPhase];
+type EditPhase = (typeof EditPhase)[keyof typeof EditPhase];
 
 type EditPageProps = {
   phase: EditPhase;
   sheetOperator: SheetOperator;
   onExitEditPhase: () => void;
-}
+};
 
 function EditPage({ phase, sheetOperator, onExitEditPhase }: EditPageProps) {
   const [isEditPrevButtonVisible, setIsEditPrevButtonVisible] = useState(true);
 
   return (
     <div>
-      {phase === EditPhase.CATEGORY_MASTER && <EditCategoryMaster sheetOperator={sheetOperator} />}
-      {phase === EditPhase.BUDGET_DISPLAY_CATEGORY_MASTER && <EditBudgetDisplayCategoryMaster sheetOperator={sheetOperator} />}
-      {phase === EditPhase.BUDGET_MASTER && <EditBudgetMaster sheetOperator={sheetOperator} />}
-      {phase === EditPhase.PAYMENT_TABLE && <EditPaymentTable
-        sheetOperator={sheetOperator}
-        onEnterTableUpdateUI={() => setIsEditPrevButtonVisible(false)}
-        onExitTableUpdateUI={() => setIsEditPrevButtonVisible(true)}
-      />}
-      {isEditPrevButtonVisible && <button onClick={onExitEditPhase}>戻る</button>}
+      {phase === EditPhase.CATEGORY_MASTER && (
+        <EditCategoryMaster sheetOperator={sheetOperator} />
+      )}
+      {phase === EditPhase.BUDGET_DISPLAY_CATEGORY_MASTER && (
+        <EditBudgetDisplayCategoryMaster sheetOperator={sheetOperator} />
+      )}
+      {phase === EditPhase.BUDGET_MASTER && (
+        <EditBudgetMaster sheetOperator={sheetOperator} />
+      )}
+      {phase === EditPhase.PAYMENT_TABLE && (
+        <EditPaymentTable
+          sheetOperator={sheetOperator}
+          onEnterTableUpdateUI={() => setIsEditPrevButtonVisible(false)}
+          onExitTableUpdateUI={() => setIsEditPrevButtonVisible(true)}
+        />
+      )}
+      {isEditPrevButtonVisible && (
+        <button onClick={onExitEditPhase}>戻る</button>
+      )}
     </div>
   );
 }
@@ -227,7 +273,10 @@ export type LoginContentProps = {
   onLogout: () => void;
 };
 
-export default function LoginContent({ sheetOperator, onLogout }: LoginContentProps) {
+export default function LoginContent({
+  sheetOperator,
+  onLogout,
+}: LoginContentProps) {
   const now = new Date();
   const nowYear = now.getFullYear();
   const nowMonth = now.getMonth() + 1;
@@ -236,7 +285,7 @@ export default function LoginContent({ sheetOperator, onLogout }: LoginContentPr
     BUDGET: 0,
     INPUT: 1,
     MENU: 2,
-    EDIT: 3
+    EDIT: 3,
   } as const;
 
   const [page, setPage] = useState<number>(Phase.BUDGET);
@@ -248,7 +297,7 @@ export default function LoginContent({ sheetOperator, onLogout }: LoginContentPr
     setStackPage(page);
     setPage(Phase.EDIT);
     setEditPhase(phase);
-  }
+  };
 
   const handleExitEditPhase = () => {
     if (stackPage !== undefined) {
@@ -256,11 +305,13 @@ export default function LoginContent({ sheetOperator, onLogout }: LoginContentPr
       setStackPage(undefined);
       setEditPhase(undefined);
     }
-  }
+  };
 
   useEffect(() => {
     setIsPropagateLoading(true);
-    sheetOperator.propagateLatestBudgetUntilTarget(nowYear, nowMonth).finally(() => setIsPropagateLoading(false));
+    sheetOperator
+      .propagateLatestBudgetUntilTarget(nowYear, nowMonth)
+      .finally(() => setIsPropagateLoading(false));
   }, [sheetOperator]);
 
   if (isPropagateLoading) {
@@ -278,56 +329,81 @@ export default function LoginContent({ sheetOperator, onLogout }: LoginContentPr
   }
 
   const buttonStyle = {
-    background: "transparent", /* 背景を透明に */
-    color: "white",            /* 文字色を白に */
-    fontSize: "1.2em",        /* フォントサイズ指定 */
+    background: "transparent" /* 背景を透明に */,
+    color: "white" /* 文字色を白に */,
+    fontSize: "1.2em" /* フォントサイズ指定 */,
     flex: 1,
-    cursor: "pointer",         /* ホバー時に指マークにする */
-    padding: "10px 20px",      /* クリックエリアを広げる（任意） */
+    cursor: "pointer" /* ホバー時に指マークにする */,
+    padding: "10px 20px" /* クリックエリアを広げる（任意） */,
     border: "none",
   };
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column', // 縦に並べる
-    }}>
-      <div style={{
-        height: '90vh',
-        overflowY: 'auto',      // メインコンテンツ内はスクロール可能にする
-        backgroundColor: "#c5fff8",
+    <div
+      style={{
         display: "flex",
-        flexDirection: "column",
-      }}>
-        {page === Phase.BUDGET && <BudgetPage sheetOperator={sheetOperator} onClickDisplaySetting={() => handleEnterEditPhase(EditPhase.BUDGET_DISPLAY_CATEGORY_MASTER)} />}
-        {page === Phase.INPUT && <InputPage sheetOperator={sheetOperator} />}
-        {
-          page === Phase.MENU && <Menu
-            onLogout={onLogout}
-            onEditCategoryMaster={() => handleEnterEditPhase(EditPhase.CATEGORY_MASTER)}
-            onEditBudgetMaster={() => handleEnterEditPhase(EditPhase.BUDGET_MASTER)}
-            onEditPaymentTable={() => handleEnterEditPhase(EditPhase.PAYMENT_TABLE)}
+        flexDirection: "column", // 縦に並べる
+      }}
+    >
+      <div
+        style={{
+          height: "90vh",
+          overflowY: "auto", // メインコンテンツ内はスクロール可能にする
+          backgroundColor: "#c5fff8",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {page === Phase.BUDGET && (
+          <BudgetPage
+            sheetOperator={sheetOperator}
+            onClickDisplaySetting={() =>
+              handleEnterEditPhase(EditPhase.BUDGET_DISPLAY_CATEGORY_MASTER)
+            }
           />
-        }
+        )}
+        {page === Phase.INPUT && <InputPage sheetOperator={sheetOperator} />}
+        {page === Phase.MENU && (
+          <Menu
+            onLogout={onLogout}
+            onEditCategoryMaster={() =>
+              handleEnterEditPhase(EditPhase.CATEGORY_MASTER)
+            }
+            onEditBudgetMaster={() =>
+              handleEnterEditPhase(EditPhase.BUDGET_MASTER)
+            }
+            onEditPaymentTable={() =>
+              handleEnterEditPhase(EditPhase.PAYMENT_TABLE)
+            }
+          />
+        )}
       </div>
-      <nav style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        width: '100%',
-        height: '10vh',
-        display: 'flex',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        backgroundColor: '#5fbdff', // 背景色が白だと文字が見えないため仮の色
-        padding: '0 20px',
-        boxSizing: 'border-box', // パディングを含めて100%にする
-        whiteSpace: "nowrap"
-      }}>
-        <button style={buttonStyle} onClick={() => setPage(Phase.BUDGET)}>予算</button>
-        <button style={buttonStyle} onClick={() => setPage(Phase.INPUT)}>入力</button>
-        <button style={buttonStyle} onClick={() => setPage(Phase.MENU)}>メニュー</button>
+      <nav
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          width: "100%",
+          height: "10vh",
+          display: "flex",
+          justifyContent: "space-around",
+          alignItems: "center",
+          backgroundColor: "#5fbdff", // 背景色が白だと文字が見えないため仮の色
+          padding: "0 20px",
+          boxSizing: "border-box", // パディングを含めて100%にする
+          whiteSpace: "nowrap",
+        }}
+      >
+        <button style={buttonStyle} onClick={() => setPage(Phase.BUDGET)}>
+          予算
+        </button>
+        <button style={buttonStyle} onClick={() => setPage(Phase.INPUT)}>
+          入力
+        </button>
+        <button style={buttonStyle} onClick={() => setPage(Phase.MENU)}>
+          メニュー
+        </button>
       </nav>
-    </div >
+    </div>
   );
 }
