@@ -55,63 +55,79 @@ export default function EditBudgetDisplayCategoryMaster({
   }
 
   return (
-    <div>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        flex: "1",
+      }}
+    >
       <div style={headerStyle}>予算の表示設定</div>
-      <OrderedTextList
-        value={displayCategories.map((c) => {
-          return {
-            id: c.categoryID,
-            text: c.name,
-          };
-        })}
-        onRenderItem={(item) => {
-          return <PlainTextItem data={item.text} />;
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "16px",
+          padding: "16px",
+          flex: "1",
         }}
-        onRequestDelete={async (item) => {
-          if (!window.confirm("本当に削除しますか？")) {
-            return;
-          }
+      >
+        <OrderedTextList
+          value={displayCategories.map((c) => {
+            return {
+              id: c.categoryID,
+              text: c.name,
+            };
+          })}
+          onRenderItem={(item) => {
+            return <PlainTextItem data={item.text} />;
+          }}
+          onRequestDelete={async (item) => {
+            if (!window.confirm("本当に削除しますか？")) {
+              return;
+            }
 
-          setIsLoading(true);
-          try {
-            await sheetOperator.requestDeleteDisplayBudget(item.id);
-          } finally {
-            setIsLoading(false);
-          }
+            setIsLoading(true);
+            try {
+              await sheetOperator.requestDeleteDisplayBudget(item.id);
+            } finally {
+              setIsLoading(false);
+            }
 
-          await fetchCategories();
-        }}
-        onChangeOrder={async (items) => {
-          setIsLoading(true);
-          try {
-            await sheetOperator.updateOrderedBudgetDisplayCategories(
-              items.map((item) => item.id),
-            );
-          } finally {
-            setIsLoading(false);
-          }
+            await fetchCategories();
+          }}
+          onChangeOrder={async (items) => {
+            setIsLoading(true);
+            try {
+              await sheetOperator.updateOrderedBudgetDisplayCategories(
+                items.map((item) => item.id),
+              );
+            } finally {
+              setIsLoading(false);
+            }
 
-          await fetchCategories();
-        }}
-      />
-      <ListedTextAdd
-        items={unDisplayCategories.map((c) => {
-          return {
-            id: c.categoryID,
-            text: c.name,
-          };
-        })}
-        onSelected={async (item) => {
-          setIsLoading(true);
-          try {
-            await sheetOperator.requestAddDisplayBudget(item.id);
-          } finally {
-            setIsLoading(false);
-          }
+            await fetchCategories();
+          }}
+        />
+        <ListedTextAdd
+          items={unDisplayCategories.map((c) => {
+            return {
+              id: c.categoryID,
+              text: c.name,
+            };
+          })}
+          onSelected={async (item) => {
+            setIsLoading(true);
+            try {
+              await sheetOperator.requestAddDisplayBudget(item.id);
+            } finally {
+              setIsLoading(false);
+            }
 
-          await fetchCategories();
-        }}
-      />
+            await fetchCategories();
+          }}
+        />
+      </div>
     </div>
   );
 }

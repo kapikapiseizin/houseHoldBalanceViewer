@@ -14,6 +14,7 @@ import EditBudgetMaster from "../edit_table/EditBudgetMaster";
 import EditPaymentTable from "../edit_table/EditPaymentTable";
 import GridButton from "../ui/GridButton";
 import { headerStyle } from "../ui/HeaderStyle";
+import { pushButtonStyle } from "../ui/PushButtonStyle";
 
 type BudgetPageProps = {
   sheetOperator: SheetOperator;
@@ -216,20 +217,7 @@ function InputPage({ sheetOperator }: InputPageProps) {
         amount={amount}
         onChangeAmount={setAmount}
       />
-      <button
-        onClick={handleSubmit}
-        style={{
-          backgroundColor: "#5FBDFF",
-          color: "#FFFFFF",
-          border: "none",
-          borderRadius: "8px",
-          padding: "12px 50px",
-          fontSize: "16px",
-          fontWeight: 700,
-          cursor: "pointer",
-          height: "44px",
-        }}
-      >
+      <button onClick={handleSubmit} style={pushButtonStyle}>
         登録
       </button>
     </div>
@@ -299,7 +287,14 @@ function EditPage({ phase, sheetOperator, onExitEditPhase }: EditPageProps) {
   const [isEditPrevButtonVisible, setIsEditPrevButtonVisible] = useState(true);
 
   return (
-    <div>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+        backgroundColor: "#C5FFF8",
+      }}
+    >
       {phase === EditPhase.CATEGORY_MASTER && (
         <EditCategoryMaster sheetOperator={sheetOperator} />
       )}
@@ -317,7 +312,14 @@ function EditPage({ phase, sheetOperator, onExitEditPhase }: EditPageProps) {
         />
       )}
       {isEditPrevButtonVisible && (
-        <button onClick={onExitEditPhase}>戻る</button>
+        <div>
+          <button
+            onClick={onExitEditPhase}
+            style={{ ...pushButtonStyle, width: "50%" }}
+          >
+            戻る
+          </button>
+        </div>
       )}
     </div>
   );
