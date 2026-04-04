@@ -184,6 +184,21 @@ function InputPage({ sheetOperator }: InputPageProps) {
         gap: "1rem",
       }}
     >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "8px",
+          fontSize: "1.5em",
+          height: "10vh",
+          width: "100%",
+          backgroundColor: "#7b66ff",
+          color: "#FFFFFF",
+        }}
+      >
+        決済を入力
+      </div>
       <PaymentInput
         inputDate={inputDate}
         onChangeDate={setInputDate}
@@ -195,7 +210,22 @@ function InputPage({ sheetOperator }: InputPageProps) {
         amount={amount}
         onChangeAmount={setAmount}
       />
-      <button onClick={handleSubmit}>登録</button>
+      <button
+        onClick={handleSubmit}
+        style={{
+          backgroundColor: "#5FBDFF",
+          color: "#FFFFFF",
+          border: "none",
+          borderRadius: "8px",
+          padding: "12px 50px",
+          fontSize: "16px",
+          fontWeight: 700,
+          cursor: "pointer",
+          height: "44px",
+        }}
+      >
+        登録
+      </button>
     </div>
   );
 }
