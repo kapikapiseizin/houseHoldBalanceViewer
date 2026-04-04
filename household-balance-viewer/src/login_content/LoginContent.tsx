@@ -12,7 +12,7 @@ import EditCategoryMaster from "../edit_table/EditCategoryMaster";
 import EditBudgetDisplayCategoryMaster from "../edit_table/EditBudgetDisplayCategoryMaster";
 import EditBudgetMaster from "../edit_table/EditBudgetMaster";
 import EditPaymentTable from "../edit_table/EditPaymentTable";
-import eyeImage from "../assets/eye.png";
+import GridButton from "../ui/GridButton";
 
 type BudgetPageProps = {
   sheetOperator: SheetOperator;
@@ -91,7 +91,7 @@ function BudgetPage({ sheetOperator, onClickDisplaySetting }: BudgetPageProps) {
             border: "none",
             cursor: "pointer",
             padding: 0,
-            backgroundImage: `url(${eyeImage})`,
+            backgroundImage: `url(./eye_blue3.png)`,
             backgroundPosition: "center",
             backgroundSize: "80%",
             backgroundRepeat: "no-repeat",
@@ -243,18 +243,6 @@ function Menu({
   onEditBudgetMaster,
   onEditPaymentTable,
 }: MenuProps) {
-  const styleButton = {
-    backgroundColor: "#5FBDFF",
-    color: "#FFFFFF",
-    border: "none",
-    borderRadius: "8px",
-    padding: "12px 50px",
-    fontSize: "16px",
-    fontWeight: 700,
-    cursor: "pointer",
-    height: "44px",
-  };
-
   return (
     <div>
       <div
@@ -272,30 +260,30 @@ function Menu({
       >
         メニュー
       </div>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column", // 縦に並べる
-          justifyContent: "center",
-          alignItems: "center",
-          gap: "8px",
-          flexWrap: "wrap",
-          padding: "20px",
-        }}
-      >
-        <button onClick={onLogout} style={styleButton}>
-          Logout
-        </button>
-        <button onClick={onEditCategoryMaster} style={styleButton}>
-          決済の種類
-        </button>
-        <button onClick={onEditBudgetMaster} style={styleButton}>
-          予算を編集
-        </button>
-        <button onClick={onEditPaymentTable} style={styleButton}>
-          決済を編集
-        </button>
-      </div>
+      <GridButton
+        elements={[
+          {
+            title: "Logout",
+            onClick: onLogout,
+            iconSrc: "/logout.png",
+          },
+          {
+            title: "決済の種類",
+            onClick: onEditCategoryMaster,
+            iconSrc: "/category.png",
+          },
+          {
+            title: "予算を編集",
+            onClick: onEditBudgetMaster,
+            iconSrc: "/budget.png",
+          },
+          {
+            title: "決済を編集",
+            onClick: onEditPaymentTable,
+            iconSrc: "/payment.png",
+          },
+        ]}
+      />
     </div>
   );
 }
