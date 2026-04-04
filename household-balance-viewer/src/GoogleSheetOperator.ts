@@ -815,8 +815,6 @@ export class GoogleSheetOperator implements SheetOperator {
         targetMonth,
       );
 
-    console.log("rowsBudgetOrderByDateAsc", rowsBudgetOrderByDateAsc);
-
     const categoryIDtoLatestBudget = new Map<
       string,
       { year: number; month: number; budgetAmount: number }
@@ -837,8 +835,6 @@ export class GoogleSheetOperator implements SheetOperator {
         budgetAmount,
       });
     }
-
-    console.log(categoryIDtoLatestBudget);
 
     const rowsToAdd: string[][] = [];
 
