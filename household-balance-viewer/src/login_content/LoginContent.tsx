@@ -12,6 +12,7 @@ import EditCategoryMaster from "../edit_table/EditCategoryMaster";
 import EditBudgetDisplayCategoryMaster from "../edit_table/EditBudgetDisplayCategoryMaster";
 import EditBudgetMaster from "../edit_table/EditBudgetMaster";
 import EditPaymentTable from "../edit_table/EditPaymentTable";
+import eyeImage from "../assets/eye.png";
 
 type BudgetPageProps = {
   sheetOperator: SheetOperator;
@@ -84,23 +85,20 @@ function BudgetPage({ sheetOperator, onClickDisplaySetting }: BudgetPageProps) {
             bottom: "20px",
             right: "20px",
             fontSize: "4rem",
-            color: "#FFFFFF",
-            backgroundColor: "#696969",
+            backgroundColor: "transparent",
             width: "5rem",
             height: "5rem",
-            borderRadius: "50%",
             border: "none",
             cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            lineHeight: "1",
             padding: 0,
+            backgroundImage: `url(${eyeImage})`,
+            backgroundPosition: "center",
+            backgroundSize: "80%",
+            backgroundRepeat: "no-repeat",
+            overflow: "hidden",
           }}
           onClick={onClickDisplaySetting}
-        >
-          <span>&#x1f6e0;</span>
-        </button>
+        />
       </div>
     </div>
   );
