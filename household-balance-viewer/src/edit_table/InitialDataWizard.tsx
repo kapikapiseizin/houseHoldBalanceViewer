@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import type { SheetOperator } from "../SheetOperator";
 import EditCategoryMaster from "./EditCategoryMaster";
 import EditBudgetDisplayCategoryMaster from "./EditBudgetDisplayCategoryMaster";
@@ -25,7 +25,7 @@ export default function InitialDataWizard({
   type EditPhase = (typeof EditPhase)[keyof typeof EditPhase];
 
   const [phase, setPhase] = useState<EditPhase>(EditPhase.CategoryMaster);
-  const [isDisplayButtons, setIsDisplayButtons] = useState(true);
+  const [isDisplayButtons] = useState(true);
 
   const handleNextPhase = () => {
     if (phase == EditPhase.BudgetMaster) {

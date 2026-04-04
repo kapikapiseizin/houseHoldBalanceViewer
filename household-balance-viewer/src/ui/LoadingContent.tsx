@@ -4,7 +4,7 @@ type LoadingContentProps = {
 
 export default function LoadingContent({ title }: LoadingContentProps) {
   // 親要素のスタイル（画面中央・角丸正方形）
-  const containerStyle = {
+  const containerStyle: React.CSSProperties = {
     position: "fixed",
     top: "50%",
     left: "50%",
@@ -21,7 +21,7 @@ export default function LoadingContent({ title }: LoadingContentProps) {
     alignItems: "center",
     gap: "20px",
     zIndex: 9999, // 最前面に表示
-  };
+  } as const;
 
   // 画像のスタイル
   const imageStyle = {

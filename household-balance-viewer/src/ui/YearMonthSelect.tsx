@@ -1,5 +1,3 @@
-import React from "react";
-
 type YearMonthSelectProps = {
   year: number; // 西暦
   month: number; // 1～12

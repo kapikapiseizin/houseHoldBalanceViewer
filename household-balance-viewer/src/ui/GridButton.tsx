@@ -17,7 +17,7 @@ export default function GridButton({ elements }: GridButtonProps) {
     padding: "8px",
   };
 
-  const styleButton = {
+  const styleButton: React.CSSProperties = {
     aspectRatio: "1 / 1",
     display: "flex",
     flexDirection: "column",
@@ -29,7 +29,7 @@ export default function GridButton({ elements }: GridButtonProps) {
     borderRadius: "12px",
     cursor: "pointer",
     padding: "10px",
-  };
+  } as const;
 
   const styleButtonImage = {
     width: "50%" /* ボタンの幅に対して大きめに設定 */,

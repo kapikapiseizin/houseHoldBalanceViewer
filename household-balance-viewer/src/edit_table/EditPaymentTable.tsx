@@ -218,7 +218,7 @@ function UpdatePaymentTable({
     });
   };
 
-  const styleButton = {
+  const styleButton: React.CSSProperties = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -233,7 +233,7 @@ function UpdatePaymentTable({
     width: "50px",
     height: "50px",
     margin: "10px",
-  };
+  } as const;
 
   return (
     <div>
