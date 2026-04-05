@@ -17,6 +17,9 @@ export default function EditPaymentTable({
   onEnterTableUpdateUI = () => {},
   onExitTableUpdateUI = () => {},
 }: EditPaymentTableProps) {
+  const now = new Date();
+  const [targetYear, setTargetYear] = useState(now.getFullYear());
+  const [targetMonth, setTargetMonth] = useState(now.getMonth() + 1);
   const [phase, setPhase] = useState<"select" | "edit">("select");
   const [payment, setPayment] = useState<Payment | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
@@ -85,6 +88,10 @@ export default function EditPaymentTable({
         <SelectPaymentTable
           sheetOperator={sheetOperator}
           onSelect={handlePaymentSelect}
+          targetYear={targetYear}
+          targetMonth={targetMonth}
+          onSetTargetYear={setTargetYear}
+          onSetTargetMonth={setTargetMonth}
         />
       )}
       {phase === "edit" && payment && (
@@ -103,15 +110,20 @@ export default function EditPaymentTable({
 type SelectPaymentTableProps = {
   sheetOperator: SheetOperator;
   onSelect: (payment: Payment) => void;
+  targetYear: number;
+  targetMonth: number;
+  onSetTargetYear: (year: number) => void;
+  onSetTargetMonth: (month: number) => void;
 };
 
 function SelectPaymentTable({
   sheetOperator,
   onSelect,
+  targetYear,
+  targetMonth,
+  onSetTargetYear,
+  onSetTargetMonth,
 }: SelectPaymentTableProps) {
-  const now = new Date();
-  const [targetYear, setTargetYear] = useState(now.getFullYear());
-  const [targetMonth, setTargetMonth] = useState(now.getMonth() + 1);
   const [isLoading, setIsLoading] = useState(false);
   const [payments, setPayments] = useState<Payment[]>([]);
 
@@ -160,8 +172,8 @@ function SelectPaymentTable({
         year={targetYear}
         month={targetMonth}
         onChange={(year, month) => {
-          setTargetYear(year);
-          setTargetMonth(month);
+          onSetTargetYear(year);
+          onSetTargetMonth(month);
         }}
       />
       <div
