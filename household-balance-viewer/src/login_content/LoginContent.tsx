@@ -402,12 +402,13 @@ export default function LoginContent({
       style={{
         display: "flex",
         flexDirection: "column", // 縦に並べる
+        height: "100dvh",
       }}
     >
       <div
         style={{
           width: "100%",
-          height: "90vh",
+          height: "90%",
           overflowY: "auto", // メインコンテンツ内はスクロール可能にする
           backgroundColor: "#c5fff8",
           display: "flex",
@@ -441,7 +442,7 @@ export default function LoginContent({
       <nav
         style={{
           width: "100%",
-          height: "10vh",
+          height: "10%",
           display: "flex",
           justifyContent: "space-around",
           alignItems: "center",
