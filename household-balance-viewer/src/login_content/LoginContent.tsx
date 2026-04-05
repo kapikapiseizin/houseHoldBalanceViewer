@@ -16,6 +16,11 @@ import GridButton from "../ui/GridButton";
 import { headerStyle } from "../ui/HeaderStyle";
 import { pushButtonStyle } from "../ui/PushButtonStyle";
 
+const safeHeight =
+  typeof window !== "undefined" && CSS.supports("height", "100dvh")
+    ? "100dvh"
+    : "100vh";
+
 type BudgetPageProps = {
   sheetOperator: SheetOperator;
   onClickDisplaySetting: () => void;
@@ -293,7 +298,7 @@ function EditPage({ phase, sheetOperator, onExitEditPhase }: EditPageProps) {
       style={{
         display: "flex",
         flexDirection: "column",
-        height: "100vh",
+        height: safeHeight,
         backgroundColor: "#C5FFF8",
       }}
     >
@@ -314,10 +319,17 @@ function EditPage({ phase, sheetOperator, onExitEditPhase }: EditPageProps) {
         />
       )}
       {isEditPrevButtonVisible && (
-        <div>
+        <div
+          style={{
+            height: "10%",
+          }}
+        >
           <button
             onClick={onExitEditPhase}
-            style={{ ...pushButtonStyle, width: "50%" }}
+            style={{
+              ...pushButtonStyle,
+              width: "50%",
+            }}
           >
             戻る
           </button>
@@ -396,11 +408,6 @@ export default function LoginContent({
     padding: "10px 20px" /* クリックエリアを広げる（任意） */,
     border: "none",
   };
-
-  const safeHeight =
-    typeof window !== "undefined" && CSS.supports("height", "100dvh")
-      ? "100dvh"
-      : "100vh";
 
   return (
     <div
