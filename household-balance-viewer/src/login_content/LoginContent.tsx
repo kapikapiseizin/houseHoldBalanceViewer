@@ -413,6 +413,8 @@ export default function LoginContent({
           backgroundColor: "#c5fff8",
           display: "flex",
           flexDirection: "column",
+          position: "relative",
+          border: "5px solid red",
         }}
       >
         {page === Phase.BUDGET && (
