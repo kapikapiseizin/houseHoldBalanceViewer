@@ -397,12 +397,17 @@ export default function LoginContent({
     border: "none",
   };
 
+  const safeHeight =
+    typeof window !== "undefined" && CSS.supports("height", "100dvh")
+      ? "100dvh"
+      : "100vh";
+
   return (
     <div
       style={{
         display: "grid",
         gridTemplateRows: "1fr auto" /* 上が可変、下が中身に合わせる */,
-        height: "100dvh",
+        height: safeHeight,
       }}
     >
       <div
