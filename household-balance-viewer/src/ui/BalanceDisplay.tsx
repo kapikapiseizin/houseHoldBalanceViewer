@@ -46,7 +46,12 @@ export default function BalanceDisplay({
       <div>
         残高 <span style={{ fontSize: "1.7em" }}>{remainingAmount}</span>円 /{" "}
         {budgetAmount}円 +{" "}
-        <span style={{ color: "#ff6347" }}>{carryOverAmount}円</span>
+        <span
+          style={{ color: "#ff6347" }}
+          title={"先月使わなかった予算が繰り越し金額として表示されます"}
+        >
+          {carryOverAmount}円
+        </span>
       </div>
       <div
         style={{
