@@ -79,6 +79,13 @@ function BudgetPage({ sheetOperator, onClickDisplaySetting }: BudgetPageProps) {
             usedAmount={balance.usedAmount}
           />
         ))}
+        <details>
+          <summary>ヘルプ</summary>
+          <p>表示は下記の通りです</p>
+          <p>======================</p>
+          <p>分類</p>
+          <p>残高 / 予算 + 繰り越し金額</p>
+        </details>
       </div>
       <div
         style={{
@@ -255,7 +262,7 @@ function Menu({
             iconSrc: "/logout.png",
           },
           {
-            title: "決済の種類",
+            title: "分類を編集",
             onClick: onEditCategoryMaster,
             iconSrc: "/category.png",
           },

@@ -75,7 +75,7 @@ export default function EditBudgetMaster({
         flex: "1",
       }}
     >
-      <div style={headerStyle}>予算マスタ</div>
+      <div style={headerStyle}>予算の編集</div>
       <YearMonthSelect
         year={targetYear}
         month={targetMonth}
