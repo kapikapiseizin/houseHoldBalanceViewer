@@ -99,6 +99,7 @@ function BudgetPage({ sheetOperator, onClickDisplaySetting }: BudgetPageProps) {
             gap: "1px",
             width: "80px",
             height: "80px",
+            aspectRatio: "1 / 1",
           }}
           onClick={onClickDisplaySetting}
         >
@@ -115,6 +116,7 @@ function BudgetPage({ sheetOperator, onClickDisplaySetting }: BudgetPageProps) {
               fontSize: "0.9rem",
               color: "#5FBDFF",
               marginTop: "4px",
+              whiteSpace: "nowrap",
             }}
           >
             表示設定
@@ -404,6 +406,10 @@ export default function LoginContent({
     >
       <div
         style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
           height: "90vh",
           overflowY: "auto", // メインコンテンツ内はスクロール可能にする
           backgroundColor: "#c5fff8",
