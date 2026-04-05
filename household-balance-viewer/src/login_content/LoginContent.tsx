@@ -75,11 +75,21 @@ function BudgetPage({ sheetOperator, onClickDisplaySetting }: BudgetPageProps) {
           />
         ))}
       </div>
+      <style>
+        {`
+          @media (max-width: 768px) {
+            /* 構造上の最後の要素に、navに被らないための余白を作る */
+            .button_container {
+              padding-bottom: 80px; /* navの高さ + 20px 程度の余裕 */
+            }
+          }          `}
+      </style>
       <div
         style={{
           flex: "1",
           position: "relative",
         }}
+        className="button_container"
       >
         <button
           style={{
