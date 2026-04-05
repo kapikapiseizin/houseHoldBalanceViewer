@@ -421,6 +421,7 @@ export default function LoginContent({
           position: "relative",
           border: "25px solid red",
           boxSizing: "border-box", // パディングを含めて100%にする
+          paddingBottom: "5rem", // ← navの高さ分
         }}
       >
         {page === Phase.BUDGET && (
