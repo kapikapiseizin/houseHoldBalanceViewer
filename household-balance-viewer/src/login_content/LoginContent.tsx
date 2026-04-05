@@ -406,9 +406,6 @@ export default function LoginContent({
     >
       <div
         style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
           width: "100%",
           height: "90vh",
           overflowY: "auto", // メインコンテンツ内はスクロール可能にする
@@ -443,9 +440,6 @@ export default function LoginContent({
       </div>
       <nav
         style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
           width: "100%",
           height: "10vh",
           display: "flex",
