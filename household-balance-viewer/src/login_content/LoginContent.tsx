@@ -78,14 +78,14 @@ function BudgetPage({ sheetOperator, onClickDisplaySetting }: BudgetPageProps) {
       <div
         style={{
           flex: "1",
-          position: "relative",
         }}
       >
         <button
           style={{
-            position: "absolute",
-            bottom: "20px",
-            right: "20px",
+            marginTop: "auto",
+            marginBottom: "20px",
+            marginLeft: "auto",
+            marginRight: "20px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
