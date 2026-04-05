@@ -78,14 +78,11 @@ function BudgetPage({ sheetOperator, onClickDisplaySetting }: BudgetPageProps) {
       <div
         style={{
           flex: "1",
+          position: "relative",
         }}
       >
         <button
           style={{
-            marginTop: "auto",
-            marginBottom: "20px",
-            marginLeft: "auto",
-            marginRight: "20px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -419,9 +416,7 @@ export default function LoginContent({
           display: "flex",
           flexDirection: "column",
           position: "relative",
-          border: "25px solid red",
           boxSizing: "border-box", // パディングを含めて100%にする
-          paddingBottom: "5rem", // ← navの高さ分
         }}
       >
         {page === Phase.BUDGET && (
