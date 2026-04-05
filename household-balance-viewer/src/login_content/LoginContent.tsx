@@ -414,7 +414,8 @@ export default function LoginContent({
           display: "flex",
           flexDirection: "column",
           position: "relative",
-          border: "5px solid red",
+          border: "25px solid red",
+          boxSizing: "border-box", // パディングを含めて100%にする
         }}
       >
         {page === Phase.BUDGET && (
