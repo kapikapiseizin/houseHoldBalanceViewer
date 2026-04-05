@@ -400,15 +400,15 @@ export default function LoginContent({
   return (
     <div
       style={{
-        display: "flex",
-        flexDirection: "column", // 縦に並べる
+        display: "grid",
+        gridTemplateRows: "1fr auto" /* 上が可変、下が中身に合わせる */,
         height: "100dvh",
       }}
     >
       <div
         style={{
           width: "100%",
-          height: "90%",
+          gridRow: "1",
           overflowY: "auto", // メインコンテンツ内はスクロール可能にする
           backgroundColor: "#c5fff8",
           display: "flex",
@@ -441,8 +441,9 @@ export default function LoginContent({
       </div>
       <nav
         style={{
+          gridRow: "2",
           width: "100%",
-          height: "10%",
+          height: "5rem",
           display: "flex",
           justifyContent: "space-around",
           alignItems: "center",
