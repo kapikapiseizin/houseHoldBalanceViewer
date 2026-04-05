@@ -78,7 +78,10 @@ function BudgetPage({ sheetOperator, onClickDisplaySetting }: BudgetPageProps) {
       <div
         style={{
           flex: "1",
-          position: "relative",
+          display: "flex",
+          justifyContent: "flex-end", // 横：右
+          alignItems: "flex-end", // 縦：下
+          padding: "20px", // ← 余白
         }}
       >
         <button
