@@ -50,7 +50,7 @@ export default function AccessAccount({
     tokenClientRef.current = google.accounts.oauth2.initTokenClient({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
       scope:
-        "openid email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive",
+        "openid email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.metadata.readonly",
       callback: async (response: any) => {
         if (response.error !== undefined) {
           window.confirm("Google login failed: " + response.error);
