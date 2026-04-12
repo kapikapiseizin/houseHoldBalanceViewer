@@ -6,8 +6,6 @@ import LoginContent from "./login_content/LoginContent";
 import { GoogleSheetOperator } from "./GoogleSheetOperator";
 
 export default function App() {
-  console.log(import.meta.env.VITE_GOOGLE_CLIENT_ID);
-
   const LAST_LOGIN_EMAIL_KEY = "lastLoginEmail";
   const LAST_SPREADSHEET_ID_KEY = "lastSpreadsheetId";
 
