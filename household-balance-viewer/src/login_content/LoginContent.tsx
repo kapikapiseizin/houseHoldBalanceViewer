@@ -329,6 +329,7 @@ function EditPage({ phase, sheetOperator, onExitEditPhase }: EditPageProps) {
         <div
           style={{
             height: "10%",
+            backgroundColor: "#c5fff8",
           }}
         >
           <button

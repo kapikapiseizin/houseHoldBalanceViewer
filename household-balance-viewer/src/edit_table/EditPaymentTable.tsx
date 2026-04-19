@@ -182,6 +182,7 @@ function SelectPaymentTable({
           flexDirection: "column",
           gap: "8px",
           padding: "8px",
+          backgroundColor: "#c5fff8",
         }}
       >
         {payments.map((item, index) => (
