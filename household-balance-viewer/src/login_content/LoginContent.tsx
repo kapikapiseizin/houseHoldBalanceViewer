@@ -422,6 +422,7 @@ export default function LoginContent({
         display: "grid",
         gridTemplateRows: "1fr auto" /* 上が可変、下が中身に合わせる */,
         height: safeHeight,
+        backgroundColor: "#c5fff8",
       }}
     >
       <div
@@ -429,7 +430,6 @@ export default function LoginContent({
           width: "100%",
           gridRow: "1",
           overflowY: "auto", // メインコンテンツ内はスクロール可能にする
-          backgroundColor: "#c5fff8",
           display: "flex",
           flexDirection: "column",
           position: "relative",
@@ -472,6 +472,7 @@ export default function LoginContent({
           padding: "0 20px",
           boxSizing: "border-box", // パディングを含めて100%にする
           whiteSpace: "nowrap",
+          borderRadius: "20px",
         }}
       >
         <button style={buttonStyle} onClick={() => setPage(Phase.BUDGET)}>
